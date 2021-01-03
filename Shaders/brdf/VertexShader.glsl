@@ -5,6 +5,10 @@ layout(location = 1)in vec3 in_Normal;
 layout(location = 2)in vec2 in_TexCoords;
 layout(location = 3)in vec3 in_Tangent;
 
+#define PHONG_BRDF 0
+#define BLINN_PHONG_BRDF 1
+#define COOK_TORRANCE_BRDF 2
+
 uniform mat4 u_modelMat;
 uniform mat4 u_viewMat;
 uniform mat4 u_projMat;
@@ -15,31 +19,103 @@ uniform vec3 u_incidentVector;
 
 uniform int u_phongShininess;
 
-vec3 phongBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
-  vec3 reflectVector = reflect(toLight, normal);
+uniform float u_roughness = 0.1;
+uniform float u_f0 = 0.1;
+
+uniform int u_brdf;
+
+float phongBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
+  vec3 reflectVector = reflect(-toLight, normal);
   float specVal = pow(max(dot(toCamera, reflectVector), 0.0), u_phongShininess);
-  return vec3(specVal);
+  return specVal;
 }
 
-vec3 BRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
-  return phongBRDF(toLight, toCamera, normal, tangent, bitangent);
+float blinnPhongBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
+  vec3 halfVector = normalize(toLight + toCamera);
+  float specVal = pow(max(dot(normal, halfVector), 0.0), u_phongShininess);
+  //  float specVal = pow(dot(normal, halfVector), u_phongShininess);
+  return specVal;
+}
+
+float beckmannDistribution(float roughness, float normDotHalf){
+  float roughness2 = roughness*roughness;
+  float normDotHalf2 = normDotHalf*normDotHalf;
+  float normDotHalf4 = normDotHalf2*normDotHalf2;
+  return exp((normDotHalf2-1)/(roughness2*normDotHalf2)) / (roughness2*normDotHalf2);
+}
+
+// https://en.wikipedia.org/wiki/Schlick%27s_approximation
+float schlick(float r0, float cosTheta){
+  return r0 + (1-r0) * pow(1-cosTheta, 5);
+}
+
+float geometricAttenuation(vec3 toLight, vec3 toCamera, vec3 normal){
+  vec3 halfVector = normalize(toLight + toCamera);
+  float normDotHalf = dot(normal, halfVector);
+  float toCamDotHalf = dot(toCamera, halfVector);
+  float normDotToCamera = dot(normal, toCamera);
+  float normDotToLight = dot(normal, toLight);
+  
+  float res1 = (2*normDotHalf*normDotToCamera)/toCamDotHalf;
+  float res2 = (2*normDotHalf*normDotToLight)/toCamDotHalf;
+  
+  float res = min(1, min(res1, res2));
+  return res;
+}
+
+float cookTorranceBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
+  vec3 halfVector = normalize(toLight + toCamera);
+  
+  float normDotHalf = dot(normal, halfVector);
+  float toCamDotHalf = dot(toCamera, halfVector);
+  
+  float D = beckmannDistribution(u_roughness, normDotHalf);
+  float F = schlick(u_f0, toCamDotHalf);
+  float G = geometricAttenuation(toLight, toCamera, normal);
+  
+  float specVal = D * F * G;
+  //  float specVal = D;
+  //  float specVal = F;
+  //  float specVal = G;
+  return specVal;
+}
+
+float BRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
+  float res;
+  switch (u_brdf){
+    case PHONG_BRDF:{
+      res = phongBRDF(toLight, toCamera, normal, tangent, bitangent);
+      break;
+    }
+    
+    case BLINN_PHONG_BRDF:{
+      res = blinnPhongBRDF(toLight, toCamera, normal, tangent, bitangent);
+      break;
+    }
+    
+    case COOK_TORRANCE_BRDF:{
+      res = cookTorranceBRDF(toLight, toCamera, normal, tangent, bitangent);
+      break;
+    }
+  }
+  
+  return res;
 }
 
 void main(void){
-  vec3 normal = vec3(0, 0, 1);
-  vec3 tangent = vec3(1, 0, 0);
-  vec3 bitangent = vec3(0, 1, 0);
-  vec3 lumimance = vec3(0.2126, 0.7152, 0.0722);
+  const vec3 normal = vec3(0, 0, 1);
+  const vec3 tangent = vec3(1, 0, 0);
+  const vec3 bitangent = vec3(0, 1, 0);
+  const vec3 lumimance = vec3(0.2126, 0.7152, 0.0722);
   
   vec3 normPos = normalize(in_Position);
-  vec3 normIncident = -normalize(u_incidentVector);
+  vec3 normIncident = normalize(u_incidentVector);
   
-  vec3 brdf = BRDF(normIncident, normPos, normal, tangent, bitangent);
-  float offVal = (lumimance.x * brdf.x) + (lumimance.y * brdf.y)+ (lumimance.z * brdf.z);
-  //  float offVal = brdf.x;
-  vec3 newPos = normPos * offVal;
+  float brdf = BRDF(normIncident, normPos, normal, tangent, bitangent);
+  //float offVal = (lumimance.x * brdf.x) + (lumimance.y * brdf.y)+ (lumimance.z * brdf.z);
+  vec3 newPos = normPos * brdf;
   
   gl_Position = u_projMat * u_viewMat * u_modelMat * vec4(newPos, 1.0);
   o_texCoord = in_TexCoords;
-  o_objectColor = vec3(offVal);
+  o_objectColor = vec3(brdf);
 }

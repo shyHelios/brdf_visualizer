@@ -34,7 +34,7 @@ static LineVertexBufferObject *incidentVectorVBO = nullptr;
 static LineVertexBufferObject *reflectedVectorVBO = nullptr;
 static BRDFShader *brdfShader = nullptr;
 
-static int phongShininess = 32;
+//static int phongShininess = 32;
 
 
 void Gui::init() {
@@ -98,7 +98,6 @@ void Gui::init() {
   Shader *defShader = new DiffuseShader("./Shaders/Default/VertexShader.glsl", "./Shaders/Default/FragmentShader.glsl");
   Shader *normalShader = new NormalShader("./Shaders/Normal/VertexShader.glsl", "./Shaders/Normal/FragmentShader.glsl");
   brdfShader = new BRDFShader("./Shaders/brdf/VertexShader.glsl", "./Shaders/brdf/FragmentShader.glsl");
-//  Shader *phongShader = new PhongShader("./Shaders/Phong/VertexShader.glsl", "./Shaders/Phong/FragmentShader.glsl");
   
   scene->addDefShader(defShader);
   
@@ -136,6 +135,7 @@ void Gui::init() {
 //  scene->addObject(new Object(new IcosphereVertexBufferObject(3), normalShader));
 //  scene->addObject(new Object(new IcosphereVertexBufferObject(3), defShader));
   scene->addObject(new Object(new IcosphereVertexBufferObject(6), brdfShader));
+//  scene->addObject(new Object(new IcosphereVertexBufferObject(3), normalShader));
   scene->addObject(new Object(LineVertexBufferObject::gizmo, normalShader));
   
   scene->addLight(new Light(
@@ -192,8 +192,31 @@ void Gui::ui() {
     ImGui::SliderFloat("phi", &phi, 0, 2. * M_PI);
     
     ImGui::Separator();
-    ImGui::Text("Phong parameters");
-    ImGui::SliderInt("Shininess", &phongShininess, 1, 100);
+    ImGui::Text("BRDF");
+    int *selectedIdx = reinterpret_cast<int *>(&brdfShader->currentBrdfIdx);
+    
+    ImGui::Combo("Selected BRDF",                           // const char* label,
+                 selectedIdx,                              // int* current_item,
+                 &BRDFShader::imguiSelectionGetter,         // bool(*items_getter)(void* data, int idx, const char** out_text),
+                 (void *) BRDFShader::brdfArray,            // void* data
+                 IM_ARRAYSIZE(BRDFShader::brdfArray));// int items_count
+    
+    switch (brdfShader->currentBrdfIdx) {
+      case BRDFShader::BRDF::Phong:
+      case BRDFShader::BRDF::BlinnPhong: {
+        ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().shininess.getData(), 1, 100);
+        break;
+      }
+      
+      case BRDFShader::BRDF::TorranceSparrow: {
+        ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().roughness.getData(), 0.001, 0.2);
+        ImGui::SliderFloat("f0", &brdfShader->getBrdfUniformLocations().f0.getData(), 0, 1);
+        break;
+      }
+      
+      case BRDFShader::BRDF::CountBrdf:break;
+    }
+    
     ImGui::End();
   }
   
@@ -380,8 +403,7 @@ void Gui::renderLoop() {
           std::sin(thetha) * std::cos(phi),
           std::sin(thetha) * std::sin(phi),
           std::cos(thetha));
-      
-      brdfShader->setIncidentVector(incidentVector);
+      brdfShader->getBrdfUniformLocations().incidentVector.getData() = incidentVector;
       
       glm::vec3 reflectedVector = glm::vec3(-incidentVector[0], -incidentVector[1], incidentVector[2]);
       
@@ -395,8 +417,6 @@ void Gui::renderLoop() {
       incidentVectorVBO->recreate(incidentVertices, indices);
       reflectedVectorVBO->recreate(reflectedVertices, indices);
     }
-    
-    brdfShader->setPhongShininess(phongShininess);
     
     renderer.render(geometry);
     fbo_->unbind();

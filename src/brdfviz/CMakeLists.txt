@@ -30,7 +30,7 @@ add_executable(${PROJECT_NAME}
                gl/texture.h
                gl/light.cpp
                gl/light.h
-               gl/lightinfo.h gl/shaders/diffuseshader.cpp gl/shaders/diffuseshader.h gl/shaders/normalshader.cpp gl/shaders/normalshader.h gl/framebufferobject.cpp gl/framebufferobject.h gl/renderer.cpp gl/renderer.h gl/openglrenderer.cpp gl/openglrenderer.h gl/openglscene.cpp gl/openglscene.h gl/object.cpp gl/object.h gl/vbos/plane.h gl/linevertexbufferobject.cpp gl/linevertexbufferobject.h gl/vbos/gizmo.h gl/vbos/icosahedron.h gl/vbos/halficosahedron.h gl/icospherevertexbufferobject.cpp gl/icospherevertexbufferobject.h gl/shaders/brdfshader.cpp gl/shaders/brdfshader.h)
+               gl/lightinfo.h gl/shaders/diffuseshader.cpp gl/shaders/diffuseshader.h gl/shaders/normalshader.cpp gl/shaders/normalshader.h gl/framebufferobject.cpp gl/framebufferobject.h gl/renderer.cpp gl/renderer.h gl/openglrenderer.cpp gl/openglrenderer.h gl/openglscene.cpp gl/openglscene.h gl/object.cpp gl/object.h gl/vbos/plane.h gl/linevertexbufferobject.cpp gl/linevertexbufferobject.h gl/vbos/gizmo.h gl/vbos/icosahedron.h gl/vbos/halficosahedron.h gl/icospherevertexbufferobject.cpp gl/icospherevertexbufferobject.h gl/shaders/brdfshader.cpp gl/shaders/brdfshader.h gl/uniformlocationpair.h)
 
 target_include_directories(${PROJECT_NAME}
                            PUBLIC ${CMAKE_CURRENT_LIST_DIR})

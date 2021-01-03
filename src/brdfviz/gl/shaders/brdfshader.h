@@ -6,6 +6,7 @@
 #define BRDFSHADER_H
 
 #include "gl/shader.h"
+#include "gl/uniformlocationpair.h"
 
 class BRDFShader : public Shader {
 public:
@@ -13,25 +14,48 @@ public:
   
   virtual void use(Material *mtl) override;
   
-  const glm::vec3 &getIncidentVector() const;
-  
-  void setIncidentVector(const glm::vec3 &incidentVector);
-  
-  int getPhongShininess() const;
-  
-  void setPhongShininess(int phongShininess);
-
-private:
-  struct BRDFUniformLocations : BasicUniformLocations, MaterialUniformLocations {
-    virtual void init(int shaderProgram) override;
-    
-    int IncidentVector = -1;
-    int PhongShininess = -1;
+  enum class BRDF : int {
+    Phong = 0,
+    BlinnPhong,
+    TorranceSparrow,
+    CountBrdf
   };
   
+  struct PhongUniformLocationsPack : UniformLocations {
+    virtual void init(int shaderProgram) override;
+    
+    UniformLocationPair<int> shininess;
+  };
+  
+  struct TorranceSparrowUniformLocationsPack : UniformLocations {
+    virtual void init(int shaderProgram) override;
+    
+    UniformLocationPair<float> roughness;
+    UniformLocationPair<float> f0;
+  };
+  
+  struct BRDFUniformLocations :
+      BasicUniformLocations,
+      MaterialUniformLocations,
+      PhongUniformLocationsPack,
+      TorranceSparrowUniformLocationsPack {
+    virtual void init(int shaderProgram) override;
+    
+    UniformLocationPair<glm::vec3> incidentVector;
+    int Brdf = -1;
+  };
+  
+  BRDFUniformLocations &getBrdfUniformLocations();
+  
+  static const std::pair<const char *, BRDF> brdfArray[static_cast<int>(BRDF::CountBrdf)];
+  
+  BRDF currentBrdfIdx = BRDF::Phong;
+  
+  static bool imguiSelectionGetter(void *data, int idx, const char **out_str);
+
+
+private:
   BRDFUniformLocations brdfUniformLocations_;
-  glm::vec3 incidentVector_;
-  int phongShininess_ = 32;
 };
 
 

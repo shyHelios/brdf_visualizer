@@ -132,7 +132,7 @@ protected:
   
   void checkCompilation();
   
-  unsigned int shaderProgram;
+  int shaderProgram;
   glm::mat4 modelMatrix;
   glm::mat4 normalMatrix;
 };
