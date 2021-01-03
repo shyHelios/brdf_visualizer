@@ -5,24 +5,36 @@
 #include <pch.h>
 #include <gl/shaders/diffuseshader.h>
 #include <gl/shaders/normalshader.h>
+#include <gl/shaders/brdfshader.h>
 #include "gl/camera.h"
 #include "gl/object.h"
 #include "gl/light.h"
+
 #include "gl/vertexbufferobject.h"
+#include "gl/linevertexbufferobject.h"
+#include "gl/icospherevertexbufferobject.h"
 
 #include "gl/framebufferobject.h"
 #include "gl/openglscene.h"
 #include "gui.h"
 
-static bool show_demo_window = true;
-static bool show_another_window = false;
+static bool show_demo_window = false;
 static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 static ImVec2 winSize;
 
 static float yaw = M_PI / 4.0f;
 static float pitch = M_PI / 4.0f;
 static float dist = 7.0f;
+static float thetha = M_PI / 4.0f; // <0, PI/2>
+static float phi = M_PI - (M_PI / 4.0f); // <0, 2*PI>
 static bool mouseInput = false;
+static bool geometry = false;
+
+static LineVertexBufferObject *incidentVectorVBO = nullptr;
+static LineVertexBufferObject *reflectedVectorVBO = nullptr;
+static BRDFShader *brdfShader = nullptr;
+
+static int phongShininess = 32;
 
 
 void Gui::init() {
@@ -70,6 +82,7 @@ void Gui::init() {
   }
   
   VertexBufferObject::setupStaticObjects();
+  LineVertexBufferObject::setupStaticObjects();
   
   fbo_ = new FrameBufferObject(800, 800);
   
@@ -82,9 +95,10 @@ void Gui::init() {
   
   scene->addCamera(cam);
   
-  
   Shader *defShader = new DiffuseShader("./Shaders/Default/VertexShader.glsl", "./Shaders/Default/FragmentShader.glsl");
   Shader *normalShader = new NormalShader("./Shaders/Normal/VertexShader.glsl", "./Shaders/Normal/FragmentShader.glsl");
+  brdfShader = new BRDFShader("./Shaders/brdf/VertexShader.glsl", "./Shaders/brdf/FragmentShader.glsl");
+//  Shader *phongShader = new PhongShader("./Shaders/Phong/VertexShader.glsl", "./Shaders/Phong/FragmentShader.glsl");
   
   scene->addDefShader(defShader);
   
@@ -94,10 +108,39 @@ void Gui::init() {
   normalShader->addCamera(scene->getCamera());
   normalShader->addLight(scene->getLights());
   
-  scene->addObject(new Object(VertexBufferObject::cube, normalShader));
+  brdfShader->addCamera(scene->getCamera());
+  brdfShader->addLight(scene->getLights());
+
+
+
+//  scene->addObject(new Object(VertexBufferObject::cube, normalShader));
+//  scene->addObject(new Object(VertexBufferObject::cube, defShader));
+//  scene->addObject(new Object(VertexBufferObject::plane, defShader));
+  
+  incidentVectorVBO = new LineVertexBufferObject({glm::vec3(0, 0, 0), glm::vec3(0.5, 0.5, 0.5)}, {0, 1}, 4);
+  reflectedVectorVBO = new LineVertexBufferObject({glm::vec3(0, 0, 0), glm::vec3(0.5, 0.5, 0.5)}, {0, 1}, 4);
+//
+  scene->addObject(
+      new Object(incidentVectorVBO, defShader, nullptr,
+                 new Material("Incident vector mtl",
+                              Color3f{{0.1f, 0.1f, 0.1f}},
+                              Color3f{{1.0f, 0.647f, 0.0f}})));
+  
+  scene->addObject(
+      new Object(reflectedVectorVBO, defShader, nullptr,
+                 new Material("Reflected vector mtl",
+                              Color3f{{0.1f, 0.1f, 0.1f}},
+                              Color3f{{0.0f, 0.349, 1.0f}})));
+  
+  scene->addObject(new Object(VertexBufferObject::disk, defShader));
+//  scene->addObject(new Object(new IcosphereVertexBufferObject(3), normalShader));
+//  scene->addObject(new Object(new IcosphereVertexBufferObject(3), defShader));
+  scene->addObject(new Object(new IcosphereVertexBufferObject(6), brdfShader));
+  scene->addObject(new Object(LineVertexBufferObject::gizmo, normalShader));
+  
   scene->addLight(new Light(
       new Transformation(
-          glm::vec3(0.f, 20.f, 0.f)), //Pos
+          glm::vec3(0.f, 2000.f, 0.f)), //Pos
       glm::vec4(1.f), //Diffusion
       0.5f, //Ambient
       0.8f, //Specular
@@ -107,7 +150,7 @@ void Gui::init() {
 }
 
 void Gui::glfw_error_callback(int error, const char *description) {
-  fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+  spdlog::error("[GLFW] {} {}", error, description);
 }
 
 void Gui::ui() {
@@ -117,89 +160,86 @@ void Gui::ui() {
   
   // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
   {
-    static float f = 0.0f;
-    static int counter = 0;
+    ImGui::Begin("Hello, world!");// Create a window called "Hello, world!" and append into it.
     
-    ImGui::Begin(
-        "Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+    ImGui::Checkbox("Show Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
     
-    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-    ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-    ImGui::Checkbox("Another Window", &show_another_window);
-    
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
     ImGui::ColorEdit3("clear color", (float *) &clear_color); // Edit 3 floats representing a color
     
     renderer.clearColor[0] = clear_color.x;
     renderer.clearColor[1] = clear_color.y;
     renderer.clearColor[2] = clear_color.z;
     
-    
-    if (ImGui::Button(
-        "Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-      counter++;
-    ImGui::SameLine();
-    ImGui::Text("counter = %d", counter);
-    
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                 ImGui::GetIO().Framerate);
     
     
     ImGui::Separator();
+    ImGui::Text("Rendering");
+    ImGui::Checkbox("Render edges", &geometry);
+    ImGui::Separator();
     
+    ImGui::Text("Camera info");
+//    ImGui::SliderFloat("pitch", &pitch, -M_PI / 2., M_PI / 2.);
     ImGui::SliderFloat("yaw", &yaw, -2. * M_PI, 2. * M_PI);
-    ImGui::SliderFloat("pitch", &pitch, -M_PI / 2., M_PI / 2.);
+    ImGui::SliderFloat("pitch", &pitch, -1.553, 1.553);
     ImGui::SliderFloat("dist", &dist, 0.0f, 100);
     
+    ImGui::Separator();
+    
+    ImGui::Text("Incident beam");
+    ImGui::SliderFloat("thetha", &thetha, 0, M_PI / 2.);
+    ImGui::SliderFloat("phi", &phi, 0, 2. * M_PI);
+    
+    ImGui::Separator();
+    ImGui::Text("Phong parameters");
+    ImGui::SliderInt("Shininess", &phongShininess, 1, 100);
     ImGui::End();
-    
-    glm::vec3 newCamPos;
-    
-    newCamPos.x = cos((yaw)) * cos((pitch));
-    newCamPos.y = sin((pitch));
-    newCamPos.z = sin((yaw)) * cos((pitch));
-    
-    glm::normalize(newCamPos);
-    newCamPos *= dist;
-    
-    renderer.getCurrentScene()->getCamera()->transformation->setPosition(newCamPos);
   }
   
-  ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollWithMouse;
-  ImGui::Begin("Test drawing into window", nullptr, window_flags);
-  ImGuiIO &io = ImGui::GetIO();
   
-  ImGui::Image((void *) fbo_->getFrameBufferId(), ImVec2(fbo_->getWidth(), fbo_->getHeight()));
-  
-  
-  if (ImGui::IsItemClicked(0)) {
-    mouseInput = true;
-  }
-  
-  if (mouseInput) {
-    if (!io.MouseDown[0]) {
-      mouseInput = false;
-    } else {
-      // Draw debug line
-      ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button),
-                                              4.0f); // Draw a line between the button and the mouse cursor
-      yaw += glm::radians(io.MouseDelta.x * -1);
-      pitch += glm::radians(io.MouseDelta.y);
-      
-      pitch = std::min<float>(pitch, M_PI / 2.f);
-      pitch = std::max<float>(pitch, -M_PI / 2.f);
-      
-      if (yaw > 2 * M_PI) yaw -= 2 * M_PI;
-      if (yaw < -2 * M_PI) yaw += 2 * M_PI;
-      
+  {
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollWithMouse;
+    ImGui::Begin("Test drawing into window", nullptr, window_flags);
+    ImGuiIO &io = ImGui::GetIO();
+    
+    ImGui::Image((void *) fbo_->getFrameBufferId(), ImVec2(fbo_->getWidth(), fbo_->getHeight()));
+    
+    
+    if (ImGui::IsItemClicked(0)) {
+      mouseInput = true;
     }
+    
+    if (mouseInput) {
+      if (!io.MouseDown[0]) {
+        mouseInput = false;
+      } else {
+        // Draw debug line
+        ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button),
+                                                4.0f); // Draw a line between the button and the mouse cursor
+        
+        yaw += glm::radians(io.MouseDelta.x);
+        pitch += glm::radians(io.MouseDelta.y);
+
+//        pitch = std::min<float>(pitch, M_PI / 2.f);
+//        pitch = std::max<float>(pitch, -M_PI / 2.f);
+        
+        pitch = std::min<float>(pitch, 1.553);
+        pitch = std::max<float>(pitch, -1.553);
+        
+        if (yaw > 2 * M_PI) yaw -= 2 * M_PI;
+        if (yaw < -2 * M_PI) yaw += 2 * M_PI;
+        
+      }
+    }
+    if (ImGui::IsItemHovered()) {
+      dist -= (io.MouseWheel * 0.5f);
+      dist = std::max(dist, 0.0f);
+    }
+    winSize = ImGui::GetWindowSize();
+    ImGui::End();
   }
-  if (ImGui::IsItemHovered()) {
-    dist -= (io.MouseWheel * 0.5f);
-    dist = std::max(dist, 0.0f);
-  }
-  winSize = ImGui::GetWindowSize();
-  ImGui::End();
+  
 }
 
 Gui::Gui(const char *winName) : winName_{winName} {
@@ -320,7 +360,45 @@ void Gui::renderLoop() {
     
     //fbo_->resize(winSize.x, winSize.y);
     fbo_->bind();
-    renderer.render();
+    
+    glm::vec3 newCamPos;
+    
+    newCamPos.x = std::cos(yaw) * std::cos(pitch);
+    newCamPos.y = std::sin(yaw) * std::cos(pitch);
+    newCamPos.z = std::sin(pitch);
+    
+    glm::normalize(newCamPos);
+    newCamPos *= dist;
+    
+    renderer.getCurrentScene()->getCamera()->transformation->setPosition(newCamPos);
+    {
+      std::vector<Vertex> incidentVertices;
+      std::vector<Vertex> reflectedVertices;
+      std::vector<unsigned int> indices = {0, 1};
+      
+      glm::vec3 incidentVector = glm::vec3(
+          std::sin(thetha) * std::cos(phi),
+          std::sin(thetha) * std::sin(phi),
+          std::cos(thetha));
+      
+      brdfShader->setIncidentVector(incidentVector);
+      
+      glm::vec3 reflectedVector = glm::vec3(-incidentVector[0], -incidentVector[1], incidentVector[2]);
+      
+      incidentVertices.emplace_back(glm::vec3(0, 0, 0));
+      incidentVertices.emplace_back(incidentVector);
+      
+      reflectedVertices.emplace_back(glm::vec3(0, 0, 0));
+      reflectedVertices.emplace_back(reflectedVector);
+      
+      
+      incidentVectorVBO->recreate(incidentVertices, indices);
+      reflectedVectorVBO->recreate(reflectedVertices, indices);
+    }
+    
+    brdfShader->setPhongShininess(phongShininess);
+    
+    renderer.render(geometry);
     fbo_->unbind();
     
     ui();

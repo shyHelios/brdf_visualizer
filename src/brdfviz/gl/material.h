@@ -74,16 +74,16 @@ public:
   \param textures pole ukazatelů na textury.
   \param no_textures délka pole \a textures. Maximálně \a NO_TEXTURES - 1.
   */
-  Material(std::string &name,
-           const Color3f &ambient,
-           const Color3f &diffuse,
-           const Color3f &specular,
-           const Color3f &emission,
-           const float reflectivity,
-           const float shininess,
-           const float ior,
-           const ShaderEnum shader,
-           Texture3f **textures = NULL,
+  Material(const std::string &name,
+           const Color3f &ambient = Color3f{{0.1f, 0.1f, 0.1f}},
+           const Color3f &diffuse = Color3f{{0.5f, 0.5f, 0.5f}},
+           const Color3f &specular = Color3f{{0.6f, 0.6f, 0.6f}},
+           const Color3f &emission = Color3f{{0.0f, 0.0f, 0.0f}},
+           const float reflectivity = 0.99,
+           const float shininess = 1.0,
+           const float ior = -1.0,
+           const ShaderEnum shader = ShaderEnum::PHONG,
+           Texture3f **textures = nullptr,
            const int no_textures = 0);
   
   

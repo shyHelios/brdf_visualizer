@@ -33,10 +33,25 @@ struct Vertex {
       Texture(texture),
       Tangent(tangent) {}
   
+  Vertex(const Vertex &vertex) : Position(vertex.Position),
+                                 Normal(vertex.Normal),
+                                 Texture(vertex.Texture),
+                                 Tangent(vertex.Tangent) {};
+  
+  Vertex operator=(const Vertex &vertex) {
+    return Vertex(vertex);
+  }
+  
+  void log() {
+    spdlog::info("[VERTEX] pos [{},{},{}]", Position[0], Position[1], Position[2]);
+  }
+  
   const glm::vec3 Position;
   const glm::vec3 Normal;
   const glm::vec2 Texture;
   const glm::vec3 Tangent;
+  
+  
 };
 
 

@@ -6,7 +6,7 @@
 #include "openglrenderer.h"
 #include "openglscene.h"
 
-void OpenGLRenderer::render() {
+void OpenGLRenderer::render(const bool geometry) {
   
   glCall(glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.0f)); // state setting function
   glCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)); // state using function
@@ -14,7 +14,7 @@ void OpenGLRenderer::render() {
   glCall(glDepthFunc(GL_LESS));
   glCall(glEnable(GL_MULTISAMPLE));
   if (!scenes.empty())
-    scenes.at(currentSceneIndex)->render();
+    scenes.at(currentSceneIndex)->render(geometry);
 }
 
 unsigned int OpenGLRenderer::getCurrentSceneIndex() const {

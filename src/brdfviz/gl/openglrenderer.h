@@ -11,7 +11,7 @@ class OpenGLScene;
 
 class OpenGLRenderer : public Renderer {
 public:
-  virtual void render() override;
+  virtual void render(const bool geometry = false) override;
   
   unsigned int getCurrentSceneIndex() const;
   

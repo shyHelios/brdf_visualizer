@@ -29,7 +29,7 @@ void OpenGLScene::addObject(std::vector<Object *> o) {
   objects.insert(objects.end(), o.begin(), o.end());
 }
 
-void OpenGLScene::render() {
+void OpenGLScene::render(const bool geometry) {
   if (this->camera == NULL || lights.size() < 1) return;
   this->camera->update();
   
@@ -58,7 +58,7 @@ void OpenGLScene::render() {
   if (objects.size() > 0) {
     for (Object *o : objects) {
       glStencilFunc(GL_ALWAYS, o->getID(), 0xFF);
-      o->draw();
+      o->draw(geometry);
     }
   }
 }

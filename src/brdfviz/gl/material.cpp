@@ -26,7 +26,7 @@ Material::Material() {
   shader_ = ShaderEnum::PHONG;
 }
 
-Material::Material(std::string &name, const Color3f &ambient, const Color3f &diffuse,
+Material::Material(const std::string &name, const Color3f &ambient, const Color3f &diffuse,
                    const Color3f &specular, const Color3f &emission, const float reflectivity,
                    const float shininess, const float ior, const ShaderEnum shader, Texture3f **textures,
                    const int no_textures) {
@@ -44,9 +44,12 @@ Material::Material(std::string &name, const Color3f &ambient, const Color3f &dif
   this->ior = ior;
   
   hasTexture = false;
+  
   if (textures) {
     hasTexture = true;
     memcpy(textures_, textures, sizeof(textures) * no_textures);
+  } else {
+    memset(textures_, 0, sizeof(*textures_) * NO_TEXTURES);
   }
 }
 

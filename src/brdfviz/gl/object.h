@@ -32,7 +32,7 @@ public:
   ~Object();
   
   //bool hasShader();
-  void draw();
+  void draw(const bool geometry = false);
   
   void setShader(Shader *shader);
   

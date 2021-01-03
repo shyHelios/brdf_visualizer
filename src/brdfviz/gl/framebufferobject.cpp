@@ -17,14 +17,19 @@ FrameBufferObject::~FrameBufferObject() {
 }
 
 void FrameBufferObject::generate() {
+  // if framebuffer already exists, delete it with all attachments
   if (frameBufferID > 0) {
     glCall(glDeleteFramebuffers(1, &frameBufferID));
     glCall(glDeleteTextures(1, &frameBufferColorID));
     glCall(glDeleteTextures(1, &frameBufferDepthID));
   }
+  // Create and bind framebuffer
   glCall(glCreateFramebuffers(1, &frameBufferID));
   glCall(glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID));
   
+  // COLOR ATTACHMENT
+  
+  // Create texture for color attachment and bind it
   glCall(glCreateTextures(GL_TEXTURE_2D, 1, &frameBufferColorID));
   glCall(glBindTexture(GL_TEXTURE_2D, frameBufferColorID));
   glCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width_, height_, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
@@ -32,7 +37,9 @@ void FrameBufferObject::generate() {
   glCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
   glCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, frameBufferColorID, 0));
   
+  // DEPTH ATTACHMENT
   
+  // Create texture for depth attachment and bind it
   glCall(glCreateTextures(GL_TEXTURE_2D, 1, &frameBufferDepthID));
   glCall(glBindTexture(GL_TEXTURE_2D, frameBufferDepthID));
   glCall(glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, width_, height_));
@@ -61,6 +68,7 @@ bool FrameBufferObject::resize(uint16_t width, uint16_t height) {
   if (width == width_ && height == height_) {
     return true;
   }
+  
   spdlog::info("[FBO] resizing to  [{},{}]", width, height);
   width_ = width;
   height_ = height;

@@ -8,7 +8,7 @@
 
 class Renderer {
 public:
-  virtual void render() = 0;
+  virtual void render(const bool geometry = false) = 0;
   
   glm::vec4 clearColor = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f);
 };

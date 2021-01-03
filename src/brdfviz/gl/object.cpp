@@ -28,7 +28,7 @@ Object::Object(VertexBufferObject *innerObject, Shader *shader, ObjectTransforma
 Object::~Object() {
 }
 
-void Object::draw() {
+void Object::draw(const bool geometry) {
   if (!visible) return;
 //  if (this->transformation->isMoving()) {
 //    this->transformation->move();
@@ -37,8 +37,10 @@ void Object::draw() {
   shader->setModelMatrix(transformation->getModelMatrix());
   shader->use(material);
   
-  
-  this->innerObject->draw();
+  if (geometry)
+    this->innerObject->drawLines();
+  else
+    this->innerObject->draw();
 }
 
 void Object::setShader(Shader *shader) {

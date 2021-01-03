@@ -35,7 +35,7 @@ void Camera::update() {
 }
 
 Camera::Camera() {
-  cameraUp = glm::vec3(0.0f, -1.0f, 0.0f);
+  cameraUp = glm::vec3(0.0f, 0.0f, -1.0f);
   angle = glm::vec3(0.f);
   transformation = new CameraTransformation(glm::vec3(0.f, 0.f, 5.f));
 //  transformation->setMovementSpeed(3.f);

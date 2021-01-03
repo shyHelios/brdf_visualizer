@@ -25,7 +25,7 @@ public:
   
   void addObject(std::vector<Object *> o);
   
-  void render();
+  void render(const bool geometry = false);
   
   void addCamera(Camera *camera);
   

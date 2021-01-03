@@ -10,20 +10,20 @@ namespace vbo {
   namespace plane {
     const Vertex vertices[] = {
         Vertex{
-            1.f, 0.f, -1.f,
-            0.f, 1.f, 0.f
+            1.f, -1.f, 0.f,
+            0.f, 0.f, 1.f,
         },
         Vertex{
-            -1.f, 0.f, -1.f,
-            0.f, 1.f, 0.f
+            -1.f, -1.f, 0.f,
+            0.f, 0.f, 1.f,
         },
         Vertex{
-            -1.f, 0.f, 1.f,
-            0.f, 1.f, 0.f
+            -1.f, 1.f, 0.f,
+            0.f, 0.f, 1.f,
         },
         Vertex{
-            1.f, 0.f, 1.f,
-            0.f, 1.f, 0.f
+            1.f, 1.f, 0.f,
+            0.f, 0.f, 1.f,
         }
     };
     const unsigned int indices[] = {
