@@ -19,7 +19,7 @@
 #include "gui.h"
 
 static bool show_demo_window = false;
-static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+static ImVec4 clear_color = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
 static ImVec2 winSize;
 
 static float yaw = M_PI / 4.0f;
@@ -109,11 +109,11 @@ void Gui::init() {
   
   brdfShader->addCamera(scene->getCamera());
   brdfShader->addLight(scene->getLights());
-  
-  
-  scene->addObject(new Object(VertexBufferObject::cube, normalShader));
-  scene->addObject(new Object(VertexBufferObject::cube, defShader));
-  scene->addObject(new Object(VertexBufferObject::plane, defShader));
+
+
+//  scene->addObject(new Object(VertexBufferObject::cube, normalShader));
+//  scene->addObject(new Object(VertexBufferObject::cube, defShader));
+//  scene->addObject(new Object(VertexBufferObject::plane, defShader));
   
   incidentVectorVBO = new LineVertexBufferObject({glm::vec3(0, 0, 0), glm::vec3(0.5, 0.5, 0.5)}, {0, 1}, 4);
   reflectedVectorVBO = new LineVertexBufferObject({glm::vec3(0, 0, 0), glm::vec3(0.5, 0.5, 0.5)}, {0, 1}, 4);
@@ -131,10 +131,10 @@ void Gui::init() {
                               Color3f{{0.0f, 0.349, 1.0f}})));
   
   scene->addObject(new Object(VertexBufferObject::disk, defShader));
-  scene->addObject(new Object(new IcosphereVertexBufferObject(0), normalShader));
+//  scene->addObject(new Object(new IcosphereVertexBufferObject(0), normalShader));
 //  scene->addObject(new Object(new IcosphereVertexBufferObject(3), defShader));
-//  scene->addObject(new Object(new IcosphereVertexBufferObject(6), brdfShader));
 //  scene->addObject(new Object(new IcosphereVertexBufferObject(3), normalShader));
+  scene->addObject(new Object(new IcosphereVertexBufferObject(6), brdfShader));
   scene->addObject(new Object(LineVertexBufferObject::gizmo, normalShader));
   
   scene->addLight(new Light(
@@ -301,6 +301,8 @@ void Gui::preRenderInit() {
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
   //ImGui::StyleColorsClassic();
+  
+  //clear_color = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
   
   // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
   ImGuiStyle &style = ImGui::GetStyle();
