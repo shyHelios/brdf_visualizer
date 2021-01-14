@@ -24,6 +24,7 @@ static ImVec2 winSize;
 
 static float yaw = M_PI / 4.0f;
 static float pitch = M_PI / 4.0f;
+//static float pitch = 0.3f;
 static float dist = 7.0f;
 static float thetha = M_PI / 4.0f; // <0, PI/2>
 static float phi = M_PI - (M_PI / 4.0f); // <0, 2*PI>
@@ -34,8 +35,7 @@ static LineVertexBufferObject *incidentVectorVBO = nullptr;
 static LineVertexBufferObject *reflectedVectorVBO = nullptr;
 static BRDFShader *brdfShader = nullptr;
 
-//static int phongShininess = 32;
-
+static bool shallSave = false;
 
 void Gui::init() {
   glfwSetErrorCallback(glfw_error_callback);
@@ -109,16 +109,15 @@ void Gui::init() {
   
   brdfShader->addCamera(scene->getCamera());
   brdfShader->addLight(scene->getLights());
-
-
-
-//  scene->addObject(new Object(VertexBufferObject::cube, normalShader));
-//  scene->addObject(new Object(VertexBufferObject::cube, defShader));
-//  scene->addObject(new Object(VertexBufferObject::plane, defShader));
+  
+  
+  scene->addObject(new Object(VertexBufferObject::cube, normalShader));
+  scene->addObject(new Object(VertexBufferObject::cube, defShader));
+  scene->addObject(new Object(VertexBufferObject::plane, defShader));
   
   incidentVectorVBO = new LineVertexBufferObject({glm::vec3(0, 0, 0), glm::vec3(0.5, 0.5, 0.5)}, {0, 1}, 4);
   reflectedVectorVBO = new LineVertexBufferObject({glm::vec3(0, 0, 0), glm::vec3(0.5, 0.5, 0.5)}, {0, 1}, 4);
-//
+  
   scene->addObject(
       new Object(incidentVectorVBO, defShader, nullptr,
                  new Material("Incident vector mtl",
@@ -132,9 +131,9 @@ void Gui::init() {
                               Color3f{{0.0f, 0.349, 1.0f}})));
   
   scene->addObject(new Object(VertexBufferObject::disk, defShader));
-//  scene->addObject(new Object(new IcosphereVertexBufferObject(3), normalShader));
+  scene->addObject(new Object(new IcosphereVertexBufferObject(0), normalShader));
 //  scene->addObject(new Object(new IcosphereVertexBufferObject(3), defShader));
-  scene->addObject(new Object(new IcosphereVertexBufferObject(6), brdfShader));
+//  scene->addObject(new Object(new IcosphereVertexBufferObject(6), brdfShader));
 //  scene->addObject(new Object(new IcosphereVertexBufferObject(3), normalShader));
   scene->addObject(new Object(LineVertexBufferObject::gizmo, normalShader));
   
@@ -177,6 +176,7 @@ void Gui::ui() {
     ImGui::Separator();
     ImGui::Text("Rendering");
     ImGui::Checkbox("Render edges", &geometry);
+    shallSave = ImGui::Button("Save");
     ImGui::Separator();
     
     ImGui::Text("Camera info");
@@ -420,6 +420,7 @@ void Gui::renderLoop() {
     
     renderer.render(geometry);
     fbo_->unbind();
+    if (shallSave) fbo_->saveScreen();
     
     ui();
     

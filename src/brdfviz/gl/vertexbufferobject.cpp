@@ -132,6 +132,7 @@ void VertexBufferObject::draw() {
 
 void VertexBufferObject::drawLines() {
   glCall(glBindVertexArray(VAO));
+  glCall(glLineWidth(5));
   glCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
   glCall(glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, NULL));
 //  glCall(glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, NULL));

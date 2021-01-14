@@ -11,21 +11,22 @@
 #define _CRT_SECURE_NO_WARNINGS
 #define _USE_MATH_DEFINES
 
+#include <cassert>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
 #include <cstdlib>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <memory.h>
+#include <ostream>
+#include <random>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <map>
-#include <random>
-#include <cmath>
-#include <cassert>
-#include <functional>
-#include <memory.h>
-#include <cstring>
-#include <cstdio>
-#include <ostream>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
@@ -42,6 +43,8 @@
 //#include <assimp/Importer.hpp> // C++ importer interface
 //#include <assimp/scene.h> // aiScene output data structure
 //#include <assimp/postprocess.h> // Post processing flags
+
+#include <FreeImage.h>
 
 // Glad - multi-Language GL/GLES/EGL/GLX/WGL loader-generator based on the official specs
 #include <glad/glad.h>

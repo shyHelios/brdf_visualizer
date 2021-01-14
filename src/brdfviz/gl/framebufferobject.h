@@ -14,11 +14,13 @@ public:
   
   void generate();
   
-  void bind();
+  void bind() const;
   
-  void unbind();
+  void unbind() const;
   
   bool resize(uint16_t width, uint16_t height);
+  
+  void saveScreen() const;
   
   uint32_t getWidth() const;
   

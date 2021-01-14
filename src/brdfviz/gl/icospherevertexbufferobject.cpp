@@ -9,10 +9,10 @@
 
 IcosphereVertexBufferObject::IcosphereVertexBufferObject(int subdivisions, float radius) :
     radius(radius),
-    VertexBufferObject(std::vector<Vertex>(std::begin(vbo::icosahedron::vertices), std::end(vbo::icosahedron::vertices)),
-                       std::vector<unsigned int>(std::begin(vbo::icosahedron::indices), std::end(vbo::icosahedron::indices)))
-//    VertexBufferObject(std::vector<Vertex>(std::begin(vbo::halficosahedron::vertices), std::end(vbo::halficosahedron::vertices)),
-//                       std::vector<unsigned int>(std::begin(vbo::halficosahedron::indices), std::end(vbo::halficosahedron::indices)))
+//    VertexBufferObject(std::vector<Vertex>(std::begin(vbo::icosahedron::vertices), std::end(vbo::icosahedron::vertices)),
+//                       std::vector<unsigned int>(std::begin(vbo::icosahedron::indices), std::end(vbo::icosahedron::indices)))
+    VertexBufferObject(std::vector<Vertex>(std::begin(vbo::halficosahedron::vertices), std::end(vbo::halficosahedron::vertices)),
+                       std::vector<unsigned int>(std::begin(vbo::halficosahedron::indices), std::end(vbo::halficosahedron::indices)))
 //    VertexBufferObject(std::vector<Vertex>(std::begin(vbo::plane::vertices), std::end(vbo::plane::vertices)),
 //                       std::vector<unsigned int>(std::begin(vbo::plane::indices), std::end(vbo::plane::indices)))
 {
