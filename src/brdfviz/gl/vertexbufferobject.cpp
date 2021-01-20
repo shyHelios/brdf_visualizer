@@ -75,7 +75,7 @@ VertexBufferObject::VertexBufferObject(const std::vector<Vertex> &vertices, cons
   
   // Position
   glCall(glEnableVertexAttribArray(0));
-  glCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid *) (0)));
+  glCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid *) nullptr));
   //Normal
   glCall(glEnableVertexAttribArray(1));
   glCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid *) (3 * sizeof(GLfloat))));
@@ -101,11 +101,8 @@ VertexBufferObject::~VertexBufferObject() {
 
 void VertexBufferObject::draw() {
   glCall(glBindVertexArray(VAO));
-//  glCall(glLineWidth(5));
-//  glCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
   glCall(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
-  glCall(glDrawElements(GL_TRIANGLES, indices_.size(), GL_UNSIGNED_INT, NULL));
-//  glCall(glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, NULL));
+  glCall(glDrawElements(GL_TRIANGLES, indices_.size(), GL_UNSIGNED_INT, nullptr));
   glCall(glBindVertexArray(0));
   
 }
@@ -114,8 +111,7 @@ void VertexBufferObject::drawLines() {
   glCall(glBindVertexArray(VAO));
   glCall(glLineWidth(5));
   glCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-  glCall(glDrawElements(GL_TRIANGLES, indices_.size(), GL_UNSIGNED_INT, NULL));
-//  glCall(glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, NULL));
+  glCall(glDrawElements(GL_TRIANGLES, indices_.size(), GL_UNSIGNED_INT, nullptr));
   glCall(glBindVertexArray(0));
 }
 

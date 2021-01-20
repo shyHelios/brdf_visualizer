@@ -53,7 +53,7 @@ void Transformation::setPosition(glm::vec3 position) {
 //
 //void Transformation::removeCurve() {
 //  delete (this->curve);
-//  this->curve = NULL;
+//  this->curve = nullptr;
 //  hasCrv = false;
 //}
 //

@@ -32,7 +32,8 @@ void FrameBufferObject::generate() {
   // Create texture for color attachment and bind it
   glCall(glCreateTextures(GL_TEXTURE_2D, 1, &frameBufferColorID));
   glCall(glBindTexture(GL_TEXTURE_2D, frameBufferColorID));
-  glCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width_, height_, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+  glCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, realWidth_, realHeight_, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+//  glCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width_, height_, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
   glCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
   glCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
   glCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, frameBufferColorID, 0));
@@ -42,7 +43,8 @@ void FrameBufferObject::generate() {
   // Create texture for depth attachment and bind it
   glCall(glCreateTextures(GL_TEXTURE_2D, 1, &frameBufferDepthID));
   glCall(glBindTexture(GL_TEXTURE_2D, frameBufferDepthID));
-  glCall(glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, width_, height_));
+  glCall(glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, realWidth_, realHeight_));
+//  glCall(glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, width_, height_));
   glCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, frameBufferDepthID, 0));
   
   assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
@@ -72,7 +74,6 @@ bool FrameBufferObject::resize(uint16_t width, uint16_t height) {
   spdlog::info("[FBO] resizing to  [{},{}]", width, height);
   width_ = width;
   height_ = height;
-  generate();
   return true;
 }
 
@@ -121,4 +122,21 @@ void FrameBufferObject::saveScreen() const {
   
   free(pixels);
   unbind();
+}
+
+const uint32_t FrameBufferObject::getRealWidth() const {
+  return realWidth_;
+}
+
+const uint32_t FrameBufferObject::getRealHeight() const {
+  return realHeight_;
+}
+
+glm::vec2 FrameBufferObject::getUV() const {
+  return glm::vec2(static_cast<float>(width_) / static_cast<float>(realWidth_),
+                   static_cast<float>(height_) / static_cast<float>(realHeight_));
+}
+
+float FrameBufferObject::getRatio() const {
+  return static_cast<float>(width_) / static_cast<float>(height_);
 }

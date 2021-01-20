@@ -36,24 +36,29 @@ public:
 //private:
   void notifyObservers();
   
-  CameraInfo camInfo;
-  bool camInfoChanged;
+  CameraInfo camInfo{};
+  bool camInfoChanged{};
   
   glm::vec3 getTarget();
   
-  glm::vec3 angle;
-  glm::vec3 cameraUp;
-  glm::vec3 target;
-  glm::mat4 projectionMatrix;
+  glm::vec3 angle{};
+  glm::vec3 cameraUp{};
+  glm::vec3 target{};
+  glm::mat4 projectionMatrix{};
   std::shared_ptr<CameraTransformation> transformation;
   std::vector<std::weak_ptr<Shader>> shaders;
   
   float yaw;
   float pitch;
+  float ratio = 1.0;
   
-  bool firstMouse;
-  double lastX;
-  double lastY;
+  float getRatio() const;
+  
+  void setRatio(float ratio);
+  
+  bool firstMouse{};
+  double lastX{};
+  double lastY{};
 };
 
 

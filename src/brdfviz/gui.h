@@ -27,19 +27,15 @@ public:
   virtual ~Gui();
   
   virtual void render();
-  
-  // static bool loadTextureFromFile(const char *filename, GLuint *out_texture, int *out_width, int *out_height);
 
 protected:
   std::unique_ptr<FrameBufferObject> fbo_;
-  std::unique_ptr<OpenGLRenderer> renderer;
-  std::shared_ptr<LineVertexBufferObject> incidentVectorVBO;
-  std::shared_ptr<LineVertexBufferObject> reflectedVectorVBO;
-  std::shared_ptr<BRDFShader> brdfShader;
+  std::unique_ptr<OpenGLRenderer> renderer_;
+  std::weak_ptr<LineVertexBufferObject> incidentVectorVBO_;
+  std::weak_ptr<LineVertexBufferObject> reflectedVectorVBO_;
+  std::weak_ptr<BRDFShader> brdfShader_;
   
   virtual void ui();
-
-//    virtual void initTextures() {}
   
   virtual void preRenderInit();
   

@@ -10,25 +10,17 @@
 
 
 void Camera::update() {
-  CameraInfo camInfo;
-  camInfo.viewMatrix = this->getViewMatrix();
-
-
-//  if (transformation->isMoving() && transformation->hasCurve()) {
-//    //camInfo.viewMatrix = glm::lookAt(camInfo.cameraPosition, glm::vec3(1.f), cameraUp);
-//    camInfo.cameraPosition = transformation->getPosition(target);
-//    transformation->move();
-//  } else {
-  camInfo.cameraPosition = transformation->getPosition(target);
-//  }
+  CameraInfo cameraInfo{};
+  cameraInfo.viewMatrix = this->getViewMatrix();
   
-  camInfo.projectionMatrix = getProjectionMatrix();
+  cameraInfo.cameraPosition = transformation->getPosition(target);
+  cameraInfo.projectionMatrix = getProjectionMatrix();
   
   
-  if (this->camInfo.cameraPosition != camInfo.cameraPosition ||
-      this->camInfo.projectionMatrix != camInfo.projectionMatrix ||
-      this->camInfo.viewMatrix != camInfo.viewMatrix) {
-    this->camInfo = camInfo;
+  if (this->camInfo.cameraPosition != cameraInfo.cameraPosition ||
+      this->camInfo.projectionMatrix != cameraInfo.projectionMatrix ||
+      this->camInfo.viewMatrix != cameraInfo.viewMatrix) {
+    this->camInfo = cameraInfo;
     camInfoChanged = true;
     notifyObservers();
   }
@@ -57,8 +49,6 @@ glm::mat4 Camera::getViewMatrix() {
 }
 
 glm::mat4 Camera::getProjectionMatrix() {
-  //TODO TEMPORARY
-  float ratio = 1.0f;
   return glm::perspective(glm::radians(45.0f), ratio, 0.1f, 100.0f);
 }
 
@@ -151,4 +141,12 @@ void Camera::mouse_callback(GLFWwindow *window, double xpos, double ypos) {
   direction.y = sin(glm::radians(pitch));
   direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
   target = glm::normalize(direction);
+}
+
+float Camera::getRatio() const {
+  return ratio;
+}
+
+void Camera::setRatio(float ratio) {
+  this->ratio = ratio;
 }

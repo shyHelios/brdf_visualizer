@@ -47,7 +47,7 @@ GLint ShaderLoader::loadShader(const char *vertexFile, const char *fragmentFile)
     GLint infoLogLength;
     glGetShaderiv(vertexID, GL_INFO_LOG_LENGTH, &infoLogLength);
     GLchar *strInfoLog = new GLchar[infoLogLength + 1];
-    glGetShaderInfoLog(vertexID, infoLogLength, NULL, strInfoLog);
+    glGetShaderInfoLog(vertexID, infoLogLength, nullptr, strInfoLog);
     spdlog::error("[SHADER] Compile failure in Vertex shader:\n{}", strInfoLog);
     delete[] strInfoLog;
     throw std::runtime_error("[SHADER] Compile failure in Vertex shader");
@@ -62,7 +62,7 @@ GLint ShaderLoader::loadShader(const char *vertexFile, const char *fragmentFile)
     GLint infoLogLength;
     glGetShaderiv(fragmentID, GL_INFO_LOG_LENGTH, &infoLogLength);
     GLchar *strInfoLog = new GLchar[infoLogLength + 1];
-    glGetShaderInfoLog(fragmentID, infoLogLength, NULL, strInfoLog);
+    glGetShaderInfoLog(fragmentID, infoLogLength, nullptr, strInfoLog);
     spdlog::error("[SHADER] Compile failure in Fragment shader:\n{}", strInfoLog);
     delete[] strInfoLog;
     throw std::runtime_error("[SHADER] Compile failure in Fragment shader");
@@ -79,7 +79,7 @@ GLint ShaderLoader::loadShader(const char *vertexFile, const char *fragmentFile)
     glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &infoLogLength);
     
     GLchar *strInfoLog = new GLchar[infoLogLength + 1];
-    glGetProgramInfoLog(programID, infoLogLength, NULL, strInfoLog);
+    glGetProgramInfoLog(programID, infoLogLength, nullptr, strInfoLog);
     spdlog::error("[SHADER] Linker failure: {}", strInfoLog);
     delete[] strInfoLog;
     throw std::runtime_error("[SHADER] Linker failure");

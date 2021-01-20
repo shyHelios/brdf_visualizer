@@ -13,7 +13,7 @@ LineVertexBufferObject::LineVertexBufferObject(const std::vector<Vertex> &vertic
 void LineVertexBufferObject::draw() {
   glCall(glBindVertexArray(VAO));
   glCall(glLineWidth(lineWidth));
-  glCall(glDrawElements(GL_LINES, indices_.size(), GL_UNSIGNED_INT, NULL));
+  glCall(glDrawElements(GL_LINES, indices_.size(), GL_UNSIGNED_INT, nullptr));
   glCall(glBindVertexArray(0));
   glCall(glLineWidth(1));
 }
@@ -29,7 +29,7 @@ void LineVertexBufferObject::draw() {
 void LineVertexBufferObject::drawLines() {
   glCall(glBindVertexArray(VAO));
   glCall(glLineWidth(1));
-  glCall(glDrawElements(GL_LINES, indices_.size(), GL_UNSIGNED_INT, NULL));
+  glCall(glDrawElements(GL_LINES, indices_.size(), GL_UNSIGNED_INT, nullptr));
   glCall(glBindVertexArray(0));
 }
 

@@ -141,7 +141,7 @@ void Gui::init() {
       5);
 
 //  LineVertexBufferObject::setupStaticObjects();
-  renderer = std::make_unique<OpenGLRenderer>();
+  renderer_ = std::make_unique<OpenGLRenderer>();
   
   fbo_ = std::make_unique<FrameBufferObject>(800, 800);
   
@@ -157,7 +157,8 @@ void Gui::init() {
   
   std::shared_ptr<Shader> defShader = std::make_shared<DiffuseShader>("./Shaders/Default/VertexShader.glsl", "./Shaders/Default/FragmentShader.glsl");
   std::shared_ptr<Shader> normalShader = std::make_shared<NormalShader>("./Shaders/Normal/VertexShader.glsl", "./Shaders/Normal/FragmentShader.glsl");
-  brdfShader = std::make_shared<BRDFShader>("./Shaders/brdf/VertexShader.glsl", "./Shaders/brdf/FragmentShader.glsl");
+  auto brdfShader = std::make_shared<BRDFShader>("./Shaders/brdf/VertexShader.glsl", "./Shaders/brdf/FragmentShader.glsl");
+  brdfShader_ = brdfShader; // assign to weak ptr
   
   scene->addDefShader(defShader);
   
@@ -181,8 +182,11 @@ void Gui::init() {
   const std::vector<Vertex> vertices = {glm::vec3(0, 0, 0), glm::vec3(0.5, 0.5, 0.5)};
   const std::vector<unsigned int> indices = {0, 1};
   
-  incidentVectorVBO = std::make_shared<LineVertexBufferObject>(vertices, indices, 4);
-  reflectedVectorVBO = std::make_shared<LineVertexBufferObject>(vertices, indices, 4);
+  auto incidentVectorVBO = std::make_shared<LineVertexBufferObject>(vertices, indices, 4);
+  auto reflectedVectorVBO = std::make_shared<LineVertexBufferObject>(vertices, indices, 4);
+  
+  incidentVectorVBO_ = incidentVectorVBO; // Assign to weak ptr
+  reflectedVectorVBO_ = reflectedVectorVBO; // Assign to weak ptr
   
   scene->addObject(
       std::make_shared<Object>(incidentVectorVBO, defShader, nullptr,
@@ -212,7 +216,7 @@ void Gui::init() {
                       LIGHT_INTENSITY_10),
                   cube); //Intenzita
   
-  renderer->addScene(scene, true);
+  renderer_->addScene(scene, true);
 }
 
 void Gui::glfw_error_callback(int error, const char *description) {
@@ -232,9 +236,9 @@ void Gui::ui() {
     
     ImGui::ColorEdit3("clear color", (float *) &clear_color); // Edit 3 floats representing a color
     
-    renderer->clearColor[0] = clear_color.x;
-    renderer->clearColor[1] = clear_color.y;
-    renderer->clearColor[2] = clear_color.z;
+    renderer_->clearColor[0] = clear_color.x;
+    renderer_->clearColor[1] = clear_color.y;
+    renderer_->clearColor[2] = clear_color.z;
     
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                 ImGui::GetIO().Framerate);
@@ -259,31 +263,35 @@ void Gui::ui() {
     ImGui::SliderFloat("phi", &phi, 0, 2. * M_PI);
     
     ImGui::Separator();
-    ImGui::Text("BRDF");
-    int *selectedIdx = reinterpret_cast<int *>(&brdfShader->currentBrdfIdx);
     
-    ImGui::Combo("Selected BRDF",                           // const char* label,
-                 selectedIdx,                              // int* current_item,
-                 &BRDFShader::imguiSelectionGetter,         // bool(*items_getter)(void* data, int idx, const char** out_text),
-                 (void *) BRDFShader::brdfArray,            // void* data
-                 IM_ARRAYSIZE(BRDFShader::brdfArray));// int items_count
-    
-    switch (brdfShader->currentBrdfIdx) {
-      case BRDFShader::BRDF::Phong:
-      case BRDFShader::BRDF::BlinnPhong: {
-        ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().shininess.getData(), 1, 100);
-        break;
-      }
+    if (auto brdfShader = brdfShader_.lock()) {
+      ImGui::Text("BRDF");
+      int *selectedIdx = reinterpret_cast<int *>(&brdfShader->currentBrdfIdx);
       
-      case BRDFShader::BRDF::TorranceSparrow: {
-        ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().roughness.getData(), 0.001, 0.2);
-        ImGui::SliderFloat("f0", &brdfShader->getBrdfUniformLocations().f0.getData(), 0, 1);
-        break;
-      }
+      ImGui::Combo("Selected BRDF",                           // const char* label,
+                   selectedIdx,                              // int* current_item,
+                   &BRDFShader::imguiSelectionGetter,         // bool(*items_getter)(void* data, int idx, const char** out_text),
+                   (void *) BRDFShader::brdfArray,            // void* data
+                   IM_ARRAYSIZE(BRDFShader::brdfArray));// int items_count
       
-      case BRDFShader::BRDF::CountBrdf:break;
+      switch (brdfShader->currentBrdfIdx) {
+        case BRDFShader::BRDF::Phong:
+        case BRDFShader::BRDF::BlinnPhong: {
+          ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().shininess.getData(), 1, 100);
+          break;
+        }
+        
+        case BRDFShader::BRDF::TorranceSparrow: {
+          ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().roughness.getData(), 0.001, 0.2);
+          ImGui::SliderFloat("f0", &brdfShader->getBrdfUniformLocations().f0.getData(), 0, 1);
+          break;
+        }
+        
+        case BRDFShader::BRDF::CountBrdf:break;
+      }
+    } else {
+      spdlog::warn("[GUI] BRDFShader ptr expired");
     }
-    
     ImGui::End();
   }
   
@@ -293,7 +301,11 @@ void Gui::ui() {
     ImGui::Begin("Test drawing into window", nullptr, window_flags);
     ImGuiIO &io = ImGui::GetIO();
     
-    ImGui::Image((void *) fbo_->getFrameBufferId(), ImVec2(fbo_->getWidth(), fbo_->getHeight()));
+    glm::vec2 fboUv = fbo_->getUV();
+    ImGui::Image((void *) fbo_->getFrameBufferId(),
+                 ImVec2(fbo_->getWidth(), fbo_->getHeight()),
+                 ImVec2(0, 0),
+                 ImVec2(fboUv.x, fboUv.y));
     
     
     if (ImGui::IsItemClicked(0)) {
@@ -337,13 +349,8 @@ Gui::Gui(const char *winName) : winName_{winName} {
 }
 
 Gui::~Gui() {
-  
-  printf("Is incidentVectorVBO unique: %d", (int) incidentVectorVBO.unique());
-  printf("Is reflectedVectorVBO unique: %d", (int) reflectedVectorVBO.unique());
-  printf("Is brdfShader unique: %d", (int) brdfShader.unique());
-  
   // Delete pointers before GLFW
-  auto rendererRaw = renderer.release();
+  auto rendererRaw = renderer_.release();
   delete rendererRaw;
   
   auto fboRaw = fbo_.release();
@@ -464,7 +471,10 @@ void Gui::renderLoop() {
     //Ui routine to be overriden in child class
     
     
-    //fbo_->resize(winSize.x, winSize.y);
+    fbo_->resize(winSize.x, winSize.y);
+    auto cam = renderer_->getCurrentScene()->getCamera();
+    cam->ratio = fbo_->getRatio();
+    
     fbo_->bind();
     
     glm::vec3 newCamPos;
@@ -476,7 +486,7 @@ void Gui::renderLoop() {
     glm::normalize(newCamPos);
     newCamPos *= dist;
     
-    renderer->getCurrentScene()->getCamera()->transformation->setPosition(newCamPos);
+    cam->transformation->setPosition(newCamPos);
     {
       std::vector<Vertex> incidentVertices;
       std::vector<Vertex> reflectedVertices;
@@ -486,7 +496,11 @@ void Gui::renderLoop() {
           std::sin(thetha) * std::cos(phi),
           std::sin(thetha) * std::sin(phi),
           std::cos(thetha));
-      brdfShader->getBrdfUniformLocations().incidentVector.getData() = incidentVector;
+      if (auto brdfShader = brdfShader_.lock()) {
+        brdfShader->getBrdfUniformLocations().incidentVector.getData() = incidentVector;
+      } else {
+        spdlog::warn("[GUI] BRDFShader ptr expired");
+      }
       
       glm::vec3 reflectedVector = glm::vec3(-incidentVector[0], -incidentVector[1], incidentVector[2]);
       
@@ -497,11 +511,20 @@ void Gui::renderLoop() {
       reflectedVertices.emplace_back(reflectedVector);
       
       
-      incidentVectorVBO->recreate(incidentVertices, indices);
-      reflectedVectorVBO->recreate(reflectedVertices, indices);
+      if (auto incidentVectorVBO = incidentVectorVBO_.lock()) {
+        incidentVectorVBO->recreate(incidentVertices, indices);
+      } else {
+        spdlog::warn("[GUI] incidentVectorVBO ptr expired");
+      }
+      
+      if (auto reflectedVectorVBO = reflectedVectorVBO_.lock()) {
+        reflectedVectorVBO->recreate(reflectedVertices, indices);
+      } else {
+        spdlog::warn("[GUI] reflectedVectorVBO ptr expired");
+      }
     }
     
-    renderer->render(geometry);
+    renderer_->render(geometry);
     fbo_->unbind();
     if (shallSave) fbo_->saveScreen();
     

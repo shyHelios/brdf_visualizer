@@ -193,7 +193,7 @@ void Shader::setModelMatrix(glm::mat4 ModelMatrix) {
 }
 
 void Shader::addCamera(const std::shared_ptr<Camera> &camera) {
-  if (camera_ == NULL) {
+  if (camera_ == nullptr) {
     camera_ = camera;
     //camera_->addShader(shared_from_this());
   }

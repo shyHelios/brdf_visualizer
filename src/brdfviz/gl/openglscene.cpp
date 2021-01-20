@@ -27,7 +27,7 @@ void OpenGLScene::addObject(const std::vector<std::shared_ptr<Object>> &o) {
 }
 
 void OpenGLScene::render(const bool geometry) {
-  if (this->camera == NULL || lights.size() < 1) return;
+  if (this->camera == nullptr || lights.size() < 1) return;
   this->camera->update();
   
   for (auto l : lights) {

@@ -43,10 +43,10 @@ FIBITMAP *BitmapFromFile(const char *file_name, int &width, int &height) {
 }
 
 FIBITMAP *Custom_FreeImage_ConvertToRGBF(FIBITMAP *dib) {
-  FIBITMAP *src = NULL;
-  FIBITMAP *dst = NULL;
+  FIBITMAP *src = nullptr;
+  FIBITMAP *dst = nullptr;
   
-  if (!FreeImage_HasPixels(dib)) return NULL;
+  if (!FreeImage_HasPixels(dib)) return nullptr;
   
   const FREE_IMAGE_TYPE src_type = FreeImage_GetImageType(dib);
   
@@ -57,7 +57,7 @@ FIBITMAP *Custom_FreeImage_ConvertToRGBF(FIBITMAP *dib) {
       const FREE_IMAGE_COLOR_TYPE color_type = FreeImage_GetColorType(dib);
       if ((color_type != FIC_RGB) && (color_type != FIC_RGBALPHA)) {
         src = FreeImage_ConvertTo24Bits(dib);
-        if (!src) return NULL;
+        if (!src) return nullptr;
       } else {
         src = dib;
       }
@@ -87,7 +87,7 @@ FIBITMAP *Custom_FreeImage_ConvertToRGBF(FIBITMAP *dib) {
       // RGBF type : clone the src
       return FreeImage_Clone(dib);
       break;
-    default: return NULL;
+    default: return nullptr;
   }
   
   // allocate dst image
@@ -100,7 +100,7 @@ FIBITMAP *Custom_FreeImage_ConvertToRGBF(FIBITMAP *dib) {
     if (src != dib) {
       FreeImage_Unload(src);
     }
-    return NULL;
+    return nullptr;
   }
   
   // copy metadata from src to dst
@@ -249,10 +249,10 @@ FIBITMAP *Custom_FreeImage_ConvertToRGBF(FIBITMAP *dib) {
 }
 
 FIBITMAP *Custom_FreeImage_ConvertToRGBAF(FIBITMAP *dib) {
-  FIBITMAP *src = NULL;
-  FIBITMAP *dst = NULL;
+  FIBITMAP *src = nullptr;
+  FIBITMAP *dst = nullptr;
   
-  if (!FreeImage_HasPixels(dib)) return NULL;
+  if (!FreeImage_HasPixels(dib)) return nullptr;
   
   const FREE_IMAGE_TYPE src_type = FreeImage_GetImageType(dib);
   
@@ -263,7 +263,7 @@ FIBITMAP *Custom_FreeImage_ConvertToRGBAF(FIBITMAP *dib) {
       const FREE_IMAGE_COLOR_TYPE color_type = FreeImage_GetColorType(dib);
       if (color_type != FIC_RGBALPHA) {
         src = FreeImage_ConvertTo32Bits(dib);
-        if (!src) return NULL;
+        if (!src) return nullptr;
       } else {
         src = dib;
       }
@@ -293,7 +293,7 @@ FIBITMAP *Custom_FreeImage_ConvertToRGBAF(FIBITMAP *dib) {
       // RGBAF type : clone the src
       return FreeImage_Clone(dib);
       break;
-    default: return NULL;
+    default: return nullptr;
   }
   
   // allocate dst image
@@ -306,7 +306,7 @@ FIBITMAP *Custom_FreeImage_ConvertToRGBAF(FIBITMAP *dib) {
     if (src != dib) {
       FreeImage_Unload(src);
     }
-    return NULL;
+    return nullptr;
   }
   
   // copy metadata from src to dst
