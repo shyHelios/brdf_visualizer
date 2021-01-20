@@ -12,20 +12,20 @@
 int Object::IDcounter = 0;
 std::map<int, Object *> Object::objects = std::map<int, Object *>();
 
-Object::Object(VertexBufferObject *innerObject, Shader *shader, ObjectTransformation *transformation,
-               Material *material) :
+Object::Object(const std::shared_ptr<VertexBufferObject> &innerObject,
+               const std::shared_ptr<Shader> &shader,
+               const std::shared_ptr<ObjectTransformation> &transformation,
+               const std::shared_ptr<Material> &material) :
     visible(true),
-    innerObject(innerObject == nullptr ? VertexBufferObject::cube : innerObject),
+    innerObject(/*innerObject == nullptr ? VertexBufferObject::cube : */innerObject),
     ID(IDcounter++),
-    shader(shader == nullptr ? new DiffuseShader() : shader),
-    material(material == nullptr ? new Material() : material),
+    shader(shader == nullptr ? std::make_shared<DiffuseShader>() : shader),
+    material(material == nullptr ? std::make_shared<Material>() : material),
     hasMtl(true),
-    transformation(transformation == nullptr ? new ObjectTransformation(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.f), glm::vec3(0.0f)) : transformation) {
+    transformation(transformation == nullptr ?
+                   std::make_shared<ObjectTransformation>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.f), glm::vec3(0.0f)) :
+                   transformation) {
   objects.insert_or_assign(ID, this);
-}
-
-
-Object::~Object() {
 }
 
 void Object::draw(const bool geometry) {
@@ -43,7 +43,7 @@ void Object::draw(const bool geometry) {
     this->innerObject->draw();
 }
 
-void Object::setShader(Shader *shader) {
+void Object::setShader(const std::shared_ptr<Shader> &shader) {
   this->shader = shader;
 }
 
@@ -59,7 +59,7 @@ bool Object::hasMaterial() {
   return hasMtl;
 }
 
-void Object::addMaterial(Material *material) {
+void Object::addMaterial(const std::shared_ptr<Material> &material) {
   this->material = material;
   hasMtl = true;
 }
@@ -72,8 +72,8 @@ int Object::getID() {
   return ID;
 }
 
-void Object::addName(std::string name) {
-  this->objectName = new std::string(name);
+void Object::addName(const std::string &name) {
+  this->objectName = name;
 }
 
 Object *Object::getObjectByID(int ID) {

@@ -91,7 +91,7 @@ public:
   /*!
   Uvolní všechny alokované zdroje.
   */
-  ~Material();
+  virtual ~Material();
   
   //void Print();
   
@@ -146,7 +146,7 @@ public:
   
   Color3f emission(const glm::vec2 *tex_coord = nullptr) const;
   
-  void set(Material *mtl);
+  void set(const std::shared_ptr<Material> &mtl);
   
   void setName(const std::string &name);
 
@@ -157,14 +157,14 @@ public:
   Color3f emission_; /*!< RGB barva emise \f$\left<0, 1\right>^3\f$. */
   
   float shininess; /*!< Koeficient lesklosti (\f$\ge 0\f$). Čím je hodnota větší, tím se jeví povrch lesklejší. */
-  float roughness_; /*!< Koeficient drsnosti. */
-  float metallicness; /*!< Koeficient kovovosti. */
+  float roughness_{}; /*!< Koeficient drsnosti. */
+  float metallicness{}; /*!< Koeficient kovovosti. */
   float reflectivity; /*!< Koeficient odrazivosti. */
   float ior; /*!< Index lomu. */
   
   bool hasTexture;
 private:
-  Texture3f *textures_[static_cast<int>(TextureSlot::numberOfSlots)]; /*!< Pole ukazatelů na textury. */
+  Texture3f *textures_[static_cast<int>(TextureSlot::numberOfSlots)]{}; /*!< Pole ukazatelů na textury. */
   
   std::string name_; /*!< Material name. */
   

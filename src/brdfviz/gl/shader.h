@@ -20,21 +20,21 @@
 
 class Light;
 
-class Shader : ShaderLoader {
+class Shader : public ShaderLoader/*, std::enable_shared_from_this<Shader> */{
 public:
   Shader(const char *vertex, const char *fragment);
   
-  ~Shader();
+  virtual ~Shader();
   
-  virtual void use(Material *mtl);
+  virtual void use(const std::shared_ptr<Material> &mtl);
   
   virtual void setModelMatrix(glm::mat4 ModelMatrix);
   
-  virtual void addCamera(Camera *camera);
+  virtual void addCamera(const std::shared_ptr<Camera> &camera);
   
-  virtual void addLight(Light *light);
+  virtual void addLight(const std::shared_ptr<Light> &light);
   
-  virtual void addLight(const std::vector<Light *> &light);
+  virtual void addLight(const std::vector<std::shared_ptr<Light>> &light);
   
   virtual void notify(const CameraInfo &c);
   
@@ -118,17 +118,17 @@ protected:
     
     virtual void init(int shaderProgram) override;
     
-    void addLight(Light *light, int shaderProgram);
+    void addLight(const std::shared_ptr<Light> &light, int shaderProgram);
     
-    void addLight(const std::vector<Light *> &lights, int shaderProgram);
+    void addLight(const std::vector<std::shared_ptr<Light>> &lights, int shaderProgram);
   };
   
   CameraInfo camInfo;
   int id;
   static int counterID;
   static int currentShaderID;
-  Camera *camera_;
-  std::vector<Light *> lights_;
+  std::shared_ptr<Camera> camera_;
+  std::vector<std::shared_ptr<Light>> lights_;
   
   void checkCompilation();
   

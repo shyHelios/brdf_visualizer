@@ -17,16 +17,16 @@ public:
   
   void setCurrentSceneIndex(unsigned int index);
   
-  void addScene(OpenGLScene *scene);
+  void addScene(const std::shared_ptr<OpenGLScene> &scene);
   
-  void addScene(OpenGLScene *scene, bool setThisScene);
+  void addScene(const std::shared_ptr<OpenGLScene> &, bool setThisScene);
   
-  OpenGLScene *getCurrentScene();
+  std::shared_ptr<OpenGLScene> &getCurrentScene();
 
 private:
   
   unsigned int currentSceneIndex;
-  std::vector<OpenGLScene *> scenes;
+  std::vector<std::shared_ptr<OpenGLScene>> scenes;
 };
 
 

@@ -14,8 +14,6 @@ public:
   
   glm::vec3 getPosition(glm::vec3 target);
   
-  ~CameraTransformation();
-  
   //glm::mat4 getProjectionMatrix(glm::vec3 target);
   
   std::pair<glm::vec3, bool> overrideTarget;

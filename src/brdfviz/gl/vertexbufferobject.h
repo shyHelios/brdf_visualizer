@@ -10,19 +10,21 @@
 
 class VertexBufferObject {
 public:
-  static VertexBufferObject *cube;
-  static VertexBufferObject *plane;
-  static VertexBufferObject *disk;
-  static VertexBufferObject *icosahedron;
-  static VertexBufferObject *halficosahedron;
-  
-  static void setupStaticObjects();
+//  static std::shared_ptr<VertexBufferObject> cube;
+//  static std::shared_ptr<VertexBufferObject> plane;
+//  static std::shared_ptr<VertexBufferObject> disk;
+//  static std::shared_ptr<VertexBufferObject> icosahedron;
+//  static std::shared_ptr<VertexBufferObject> halficosahedron;
+
+//  static void setupStaticObjects();
+
+//  static void deleteStaticObjects();
 
 //  VertexBufferObject(const std::vector<float> &points);
   
   VertexBufferObject(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices);
   
-  ~VertexBufferObject();
+  virtual ~VertexBufferObject();
   
   void recreate(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices);
   
@@ -31,9 +33,8 @@ public:
   virtual void drawLines();
 
 protected:
-//  std::vector<float> points;
-  std::vector<Vertex> vertices;
-  std::vector<unsigned int> indices;
+  std::vector<Vertex> vertices_;
+  std::vector<unsigned int> indices_;
   unsigned int VBO = 0;
   unsigned int VAO = 0;
   unsigned int IBO = 0;

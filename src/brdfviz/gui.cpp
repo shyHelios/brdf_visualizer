@@ -18,6 +18,12 @@
 #include "gl/openglscene.h"
 #include "gui.h"
 
+#include "gl/vbos/cube.h"
+#include "gl/vbos/plane.h"
+#include "gl/vbos/icosahedron.h"
+#include "gl/vbos/halficosahedron.h"
+#include "gl/vbos/gizmo.h"
+
 static bool show_demo_window = false;
 static ImVec4 clear_color = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
 static ImVec2 winSize;
@@ -31,9 +37,9 @@ static float phi = M_PI - (M_PI / 4.0f); // <0, 2*PI>
 static bool mouseInput = false;
 static bool geometry = false;
 
-static LineVertexBufferObject *incidentVectorVBO = nullptr;
-static LineVertexBufferObject *reflectedVectorVBO = nullptr;
-static BRDFShader *brdfShader = nullptr;
+//static std::shared_ptr<LineVertexBufferObject> incidentVectorVBO = nullptr;
+//static std::shared_ptr<LineVertexBufferObject> reflectedVectorVBO = nullptr;
+//static std::shared_ptr<BRDFShader> brdfShader = nullptr;
 
 static bool shallSave = false;
 
@@ -80,72 +86,133 @@ void Gui::init() {
     fprintf(stderr, "Failed to initialize OpenGL loader!\n");
     throw "Failed to initialize OpenGL loader";
   }
+
+//  VertexBufferObject::setupStaticObjects();
+  std::shared_ptr<VertexBufferObject> cube = nullptr;
+  std::shared_ptr<VertexBufferObject> plane = nullptr;
+  std::shared_ptr<VertexBufferObject> disk = nullptr;
+  std::shared_ptr<VertexBufferObject> icosahedron = nullptr;
+  std::shared_ptr<VertexBufferObject> halficosahedron = nullptr;
+  std::shared_ptr<LineVertexBufferObject> gizmo = nullptr;
   
-  VertexBufferObject::setupStaticObjects();
-  LineVertexBufferObject::setupStaticObjects();
+  cube = std::make_shared<VertexBufferObject>(
+      std::vector<Vertex>(std::begin(vbo::cube::vertices), std::end(vbo::cube::vertices)),
+      std::vector<unsigned int>(std::begin(vbo::cube::indices), std::end(vbo::cube::indices)));
   
-  fbo_ = new FrameBufferObject(800, 800);
+  plane = std::make_shared<VertexBufferObject>(
+      std::vector<Vertex>(std::begin(vbo::plane::vertices), std::end(vbo::plane::vertices)),
+      std::vector<unsigned int>(std::begin(vbo::plane::indices), std::end(vbo::plane::indices)));
   
-  OpenGLScene *scene = new OpenGLScene();
-  Camera *cam = new Camera();
-  CameraTransformation *camTransformation = cam->transformation;
+  icosahedron = std::make_shared<VertexBufferObject>(
+      std::vector<Vertex>(std::begin(vbo::icosahedron::vertices), std::end(vbo::icosahedron::vertices)),
+      std::vector<unsigned int>(std::begin(vbo::icosahedron::indices), std::end(vbo::icosahedron::indices)));
+  
+  halficosahedron = std::make_shared<VertexBufferObject>(
+      std::vector<Vertex>(std::begin(vbo::halficosahedron::vertices), std::end(vbo::halficosahedron::vertices)),
+      std::vector<unsigned int>(std::begin(vbo::halficosahedron::indices), std::end(vbo::halficosahedron::indices)));
+  
+  //generate disk
+  {
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+    const unsigned int resolution = 20;
+    double radiansAngle = 0;
+    const double radiansFullAngle = 2. * M_PI;
+    const double radius = 1.;
+    const double radiansStep = radiansFullAngle / static_cast<double>(resolution);
+    vertices.emplace_back(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)); // center
+    for (int i = 0; i < resolution; i++) {
+      vertices.emplace_back(glm::vec3(radius * std::cos(radiansAngle), radius * std::sin(radiansAngle), 0), glm::vec3(0, 1, 0));
+//      vertices.emplace_back(glm::vec3(radius * std::cos(radiansAngle), 0, radius * std::sin(radiansAngle)), glm::vec3(std::cos(radiansAngle), 0, std::sin(radiansAngle)));
+      radiansAngle += radiansStep;
+
+//      int vidx1 = i;
+//      int vidx2 = (i + 1) % resolution;
+      indices.emplace_back(0);
+      indices.emplace_back(((i + 1) % resolution) + 1);
+      indices.emplace_back(i + 1);
+    }
+    
+    disk = std::make_shared<VertexBufferObject>(vertices, indices);
+  }
+  gizmo = std::make_shared<LineVertexBufferObject>(
+      std::vector<Vertex>(std::begin(vbo::gizmo::vertices), std::end(vbo::gizmo::vertices)),
+      std::vector<unsigned int>(std::begin(vbo::gizmo::indices), std::end(vbo::gizmo::indices)),
+      5);
+
+//  LineVertexBufferObject::setupStaticObjects();
+  renderer = std::make_unique<OpenGLRenderer>();
+  
+  fbo_ = std::make_unique<FrameBufferObject>(800, 800);
+  
+  std::shared_ptr<OpenGLScene> scene = std::make_shared<OpenGLScene>();
+  
+  std::shared_ptr<Camera> cam = std::make_shared<Camera>();
+  std::shared_ptr<CameraTransformation> camTransformation = cam->transformation;
   camTransformation->overrideTarget.first = glm::vec3(10.f, 10.f, 0.f);
   camTransformation->overrideTarget.second = true;
   camTransformation->setPosition(glm::vec3(5, 5, 5));
   
   scene->addCamera(cam);
   
-  Shader *defShader = new DiffuseShader("./Shaders/Default/VertexShader.glsl", "./Shaders/Default/FragmentShader.glsl");
-  Shader *normalShader = new NormalShader("./Shaders/Normal/VertexShader.glsl", "./Shaders/Normal/FragmentShader.glsl");
-  brdfShader = new BRDFShader("./Shaders/brdf/VertexShader.glsl", "./Shaders/brdf/FragmentShader.glsl");
+  std::shared_ptr<Shader> defShader = std::make_shared<DiffuseShader>("./Shaders/Default/VertexShader.glsl", "./Shaders/Default/FragmentShader.glsl");
+  std::shared_ptr<Shader> normalShader = std::make_shared<NormalShader>("./Shaders/Normal/VertexShader.glsl", "./Shaders/Normal/FragmentShader.glsl");
+  brdfShader = std::make_shared<BRDFShader>("./Shaders/brdf/VertexShader.glsl", "./Shaders/brdf/FragmentShader.glsl");
   
   scene->addDefShader(defShader);
   
-  defShader->addCamera(scene->getCamera());
+  defShader->addCamera(cam);
   defShader->addLight(scene->getLights());
+  cam->addShader(defShader);
   
   normalShader->addCamera(scene->getCamera());
   normalShader->addLight(scene->getLights());
+  cam->addShader(normalShader);
   
   brdfShader->addCamera(scene->getCamera());
   brdfShader->addLight(scene->getLights());
+  cam->addShader(brdfShader);
 
 
-//  scene->addObject(new Object(VertexBufferObject::cube, normalShader));
-//  scene->addObject(new Object(VertexBufferObject::cube, defShader));
-//  scene->addObject(new Object(VertexBufferObject::plane, defShader));
+//  scene->addObject(std::make_shared<Object>(VertexBufferObject::cube, normalShader));
+//  scene->addObject(std::make_shared<Object>(VertexBufferObject::cube, defShader));
+//  scene->addObject(std::make_shared<Object>(VertexBufferObject::plane, defShader));
   
-  incidentVectorVBO = new LineVertexBufferObject({glm::vec3(0, 0, 0), glm::vec3(0.5, 0.5, 0.5)}, {0, 1}, 4);
-  reflectedVectorVBO = new LineVertexBufferObject({glm::vec3(0, 0, 0), glm::vec3(0.5, 0.5, 0.5)}, {0, 1}, 4);
+  const std::vector<Vertex> vertices = {glm::vec3(0, 0, 0), glm::vec3(0.5, 0.5, 0.5)};
+  const std::vector<unsigned int> indices = {0, 1};
   
-  scene->addObject(
-      new Object(incidentVectorVBO, defShader, nullptr,
-                 new Material("Incident vector mtl",
-                              Color3f{{0.1f, 0.1f, 0.1f}},
-                              Color3f{{1.0f, 0.647f, 0.0f}})));
+  incidentVectorVBO = std::make_shared<LineVertexBufferObject>(vertices, indices, 4);
+  reflectedVectorVBO = std::make_shared<LineVertexBufferObject>(vertices, indices, 4);
   
   scene->addObject(
-      new Object(reflectedVectorVBO, defShader, nullptr,
-                 new Material("Reflected vector mtl",
-                              Color3f{{0.1f, 0.1f, 0.1f}},
-                              Color3f{{0.0f, 0.349, 1.0f}})));
+      std::make_shared<Object>(incidentVectorVBO, defShader, nullptr,
+                               std::make_shared<Material>("Incident vector mtl",
+                                                          Color3f{{0.1f, 0.1f, 0.1f}},
+                                                          Color3f{{1.0f, 0.647f, 0.0f}})));
   
-  scene->addObject(new Object(VertexBufferObject::disk, defShader));
-//  scene->addObject(new Object(new IcosphereVertexBufferObject(0), normalShader));
-//  scene->addObject(new Object(new IcosphereVertexBufferObject(3), defShader));
-//  scene->addObject(new Object(new IcosphereVertexBufferObject(3), normalShader));
-  scene->addObject(new Object(new IcosphereVertexBufferObject(6), brdfShader));
-  scene->addObject(new Object(LineVertexBufferObject::gizmo, normalShader));
+  scene->addObject(
+      std::make_shared<Object>(reflectedVectorVBO, defShader, nullptr,
+                               std::make_shared<Material>("Reflected vector mtl",
+                                                          Color3f{{0.1f, 0.1f, 0.1f}},
+                                                          Color3f{{0.0f, 0.349, 1.0f}})));
   
-  scene->addLight(new Light(
-      new Transformation(
+  scene->addObject(std::make_shared<Object>(disk, defShader));
+//  scene->addObject(std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(0), normalShader));
+//  scene->addObject(std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(3), defShader));
+//  scene->addObject(std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(3), normalShader));
+  scene->addObject(std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(6), brdfShader));
+  scene->addObject(std::make_shared<Object>(gizmo, normalShader));
+  
+  scene->addLight(std::make_shared<Light>(
+      std::make_shared<Transformation>(
           glm::vec3(0.f, 2000.f, 0.f)), //Pos
       glm::vec4(1.f), //Diffusion
       0.5f, //Ambient
       0.8f, //Specular
-      LIGHT_INTENSITY_10)); //Intenzita
+                      LIGHT_INTENSITY_10),
+                  cube); //Intenzita
   
-  renderer.addScene(scene, true);
+  renderer->addScene(scene, true);
 }
 
 void Gui::glfw_error_callback(int error, const char *description) {
@@ -165,9 +232,9 @@ void Gui::ui() {
     
     ImGui::ColorEdit3("clear color", (float *) &clear_color); // Edit 3 floats representing a color
     
-    renderer.clearColor[0] = clear_color.x;
-    renderer.clearColor[1] = clear_color.y;
-    renderer.clearColor[2] = clear_color.z;
+    renderer->clearColor[0] = clear_color.x;
+    renderer->clearColor[1] = clear_color.y;
+    renderer->clearColor[2] = clear_color.z;
     
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                 ImGui::GetIO().Framerate);
@@ -270,13 +337,27 @@ Gui::Gui(const char *winName) : winName_{winName} {
 }
 
 Gui::~Gui() {
-  printf("Gui destructor\n");
+  
+  printf("Is incidentVectorVBO unique: %d", (int) incidentVectorVBO.unique());
+  printf("Is reflectedVectorVBO unique: %d", (int) reflectedVectorVBO.unique());
+  printf("Is brdfShader unique: %d", (int) brdfShader.unique());
+  
+  // Delete pointers before GLFW
+  auto rendererRaw = renderer.release();
+  delete rendererRaw;
+  
+  auto fboRaw = fbo_.release();
+  delete fboRaw;
+//  auto incidentVectorVBOraw = incidentVectorVBO.release();
+//  auto reflectedVectorVBOraw = reflectedVectorVBO.release();
+//  auto brdfShaderraw = brdfShader.release();
+
+//  LineVertexBufferObject::deleteStaticObjects();
+//  VertexBufferObject::deleteStaticObjects();
+  
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
-  
-  delete fbo_;
-  
   glfwDestroyWindow(window);
   glfwTerminate();
 }
@@ -395,7 +476,7 @@ void Gui::renderLoop() {
     glm::normalize(newCamPos);
     newCamPos *= dist;
     
-    renderer.getCurrentScene()->getCamera()->transformation->setPosition(newCamPos);
+    renderer->getCurrentScene()->getCamera()->transformation->setPosition(newCamPos);
     {
       std::vector<Vertex> incidentVertices;
       std::vector<Vertex> reflectedVertices;
@@ -420,7 +501,7 @@ void Gui::renderLoop() {
       reflectedVectorVBO->recreate(reflectedVertices, indices);
     }
     
-    renderer.render(geometry);
+    renderer->render(geometry);
     fbo_->unbind();
     if (shallSave) fbo_->saveScreen();
     

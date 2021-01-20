@@ -13,7 +13,7 @@ class DiffuseShader : public Shader {
 public:
   DiffuseShader(const char *vertex = "./Shaders/Default/VertexShader.glsl", const char *fragment = "./Shaders/Default/FragmentShader.glsl");
   
-  virtual void use(Material *mtl) override;
+  virtual void use(const std::shared_ptr<Material> &mtl) override;
 
 private:
   struct DiffuseUniformLocations : BasicUniformLocations, MaterialUniformLocations {

@@ -90,11 +90,10 @@ GLint ShaderLoader::loadShader(const char *vertexFile, const char *fragmentFile)
 }
 
 void ShaderLoader::deleteShader() {
-  printf("ShaderLoader::deleteShader()\n");
-  glDetachShader(programID, vertexID);
-  glDetachShader(programID, fragmentID);
-  glDeleteShader(vertexID);
-  glDeleteShader(fragmentID);
-  glUseProgram(0);
-  glDeleteProgram(this->programID);
+  glCall(glDetachShader(programID, vertexID));
+  glCall(glDetachShader(programID, fragmentID));
+  glCall(glDeleteShader(vertexID));
+  glCall(glDeleteShader(fragmentID));
+  glCall(glUseProgram(0));
+  glCall(glDeleteProgram(this->programID));
 }

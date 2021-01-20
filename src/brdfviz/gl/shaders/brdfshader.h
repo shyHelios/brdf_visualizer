@@ -12,7 +12,7 @@ class BRDFShader : public Shader {
 public:
   BRDFShader(const char *vertex = "./Shaders/brdf/VertexShader.glsl", const char *fragment = "./Shaders/brdf/FragmentShader.glsl");
   
-  virtual void use(Material *mtl) override;
+  virtual void use(const std::shared_ptr<Material> &mtl) override;
   
   enum class BRDF : int {
     Phong = 0,

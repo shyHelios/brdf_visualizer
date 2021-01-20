@@ -12,8 +12,6 @@ ObjectTransformation::ObjectTransformation(glm::vec3 position, glm::vec3 scale, 
   rotationSpeed = glm::vec3(0, 0, 0);
 }
 
-ObjectTransformation::~ObjectTransformation() {
-}
 
 glm::mat4 ObjectTransformation::getModelMatrix() {
 //  if (hasCrv && moving) {

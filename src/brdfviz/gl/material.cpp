@@ -148,7 +148,7 @@ Color3f Material::emission(const glm::vec2 *tex_coord) const {
   return emission_;
 }
 
-void Material::set(Material *mtl) {
+void Material::set(const std::shared_ptr<Material> &mtl) {
   name_ = mtl->name_;
   
   ambient_ = mtl->ambient_;

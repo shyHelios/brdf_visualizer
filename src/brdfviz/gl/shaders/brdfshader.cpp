@@ -5,8 +5,8 @@
 #include "brdfshader.h"
 
 const std::pair<const char *, BRDFShader::BRDF> BRDFShader::brdfArray[static_cast<int>(BRDF::CountBrdf)] = {
-    {"Phong", BRDF::Phong},
-    {"BlinnPhong", BRDF::BlinnPhong},
+    {"Phong",            BRDF::Phong},
+    {"BlinnPhong",       BRDF::BlinnPhong},
     {"Torrance-Sparrow", BRDF::TorranceSparrow},
 };
 
@@ -14,7 +14,7 @@ BRDFShader::BRDFShader(const char *vertex, const char *fragment) : Shader(vertex
   brdfUniformLocations_.init(shaderProgram);
 }
 
-void BRDFShader::use(Material *mtl) {
+void BRDFShader::use(const std::shared_ptr<Material> &mtl) {
   Shader::use(mtl);
   
   setData(brdfUniformLocations_.incidentVector.getUniformLocation(), brdfUniformLocations_.incidentVector.getData());

@@ -494,7 +494,7 @@ Texture<T, F>::Texture(const std::string &file_name, int slot) {
     
     assert(bpp == sizeof(T) * 8);
     
-    FreeImage_ConvertToRawBits((BYTE * )(data_.data()), dib, scan_width, bpp,
+    FreeImage_ConvertToRawBits((BYTE *) (data_.data()), dib, scan_width, bpp,
                                FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, TRUE);
     
     FreeImage_Unload(dib);
@@ -531,7 +531,7 @@ T Texture<T, F>::pixel(const int x, const int y) const {
 template<class T, FREE_IMAGE_TYPE F>
 void Texture<T, F>::Save(const std::string &file_name) const {
   FIBITMAP *bitmap = FreeImage_AllocateT(F, width_, height_, sizeof(T) * 8); // FIT_BITMAP, FIT_BITMAP, FIT_RGBF, FIT_RGBAF
-  BYTE *data = (BYTE * )(FreeImage_GetBits(bitmap));
+  BYTE *data = (BYTE *) (FreeImage_GetBits(bitmap));
   const int scan_width = FreeImage_GetPitch(bitmap);
   memcpy(data, data_.data(), scan_width * height_);
   FreeImage_FlipVertical(bitmap);
@@ -771,7 +771,7 @@ Texture<T, F>::Texture(std::vector<std::string> filenames, int slot) {
     FIBITMAP *dib = BitmapFromFile(file_name.c_str(), width, height);
     
     if (dib) {
-      if (true) // always make sure that the loaded bitmap will fit the allocated data size
+      //if (true) // always make sure that the loaded bitmap will fit the allocated data size
       {
         FIBITMAP *const dib_new = Convert(dib);
         assert(dib_new);
@@ -797,7 +797,7 @@ Texture<T, F>::Texture(std::vector<std::string> filenames, int slot) {
       
       assert(bpp == sizeof(T) * 8);
       
-      FreeImage_ConvertToRawBits((BYTE * )(dataPtr->data()), dib, scan_width, bpp,
+      FreeImage_ConvertToRawBits((BYTE *) (dataPtr->data()), dib, scan_width, bpp,
                                  FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, TRUE);
       
       FreeImage_Unload(dib);

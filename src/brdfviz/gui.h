@@ -13,6 +13,10 @@ struct GLFWwindow;
 
 class FrameBufferObject;
 
+class LineVertexBufferObject;
+
+class BRDFShader;
+
 /**
  * @brief Main GUI class for BRDF viz
  */
@@ -27,8 +31,11 @@ public:
   // static bool loadTextureFromFile(const char *filename, GLuint *out_texture, int *out_width, int *out_height);
 
 protected:
-  FrameBufferObject *fbo_;
-  OpenGLRenderer renderer;
+  std::unique_ptr<FrameBufferObject> fbo_;
+  std::unique_ptr<OpenGLRenderer> renderer;
+  std::shared_ptr<LineVertexBufferObject> incidentVectorVBO;
+  std::shared_ptr<LineVertexBufferObject> reflectedVectorVBO;
+  std::shared_ptr<BRDFShader> brdfShader;
   
   virtual void ui();
 

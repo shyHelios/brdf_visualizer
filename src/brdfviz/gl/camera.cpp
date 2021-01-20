@@ -37,15 +37,10 @@ void Camera::update() {
 Camera::Camera() {
   cameraUp = glm::vec3(0.0f, 0.0f, -1.0f);
   angle = glm::vec3(0.f);
-  transformation = new CameraTransformation(glm::vec3(0.f, 0.f, 5.f));
+  transformation = std::make_shared<CameraTransformation>(glm::vec3(0.f, 0.f, 5.f));
 //  transformation->setMovementSpeed(3.f);
   yaw = -90.0f;  // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
   pitch = 0.0f;
-}
-
-Camera::~Camera() {
-  delete transformation;
-  transformation = nullptr;
 }
 
 glm::mat4 Camera::getViewMatrix() {
@@ -67,7 +62,7 @@ glm::mat4 Camera::getProjectionMatrix() {
   return glm::perspective(glm::radians(45.0f), ratio, 0.1f, 100.0f);
 }
 
-void Camera::addShader(Shader *shader) {
+void Camera::addShader(const std::shared_ptr<Shader> &shader) {
   shaders.emplace_back(shader);
 }
 
@@ -77,8 +72,12 @@ glm::vec3 Camera::getPosition() {
 
 void Camera::notifyObservers() {
   if (camInfoChanged) {
-    for (Shader *s : shaders)
-      s->notify(this->camInfo);
+    for (std::weak_ptr<Shader> &s : shaders)
+      if (auto shaderSharedPtr = s.lock()) {
+        shaderSharedPtr->notify(this->camInfo);
+      } else {
+        spdlog::warn("[Camera] Shader ptr expired");
+      }
     camInfoChanged = false;
   }
 }

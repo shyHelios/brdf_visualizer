@@ -52,6 +52,3 @@ glm::vec3 CameraTransformation::getPosition(glm::vec3 target) {
   
   return position;
 }
-
-CameraTransformation::~CameraTransformation() {
-}

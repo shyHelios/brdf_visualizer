@@ -22,19 +22,14 @@ class ObjectTransformation;
 
 class Object {
 public:
-//  Object(VertexBufferObject *innerObject, Shader *shader);
-//
-//  Object(VertexBufferObject *innerObject, Shader *shader, ObjectTransformation *transformation = nullptr);
-//
-  Object(VertexBufferObject *innerObject, Shader *shader, ObjectTransformation *transformation = nullptr, Material *material = nullptr);
-
-//  Object(Shader *shader); //implicitne vytvori kouli
-  ~Object();
+  Object(const std::shared_ptr<VertexBufferObject> &innerObject, const std::shared_ptr<Shader> &shader,
+         const std::shared_ptr<ObjectTransformation> &transformation = nullptr,
+         const std::shared_ptr<Material> &material = nullptr);
   
   //bool hasShader();
   void draw(const bool geometry = false);
   
-  void setShader(Shader *shader);
+  void setShader(const std::shared_ptr<Shader> &shader);
   
   void setVisible(bool visible);
   
@@ -42,29 +37,29 @@ public:
   
   bool hasMaterial();
   
-  void addMaterial(Material *material);
+  void addMaterial(const std::shared_ptr<Material> &material);
   
   void setPosition(glm::vec3 position);
   
   int getID();
   
-  void addName(std::string);
+  void addName(const std::string &);
   
   static Object *getObjectByID(int ID);
 
 //private:
   bool visible;
-  std::string *objectName;
+  std::string objectName;
   static std::map<int, Object *> objects;
   
-  Material *material;
+  std::shared_ptr<Material> material;
   bool hasMtl;
   
-  VertexBufferObject *innerObject;
+  std::shared_ptr<VertexBufferObject> innerObject;
   int ID;
   static int IDcounter;
-  Shader *shader;
-  ObjectTransformation *transformation;
+  std::shared_ptr<Shader> shader;
+  std::shared_ptr<ObjectTransformation> transformation;
 };
 
 #endif //OBJECT_H

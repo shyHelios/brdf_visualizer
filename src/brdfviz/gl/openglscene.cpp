@@ -14,18 +14,15 @@ OpenGLScene::OpenGLScene() {
   this->hasSkBox = false;
 }
 
-OpenGLScene::~OpenGLScene() {
-}
-
-void OpenGLScene::addDefShader(Shader *shader) {
+void OpenGLScene::addDefShader(const std::shared_ptr<Shader> &shader) {
   this->defaultShader = shader;
 }
 
-void OpenGLScene::addObject(Object *o) {
+void OpenGLScene::addObject(const std::shared_ptr<Object> &o) {
   objects.emplace_back(o);
 }
 
-void OpenGLScene::addObject(std::vector<Object *> o) {
+void OpenGLScene::addObject(const std::vector<std::shared_ptr<Object>> &o) {
   objects.insert(objects.end(), o.begin(), o.end());
 }
 
@@ -33,13 +30,13 @@ void OpenGLScene::render(const bool geometry) {
   if (this->camera == NULL || lights.size() < 1) return;
   this->camera->update();
   
-  for (Light *l : lights) {
+  for (auto l : lights) {
     l->update();
   }
   
   if (hasSkybox()) {
     glDisable(GL_DEPTH_TEST);
-    for (Object *o : SkyBox) {
+    for (const std::shared_ptr<Object> &o : SkyBox) {
       o->setPosition(camera->getPosition());
       o->draw();
     }
@@ -48,7 +45,7 @@ void OpenGLScene::render(const bool geometry) {
   }
   if (lightObjects.size() > 0) {
     int i = 0;
-    for (Object *o : lightObjects) {
+    for (const std::shared_ptr<Object> &o : lightObjects) {
       o->setShader(this->defaultShader);
       o->setPosition(lights.at(i)->getLigthInfo().position);
       o->draw();
@@ -56,55 +53,52 @@ void OpenGLScene::render(const bool geometry) {
     }
   }
   if (objects.size() > 0) {
-    for (Object *o : objects) {
+    for (const std::shared_ptr<Object> &o : objects) {
       glStencilFunc(GL_ALWAYS, o->getID(), 0xFF);
       o->draw(geometry);
     }
   }
 }
 
-void OpenGLScene::addCamera(Camera *camera) {
+void OpenGLScene::addCamera(const std::shared_ptr<Camera> &camera) {
   this->camera = camera;
 }
 
-Camera *OpenGLScene::getCamera() {
+std::shared_ptr<Camera> &OpenGLScene::getCamera() {
   return camera;
 }
 
-std::vector<Light *> OpenGLScene::getLights() {
+std::vector<std::shared_ptr<Light>> OpenGLScene::getLights() {
   return this->lights;
 }
 
-void OpenGLScene::addLight(Light *light) {
+void OpenGLScene::addLight(const std::shared_ptr<Light> &light, const std::shared_ptr<VertexBufferObject> &lightVBO) {
   lights.emplace_back(light);
   
-  Object *lightObject = new Object(VertexBufferObject::cube, this->defaultShader);
-  Material *mtl = new Material();
-  mtl->ambient_ = Color3f({light->getLigthInfo().ambient.x, light->getLigthInfo().ambient.y, light->getLigthInfo().ambient.z});
-  mtl->diffuse_ = Color3f({light->getLigthInfo().diffuse.x, light->getLigthInfo().diffuse.y, light->getLigthInfo().diffuse.z});
-  mtl->specular_ = Color3f({light->getLigthInfo().specular.x, light->getLigthInfo().specular.y, light->getLigthInfo().specular.z});
+  std::shared_ptr<Object> lightObject = std::make_shared<Object>(lightVBO, this->defaultShader);
+  std::shared_ptr<Material> mtl = std::make_shared<Material>();
+  const auto lInfo = light->getLigthInfo();
+  mtl->ambient_ = Color3f({lInfo.ambient.x, lInfo.ambient.y, lInfo.ambient.z});
+  mtl->diffuse_ = Color3f({lInfo.diffuse.x, lInfo.diffuse.y, lInfo.diffuse.z});
+  mtl->specular_ = Color3f({lInfo.specular.x, lInfo.specular.y, lInfo.specular.z});
   lightObject->addMaterial(mtl);
   this->lightObjects.emplace_back(lightObject);
-}
-
-void OpenGLScene::addLight(std::vector<Light *> lights) {
-  spdlog::warn("[OpenGLScene] AddLight(vector<Light*>) Not implemented yet \n");
 }
 
 bool OpenGLScene::hasSkybox() {
   return hasSkBox;
 }
 
-void OpenGLScene::addSkybox(Object *skybox) {
+void OpenGLScene::addSkybox(const std::shared_ptr<Object> &skybox) {
   hasSkBox = true;
   this->SkyBox.emplace_back(skybox);
 }
 
-void OpenGLScene::addSkybox(std::vector<Object *> skybox) {
+void OpenGLScene::addSkybox(const std::vector<std::shared_ptr<Object>> &skybox) {
   hasSkBox = true;
   this->SkyBox.insert(this->SkyBox.end(), skybox.begin(), skybox.end());
 }
 
-const std::vector<Object *> &OpenGLScene::getSkyBox() const {
+const std::vector<std::shared_ptr<Object>> &OpenGLScene::getSkyBox() const {
   return SkyBox;
 }

@@ -23,13 +23,11 @@ public:
   
   Camera();
   
-  ~Camera();
-  
   glm::mat4 getViewMatrix();
   
   glm::mat4 getProjectionMatrix();
   
-  void addShader(Shader *shader);
+  void addShader(const std::shared_ptr<Shader> &shader);
   
   glm::vec3 getPosition();
   
@@ -47,9 +45,8 @@ public:
   glm::vec3 cameraUp;
   glm::vec3 target;
   glm::mat4 projectionMatrix;
-  CameraTransformation *transformation;
-  std::vector<Shader *> shaders;
-  Shader *cd_Shaders;
+  std::shared_ptr<CameraTransformation> transformation;
+  std::vector<std::weak_ptr<Shader>> shaders;
   
   float yaw;
   float pitch;

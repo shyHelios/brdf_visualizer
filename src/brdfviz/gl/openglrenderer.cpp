@@ -26,19 +26,19 @@ void OpenGLRenderer::setCurrentSceneIndex(unsigned int index) {
     this->currentSceneIndex = index;
 }
 
-void OpenGLRenderer::addScene(OpenGLScene *scene) {
+void OpenGLRenderer::addScene(const std::shared_ptr<OpenGLScene> &scene) {
   scenes.emplace_back(scene);
   
 }
 
-void OpenGLRenderer::addScene(OpenGLScene *scene, bool setThisScene) {
+void OpenGLRenderer::addScene(const std::shared_ptr<OpenGLScene> &scene, bool setThisScene) {
   int index = scenes.size();
   scenes.emplace_back(scene);
   if (setThisScene)
     setCurrentSceneIndex(index);
 }
 
-OpenGLScene *OpenGLRenderer::getCurrentScene() {
+std::shared_ptr<OpenGLScene> &OpenGLRenderer::getCurrentScene() {
   return scenes.at(currentSceneIndex);
 }
 

@@ -9,7 +9,7 @@ NormalShader::NormalShader(const char *vertex, const char *fragment) : Shader(ve
   normalUniformLocations_.init(shaderProgram);
 }
 
-void NormalShader::use(Material *mtl) {
+void NormalShader::use(const std::shared_ptr<Material> &mtl) {
   Shader::use(mtl);
   
   setData(normalUniformLocations_.ModelTransform, modelMatrix);

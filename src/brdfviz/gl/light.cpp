@@ -6,7 +6,7 @@
 #include <pch.h>
 #include "shader.h"
 
-Light::Light(Transformation *transformation, glm::vec4 diffuse, glm::vec4 ambient, glm::vec4 specular, float constant,
+Light::Light(const std::shared_ptr<Transformation> &transformation, glm::vec4 diffuse, glm::vec4 ambient, glm::vec4 specular, float constant,
              float linear, float quadratic) {
   this->transformation = transformation;
   
@@ -22,7 +22,7 @@ Light::Light(Transformation *transformation, glm::vec4 diffuse, glm::vec4 ambien
   changed = false;
 }
 
-Light::Light(Transformation *transformation, glm::vec4 diffuse, float ambient, float specular, float constant,
+Light::Light(const std::shared_ptr<Transformation> &transformation, glm::vec4 diffuse, float ambient, float specular, float constant,
              float linear, float quadratic) {
   this->transformation = transformation;
   
@@ -37,13 +37,10 @@ Light::Light(Transformation *transformation, glm::vec4 diffuse, float ambient, f
   
   changed = false;
 }
-
-Light::~Light() {
-}
-
-void Light::addShader(Shader *shader) {
-  this->shaders.emplace_back(shader);
-}
+//
+//void Light::addShader(Shader *shader) {
+//  this->shaders.emplace_back(shader);
+//}
 
 void Light::update() {
   
@@ -70,12 +67,12 @@ void Light::update() {
       notifyShaders();
   }*/
 }
-
-void Light::notifyShaders() {
-  for (Shader *s : shaders) {
-    s->notify(this->lightInfo);
-  }
-}
+//
+//void Light::notifyShaders() {
+//  for (Shader *s : shaders) {
+//    s->notify(this->lightInfo);
+//  }
+//}
 
 LightInfo Light::getLigthInfo() {
   return this->lightInfo;

@@ -177,11 +177,10 @@ Shader::Shader(const char *vertex, const char *fragment) : ShaderLoader() {
 }
 
 Shader::~Shader() {
-  spdlog::info("[SHADER] Shader destructor called");
   deleteShader();
 }
 
-void Shader::use(Material *mtl) {
+void Shader::use(const std::shared_ptr<Material> &mtl) {
   if (currentShaderID != this->id) {
     currentShaderID = this->id;
     glCall(glUseProgram(shaderProgram));
@@ -193,22 +192,22 @@ void Shader::setModelMatrix(glm::mat4 ModelMatrix) {
   this->normalMatrix = glm::transpose(glm::inverse(glm::mat3(this->modelMatrix)));
 }
 
-void Shader::addCamera(Camera *camera) {
+void Shader::addCamera(const std::shared_ptr<Camera> &camera) {
   if (camera_ == NULL) {
     camera_ = camera;
-    camera_->addShader(this);
+    //camera_->addShader(shared_from_this());
   }
 }
 
-void Shader::addLight(Light *light) {
-  light->addShader(this);
+void Shader::addLight(const std::shared_ptr<Light> &light) {
+//  light->addShader(this);
   //printf("Adding light to shader %d"), this->id);
   lights_.emplace_back(light);
 }
 
-void Shader::addLight(const std::vector<Light *> &light) {
-  for (Light *l : light) {
-    l->addShader(this);
+void Shader::addLight(const std::vector<std::shared_ptr<Light>> &light) {
+  for (const auto &l : light) {
+//    l->addShader(this);
     //printf("Adding light to shader %d"), this->id);
     lights_.emplace_back(l);
   }
@@ -516,7 +515,7 @@ void Shader::LightUniformLocations::init(int shaderProgram) {
   if (LightCount == -1) { spdlog::warn("[SHADER] LightCount not found"); }
 }
 
-void Shader::LightUniformLocations::addLight(Light *light, int shaderProgram) {
+void Shader::LightUniformLocations::addLight(const std::shared_ptr<Light> &light, int shaderProgram) {
   int idx = lightInfo.size();
   std::string number = std::to_string(idx);
   LightInfo info = light->getLigthInfo();
@@ -541,8 +540,8 @@ void Shader::LightUniformLocations::addLight(Light *light, int shaderProgram) {
   lightInfo.emplace_back(phongLightInfo);
 }
 
-void Shader::LightUniformLocations::addLight(const std::vector<Light *> &lights, int shaderProgram) {
-  for (Light *light : lights) {
+void Shader::LightUniformLocations::addLight(const std::vector<std::shared_ptr<Light>> &lights, int shaderProgram) {
+  for (const auto &light : lights) {
     addLight(light, shaderProgram);
   }
 }

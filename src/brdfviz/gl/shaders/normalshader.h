@@ -12,7 +12,7 @@ class NormalShader : public Shader {
 public:
   NormalShader(const char *vertex = "./Shaders/Normal/VertexShader.glsl", const char *fragment = "./Shaders/Normal/FragmentShader.glsl");
   
-  virtual void use(Material *mtl) override;
+  virtual void use(const std::shared_ptr<Material> &mtl) override;
 
 private:
   struct NormalUniformLocations : BasicUniformLocations, MaterialUniformLocations {

@@ -21,11 +21,11 @@ IcosphereVertexBufferObject::IcosphereVertexBufferObject(int subdivisions, float
   unsigned int index = 0;
   
   for (int i = 0; i < subdivisions; i++) {
-    tmpVertices = vertices;
-    tmpIndices = indices;
+    tmpVertices = vertices_;
+    tmpIndices = indices_;
     
-    vertices.clear();
-    indices.clear();
+    vertices_.clear();
+    indices_.clear();
     
     index = 0;
     
@@ -39,34 +39,34 @@ IcosphereVertexBufferObject::IcosphereVertexBufferObject(int subdivisions, float
       const Vertex v23 = getHalfVertex(v2, v3);
       const Vertex v31 = getHalfVertex(v3, v1);
       
-      vertices.emplace_back(v1);
-      vertices.emplace_back(v12);
-      vertices.emplace_back(v2);
-      vertices.emplace_back(v23);
-      vertices.emplace_back(v3);
-      vertices.emplace_back(v31);
+      vertices_.emplace_back(v1);
+      vertices_.emplace_back(v12);
+      vertices_.emplace_back(v2);
+      vertices_.emplace_back(v23);
+      vertices_.emplace_back(v3);
+      vertices_.emplace_back(v31);
       
-      indices.emplace_back(index + 0);
-      indices.emplace_back(index + 1);
-      indices.emplace_back(index + 5);
+      indices_.emplace_back(index + 0);
+      indices_.emplace_back(index + 1);
+      indices_.emplace_back(index + 5);
       
-      indices.emplace_back(index + 1);
-      indices.emplace_back(index + 2);
-      indices.emplace_back(index + 3);
+      indices_.emplace_back(index + 1);
+      indices_.emplace_back(index + 2);
+      indices_.emplace_back(index + 3);
       
-      indices.emplace_back(index + 5);
-      indices.emplace_back(index + 1);
-      indices.emplace_back(index + 3);
+      indices_.emplace_back(index + 5);
+      indices_.emplace_back(index + 1);
+      indices_.emplace_back(index + 3);
       
-      indices.emplace_back(index + 5);
-      indices.emplace_back(index + 3);
-      indices.emplace_back(index + 4);
+      indices_.emplace_back(index + 5);
+      indices_.emplace_back(index + 3);
+      indices_.emplace_back(index + 4);
       
       index += 6;
     }
   }
   
-  recreate(vertices, indices);
+  recreate(vertices_, indices_);
 }
 
 Vertex IcosphereVertexBufferObject::getHalfVertex(const Vertex &v1, const Vertex &v2) {

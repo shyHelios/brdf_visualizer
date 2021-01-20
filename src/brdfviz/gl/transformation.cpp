@@ -28,9 +28,6 @@ Transformation::Transformation(glm::vec3 position, glm::vec3 scale, glm::vec3 ro
 
 }
 
-Transformation::~Transformation() {
-  printf("Transformation destructor called\n");
-}
 
 glm::vec3 Transformation::getPosition() {
   return position;

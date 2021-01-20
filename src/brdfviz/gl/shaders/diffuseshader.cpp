@@ -9,7 +9,7 @@ DiffuseShader::DiffuseShader(const char *vertex, const char *fragment) : Shader(
   diffuseUniformLocations_.init(shaderProgram);
 }
 
-void DiffuseShader::use(Material *mtl) {
+void DiffuseShader::use(const std::shared_ptr<Material> &mtl) {
   Shader::use(mtl);
   
   setData(diffuseUniformLocations_.ModelTransform, modelMatrix);

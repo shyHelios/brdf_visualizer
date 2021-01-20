@@ -30,27 +30,26 @@ class Shader;
 
 class Light {
 public:
-  Light(Transformation *transformation, glm::vec4 diffuse = glm::vec4(.8f), glm::vec4 ambient = glm::vec4(0.1f),
+  Light(const std::shared_ptr<Transformation> &transformation, glm::vec4 diffuse = glm::vec4(.8f), glm::vec4 ambient = glm::vec4(0.1f),
         glm::vec4 specular = glm::vec4(.5f), float constant = 1.f, float linear = 0.045f, float quadratic = 0.0075f);
   
-  Light(Transformation *transformation, glm::vec4 diffuse = glm::vec4(.8f), float ambient = .1f, float specular = .5f,
+  Light(const std::shared_ptr<Transformation> &transformation, glm::vec4 diffuse = glm::vec4(.8f), float ambient = .1f, float specular = .5f,
         float constant = 1.f, float linear = 0.045f, float quadratic = 0.0075f);
-  
-  ~Light();
-  
-  void addShader(Shader *shader);
+
+
+//  void addShader(Shader *shader);
   
   void update();
-  
-  void notifyShaders();
+
+//  void notifyShaders();
   
   LightInfo getLigthInfo();
 
 private:
   LightInfo lightInfo;
   bool changed;
-  Transformation *transformation;
-  std::vector<Shader *> shaders;
+  std::shared_ptr<Transformation> transformation;
+//  std::vector<Shader *> shaders;
 //  Shader *cdLights;
 };
 
