@@ -57,12 +57,11 @@ void Gui::init() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
 #else
-  // GL 3.0 + GLSL 130
-  glsl_version = "#version 130";
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-  //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
+  glsl_version = "#version 460";
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+//  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+//  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
   
   // Create window with graphics context
@@ -302,7 +301,7 @@ void Gui::ui() {
     ImGuiIO &io = ImGui::GetIO();
     
     glm::vec2 fboUv = fbo_->getUV();
-    ImGui::Image((void *) fbo_->getFrameBufferId(),
+    ImGui::Image((ImTextureID) fbo_->getFrameBufferId(),
                  ImVec2(fbo_->getWidth(), fbo_->getHeight()),
                  ImVec2(0, 0),
                  ImVec2(fboUv.x, fboUv.y));
