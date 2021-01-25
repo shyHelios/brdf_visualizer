@@ -29,7 +29,8 @@ RTCShader::RTCShader() :
     camera_(nullptr),
     mathScene_(nullptr),
     light_(std::make_unique<RTLight>(glm::vec3(10, 10, 10))),
-    sphericalMap_(std::make_unique<RTSphericalMap>("data/sphereMap.jpg")),
+//    sphericalMap_(std::make_unique<RTSphericalMap>("data/sphereMap.jpg")),
+    sphericalMap_(std::make_unique<RTSphericalMap>("data/studio_small_03_4k.hdr")),
     defaultBgColor_(glm::vec4(0.8, 0.8, 0.8, 1)) {
   
 }

@@ -11,6 +11,13 @@
 #include "rtcamera.h"
 #include "pathtracerhelper.h"
 
+static float yaw = M_PI / 4.0f;
+static float pitch = M_PI / 4.0f;
+static float dist = 5.0f;
+static bool mouseInput = false;
+static bool invalidate = false;
+static std::mutex invalidateLock_;
+
 EmbreeRenderer::EmbreeRenderer(const int width, const int height) : width_(width), height_(height) {
   texData_.reserve(width_ * height_);
   
@@ -32,10 +39,11 @@ EmbreeRenderer::EmbreeRenderer(const int width, const int height) : width_(width
   commonShader_->pathTracerHelper = std::make_unique<PathTracerHelper>(width, height);
   commonShader_->camera_ = std::make_unique<RTCamera>(width, height, deg2rad(45.0), glm::vec3(5, 5, 5), glm::vec3(0, 0, 0));
   auto mtl = std::make_shared<Material>();
+  mtl->diffuse_.data = {0.9, 0.9, 0.9};
   auto sphere = std::make_unique<Sphere>(glm::vec3(0, 0, 0), 1.0f, mtl);
   commonShader_->mathScene_ = std::make_unique<MathScene>();
   commonShader_->mathScene_->spheres.emplace_back(std::move(sphere));
-  commonShader_->useShader = RTCShadingType::PathTracing;
+  commonShader_->useShader = RTCShadingType::Mirror;
 }
 
 
@@ -50,7 +58,60 @@ void EmbreeRenderer::ui() {
   
   ImGui::Begin("Image", nullptr, ImGuiWindowFlags_NoResize);
   ImGui::Image((void *) (intptr_t) texID_, ImVec2(float(width_), float(height_)));
+  
+  if (ImGui::IsItemClicked(0)) {
+    mouseInput = true;
+  }
+  ImGuiIO &io = ImGui::GetIO();
+  
+  if (mouseInput) {
+    if (!io.MouseDown[0]) {
+      mouseInput = false;
+    } else {
+      // Draw debug line
+      ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button),
+                                              4.0f);
+      
+      yaw += glm::radians(io.MouseDelta.x);
+      pitch += glm::radians(io.MouseDelta.y);
+
+//        pitch = std::min<float>(pitch, M_PI / 2.f);
+//        pitch = std::max<float>(pitch, -M_PI / 2.f);
+      
+      pitch = std::min<float>(pitch, 1.553);
+      pitch = std::max<float>(pitch, -1.553);
+      
+      if (yaw > 2 * M_PI) yaw -= 2 * M_PI;
+      if (yaw < -2 * M_PI) yaw += 2 * M_PI;
+      
+    }
+  }
+  if (ImGui::IsItemHovered()) {
+    dist -= (io.MouseWheel * 0.5f);
+    dist = std::max(dist, 0.0f);
+  }
+  
   ImGui::End();
+  
+  
+  glm::vec3 oldCamPos = commonShader_->camera_->getViewFrom();
+  glm::vec3 newCamPos;
+  
+  newCamPos.x = std::cos(yaw) * std::cos(pitch);
+  newCamPos.y = std::sin(yaw) * std::cos(pitch);
+  newCamPos.z = std::sin(pitch);
+  
+  glm::normalize(newCamPos);
+  newCamPos *= dist;
+  commonShader_->camera_->view_from_ = newCamPos;
+  if (oldCamPos != newCamPos) {
+//    commonShader_->pathTracerHelper->resetTraces();
+    {
+      std::lock_guard<std::mutex> lock(invalidateLock_);
+      invalidate = true;
+    }
+  }
+  
 }
 
 glm::vec4 EmbreeRenderer::getPixel(int x, int y, float t) {
@@ -89,10 +150,20 @@ void EmbreeRenderer::producer() {
         localData[offset].y = /*c_srgb(*/pixel.g/*, gamma_)*/;
         localData[offset].z = /*c_srgb(*/pixel.b/*, gamma_)*/;
         localData[offset].w = 1;//c_srgb(pixel.a);
-        // TODO check
-//        if (finishRequest_.load(std::memory_order_acquire)) {
-//          return;
-//        }
+        
+        if (finishRequest_.load(std::memory_order_acquire)) {
+          return;
+        }
+        
+        {
+          std::lock_guard<std::mutex> lock(invalidateLock_);
+          if (invalidate) {
+            commonShader_->pathTracerHelper->resetTraces();
+            x = 0;
+            y = 0;
+            invalidate = false;
+          }
+        }
       }
     }
     
