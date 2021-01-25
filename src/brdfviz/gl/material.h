@@ -125,10 +125,9 @@ public:
   \param slot číslo slotu textury. Maximálně \a NO_TEXTURES - 1.
   \return Ukazatel na zvolenou texturu.
   */
-  Texture3f
-  *
+  Texture3f *texture(const TextureSlot slot) const;
   
-  texture(const int slot) const;
+  Texture3f *texture(const int slot) const;
   
   ShaderEnum shader() const;
   

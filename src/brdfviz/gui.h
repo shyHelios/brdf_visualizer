@@ -5,7 +5,6 @@
 #ifndef GUI_H
 #define GUI_H
 
-#include "gl/openglrenderer.h"
 
 typedef unsigned int GLuint;
 
@@ -16,6 +15,10 @@ class FrameBufferObject;
 class LineVertexBufferObject;
 
 class BRDFShader;
+
+class EmbreeRenderer;
+
+class OpenGLRenderer;
 
 /**
  * @brief Main GUI class for BRDF viz
@@ -31,6 +34,7 @@ public:
 protected:
   std::unique_ptr<FrameBufferObject> fbo_;
   std::unique_ptr<OpenGLRenderer> renderer_;
+  std::unique_ptr<EmbreeRenderer> embreeRenderer_;
   std::weak_ptr<LineVertexBufferObject> incidentVectorVBO_;
   std::weak_ptr<LineVertexBufferObject> reflectedVectorVBO_;
   std::weak_ptr<BRDFShader> brdfShader_;

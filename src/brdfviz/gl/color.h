@@ -234,11 +234,11 @@ using Color4f = Color<4, float>;
 using Color3u = Color<3, unsigned char>;
 using Color4u = Color<4, unsigned char>;
 
-static glm::vec3 ColorToGlm(Color3f &color) {
+static glm::vec3 colorToGlm(const Color3f &color) {
   return glm::vec3(color.data[0], color.data[1], color.data[2]);
 }
 
-static Color3f glmToColor(glm::vec3 &color) {
+static Color3f glmToColor(const glm::vec3 &color) {
   return Color3f({color.x, color.y, color.z});
 }
 

@@ -55,11 +55,31 @@ add_executable(${PROJECT_NAME}
                gl/icospherevertexbufferobject.h
                gl/shaders/brdfshader.cpp
                gl/shaders/brdfshader.h
-               gl/uniformlocationpair.h)
+               gl/uniformlocationpair.h
+
+               embree/embreerenderer.cpp
+               embree/embreerenderer.h
+               embree/rtcshader.cpp
+               embree/rtcshader.h
+               embree/rtcamera.cpp
+               embree/rtcamera.h
+               embree/rtlight.cpp
+               embree/rtlight.h
+               embree/rtsphericalmap.cpp
+               embree/rtsphericalmap.h
+               embree/rtcrayhitior.h
+               embree/pathtracerhelper.cpp
+               embree/pathtracerhelper.h
+
+               common/utils/rng.cpp
+               common/utils/rng.h
+               common/utils/timer.cpp
+               common/utils/timer.h
+               common/utils/math.h embree/sphere.cpp embree/sphere.h embree/mathscene.cpp embree/mathscene.h common/utils/rgb.cpp common/utils/rgb.h embree/rtccommonshader.cpp embree/rtccommonshader.h embree/rtcshadingtype.h)
 
 target_include_directories(${PROJECT_NAME}
                            PUBLIC ${CMAKE_CURRENT_LIST_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC libbrdf libimgui glfw glad glm spdlog::spdlog freeimage)
+target_link_libraries(${PROJECT_NAME} PUBLIC libimgui glfw glad glm spdlog::spdlog freeimage ${EMBREE_LIBRARY})
 target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD)
 target_precompile_headers(${PROJECT_NAME} PUBLIC pch.h)
 

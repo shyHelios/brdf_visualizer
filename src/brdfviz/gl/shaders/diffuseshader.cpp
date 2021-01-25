@@ -65,7 +65,7 @@ void DiffuseShader::use(const std::shared_ptr<Material> &mtl) {
     }
   }
   
-  setData(diffuseUniformLocations_.MaterialDiffuseColor, ColorToGlm(mtl->diffuse_));
+  setData(diffuseUniformLocations_.MaterialDiffuseColor, colorToGlm(mtl->diffuse_));
 }
 
 void DiffuseShader::DiffuseUniformLocations::init(int shaderProgram) {

@@ -4,7 +4,6 @@
 */
 #include <iostream>
 
-#include <timer.h>
 #include "gui.h"
 
 int main(int argc, const char **argv) {

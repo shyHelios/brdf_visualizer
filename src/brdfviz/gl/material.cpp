@@ -172,3 +172,7 @@ void Material::set(const std::shared_ptr<Material> &mtl) {
 void Material::setName(const std::string &name) {
   name_ = name;
 }
+
+Texture3f *Material::texture(const TextureSlot slot) const {
+  return texture(static_cast<int>(slot));
+}

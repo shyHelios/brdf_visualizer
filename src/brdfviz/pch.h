@@ -26,15 +26,20 @@
 #include <random>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
-#include <glm/gtc/type_ptr.hpp> // glm::value_ptr
+#include <glm/geometric.hpp>
 #include <glm/mat3x3.hpp>
 #include <glm/mat4x4.hpp>
-#include <glm/gtx/transform.hpp>
+
+#include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
+#include <glm/gtc/type_ptr.hpp> // glm::value_ptr
 #include <glm/gtc/quaternion.hpp>
+
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/norm.hpp>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -43,6 +48,7 @@
 //#include <assimp/Importer.hpp> // C++ importer interface
 //#include <assimp/scene.h> // aiScene output data structure
 //#include <assimp/postprocess.h> // Post processing flags
+#include <embree3/rtcore.h>
 
 #include <FreeImage.h>
 

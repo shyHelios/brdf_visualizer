@@ -3,9 +3,12 @@
 * PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 */
 #include <pch.h>
+#include "gui.h"
+
 #include <gl/shaders/diffuseshader.h>
 #include <gl/shaders/normalshader.h>
 #include <gl/shaders/brdfshader.h>
+
 #include "gl/camera.h"
 #include "gl/object.h"
 #include "gl/light.h"
@@ -16,13 +19,15 @@
 
 #include "gl/framebufferobject.h"
 #include "gl/openglscene.h"
-#include "gui.h"
 
 #include "gl/vbos/cube.h"
 #include "gl/vbos/plane.h"
 #include "gl/vbos/icosahedron.h"
 #include "gl/vbos/halficosahedron.h"
 #include "gl/vbos/gizmo.h"
+
+#include "gl/openglrenderer.h"
+#include "embree/embreerenderer.h"
 
 static bool show_demo_window = false;
 static ImVec4 clear_color = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
@@ -141,6 +146,7 @@ void Gui::init() {
 
 //  LineVertexBufferObject::setupStaticObjects();
   renderer_ = std::make_unique<OpenGLRenderer>();
+  embreeRenderer_ = std::make_unique<EmbreeRenderer>(400, 400);
   
   fbo_ = std::make_unique<FrameBufferObject>(800, 800);
   
@@ -301,7 +307,7 @@ void Gui::ui() {
     ImGuiIO &io = ImGui::GetIO();
     
     glm::vec2 fboUv = fbo_->getUV();
-    ImGui::Image((ImTextureID) fbo_->getFrameBufferId(),
+    ImGui::Image((void *) (intptr_t) fbo_->getFrameBufferColorId(),
                  ImVec2(fbo_->getWidth(), fbo_->getHeight()),
                  ImVec2(0, 0),
                  ImVec2(fboUv.x, fboUv.y));
@@ -317,7 +323,7 @@ void Gui::ui() {
       } else {
         // Draw debug line
         ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button),
-                                                4.0f); // Draw a line between the button and the mouse cursor
+                                                4.0f);
         
         yaw += glm::radians(io.MouseDelta.x);
         pitch += glm::radians(io.MouseDelta.y);
@@ -340,6 +346,7 @@ void Gui::ui() {
     winSize = ImGui::GetWindowSize();
     ImGui::End();
   }
+  
   
 }
 
@@ -407,7 +414,7 @@ void Gui::preRenderInit() {
 
 void Gui::renderLoop() {
 // Main loop
-  
+  std::thread producerThread(&EmbreeRenderer::producer, this->embreeRenderer_.get());
   while (!glfwWindowShouldClose(window)) {
     // Poll and handle events (inputs, window resize, etc.)
     // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -452,29 +459,12 @@ void Gui::renderLoop() {
         ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
       }
-      
-      if (ImGui::BeginMenuBar()) {
-        if (ImGui::BeginMenu("Menu")) {
-          
-          if (ImGui::MenuItem("MenuItem1", "", false)) {
-          
-          }
-          if (ImGui::MenuItem("MenuItem2", "", false)) {
-          }
-          ImGui::EndMenu();
-        }
-        ImGui::EndMenuBar();
-      }
       ImGui::End();
     }
-    //Ui routine to be overriden in child class
     
-    
-    fbo_->resize(winSize.x, winSize.y);
     auto cam = renderer_->getCurrentScene()->getCamera();
     cam->ratio = fbo_->getRatio();
     
-    fbo_->bind();
     
     glm::vec3 newCamPos;
     
@@ -523,11 +513,14 @@ void Gui::renderLoop() {
       }
     }
     
+    fbo_->resize(winSize.x, winSize.y);
+    fbo_->bind();
     renderer_->render(geometry);
     fbo_->unbind();
     if (shallSave) fbo_->saveScreen();
     
     ui();
+    embreeRenderer_->ui();
     
     
     // Rendering
@@ -550,4 +543,6 @@ void Gui::renderLoop() {
     }
     glfwSwapBuffers(window);
   }
+  embreeRenderer_->finishRendering();
+  producerThread.join();
 }
