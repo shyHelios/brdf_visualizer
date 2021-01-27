@@ -52,12 +52,6 @@ glm::vec4 RTCCommonShader::traceRay(const RTCRayHitIor &rayHit, int depth) {
     material = static_cast<Material *>(rtcGetGeometryUserData(geometry));
   }*/
   
-  
-  
-  
-  
-  
-  
   /*
    * Common for all shaders
    * */
@@ -91,35 +85,16 @@ glm::vec4 RTCCommonShader::traceRay(const RTCRayHitIor &rayHit, int depth) {
   const RTCShadingType selectedShader = useShader;
   
   switch (selectedShader) {
-    case RTCShadingType::None: {
-      resultColor = traceMaterial<RTCShadingType::None>(rayHit, material, tex_coord, origin, direction, worldPos,
-                                                        directionToCamera, lightPos, lightDir, shaderNormal,
-                                                        dotNormalCamera, depth);
-      break;
-    }
-    
     case RTCShadingType::Glass: {
       resultColor = traceMaterial<RTCShadingType::Glass>(rayHit, material, tex_coord, origin, direction, worldPos,
                                                          directionToCamera, lightPos, lightDir, shaderNormal,
                                                          dotNormalCamera, depth);
       break;
     }
-    case RTCShadingType::Lambert: {
-      resultColor = traceMaterial<RTCShadingType::Lambert>(rayHit, material, tex_coord, origin, direction, worldPos,
-                                                           directionToCamera, lightPos, lightDir, shaderNormal,
-                                                           dotNormalCamera, depth);
-      break;
-    }
     case RTCShadingType::Mirror: {
       resultColor = traceMaterial<RTCShadingType::Mirror>(rayHit, material, tex_coord, origin, direction, worldPos,
                                                           directionToCamera, lightPos, lightDir, shaderNormal,
                                                           dotNormalCamera, depth);
-      break;
-    }
-    case RTCShadingType::Phong: {
-      resultColor = traceMaterial<RTCShadingType::Phong>(rayHit, material, tex_coord, origin, direction, worldPos,
-                                                         directionToCamera, lightPos, lightDir, shaderNormal,
-                                                         dotNormalCamera, depth);
       break;
     }
     case RTCShadingType::PathTracing: {
@@ -138,6 +113,13 @@ glm::vec4 RTCCommonShader::traceRay(const RTCRayHitIor &rayHit, int depth) {
       resultColor = traceMaterial<RTCShadingType::TexCoords>(rayHit, material, tex_coord, origin, direction, worldPos,
                                                              directionToCamera, lightPos, lightDir, shaderNormal,
                                                              dotNormalCamera, depth);
+      break;
+    };
+    default:
+    case RTCShadingType::None: {
+      resultColor = traceMaterial<RTCShadingType::None>(rayHit, material, tex_coord, origin, direction, worldPos,
+                                                        directionToCamera, lightPos, lightDir, shaderNormal,
+                                                        dotNormalCamera, depth);
       break;
     };
   }
@@ -163,6 +145,81 @@ glm::vec4 RTCCommonShader::traceMaterial(const RTCRayHitIor &rayHit,
   return glm::vec4(1, 0, 1, 1);
 }
 
+float
+RTCCommonShader::getPhongBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal, const std::shared_ptr<BRDFShader> &brdfShaderPtr) {
+  glm::vec3 reflectVector = reflect(-toLight, normal);
+  float specVal = std::pow(std::max(dot(toCamera, reflectVector), 0.0f), brdfShaderPtr->getBrdfUniformLocations().shininess.getData());
+  return specVal;
+}
+
+float RTCCommonShader::getBlinnPhongBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal,
+                                         const std::shared_ptr<BRDFShader> &brdfShaderPtr) {
+  glm::vec3 halfVector = normalize(toLight + toCamera);
+  float specVal = std::pow(std::max(glm::dot(normal, halfVector), 0.0f), brdfShaderPtr->getBrdfUniformLocations().shininess.getData());
+  //  float specVal = pow(dot(normal, halfVector), u_phongShininess);
+  return specVal;
+}
+
+
+float RTCCommonShader::beckmannDistribution(float roughness, float normDotHalf) {
+  float roughness2 = roughness * roughness;
+  float normDotHalf2 = normDotHalf * normDotHalf;
+  float normDotHalf4 = normDotHalf2 * normDotHalf2;
+  return std::exp((normDotHalf2 - 1) / (roughness2 * normDotHalf2)) / (roughness2 * normDotHalf2);
+}
+
+// https://en.wikipedia.org/wiki/Schlick%27s_approximation
+float RTCCommonShader::schlick(float r0, float cosTheta) {
+  return r0 + (1.f - r0) * std::pow(1.f - cosTheta, 5.f);
+}
+
+float RTCCommonShader::geometricAttenuation(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal) {
+  glm::vec3 halfVector = normalize(toLight + toCamera);
+  float normDotHalf = dot(normal, halfVector);
+  float toCamDotHalf = dot(toCamera, halfVector);
+  float normDotToCamera = dot(normal, toCamera);
+  float normDotToLight = dot(normal, toLight);
+  
+  float res1 = (2.f * normDotHalf * normDotToCamera) / toCamDotHalf;
+  float res2 = (2.f * normDotHalf * normDotToLight) / toCamDotHalf;
+  
+  float res = std::min(1.f, std::min(res1, res2));
+  return res;
+}
+
+float RTCCommonShader::getTorranceSparrowBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal,
+                                              const std::shared_ptr<BRDFShader> &brdfShaderPtr) {
+  glm::vec3 halfVector = normalize(toLight + toCamera);
+  
+  float normDotHalf = dot(normal, halfVector);
+  float toCamDotHalf = dot(toCamera, halfVector);
+  
+  float D = beckmannDistribution(brdfShaderPtr->getBrdfUniformLocations().roughness.getData(), normDotHalf);
+  float F = schlick(brdfShaderPtr->getBrdfUniformLocations().f0.getData(), toCamDotHalf);
+  float G = geometricAttenuation(toLight, toCamera, normal);
+  
+  float specVal = D * F * G;
+  return specVal;
+}
+
+
+float RTCCommonShader::getBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal) {
+  if (auto brdfShaderPtr = brdfShader.lock()) {
+    switch (brdfShaderPtr->currentBrdfIdx) {
+      case BRDFShader::BRDF::Phong:return getPhongBRDF(toLight, toCamera, normal, brdfShaderPtr);
+      case BRDFShader::BRDF::BlinnPhong:return getBlinnPhongBRDF(toLight, toCamera, normal, brdfShaderPtr);
+      case BRDFShader::BRDF::TorranceSparrow:return getTorranceSparrowBRDF(toLight, toCamera, normal, brdfShaderPtr);
+      default: {
+        spdlog::warn("[COMMON SHADER] invalid BRDF selected");
+        return 0;
+      }
+    }
+  } else {
+    spdlog::warn("[COMMON SHADER] cannot cock brdf shader");
+    return 0;
+  }
+}
+
 
 template<>
 glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::None>(const RTCRayHitIor &rayHit,
@@ -178,8 +235,8 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::None>(const RTCRayHitIo
                                                                const float dotNormalCamera,
                                                                const int depth) {
   
-  
-  return glm::vec4(1.f, 0.f, 0.f, 1.f);
+  return glm::vec4(colorToGlm(material->diffuse_), 1);
+//  return glm::vec4(1.f, 0.f, 0.f, 1.f);
 }
 
 template<>
@@ -289,49 +346,6 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::Glass>(const RTCRayHitI
 }
 
 template<>
-glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::Lambert>(const RTCRayHitIor &rayHit,
-                                                                  const std::shared_ptr<Material> &material,
-                                                                  const glm::vec2 &tex_coord,
-                                                                  const glm::vec3 &origin,
-                                                                  const glm::vec3 &direction,
-                                                                  const glm::vec3 &worldPos,
-                                                                  const glm::vec3 &directionToCamera,
-                                                                  const glm::vec3 &lightPos,
-                                                                  const glm::vec3 &lightDir,
-                                                                  const glm::vec3 &shaderNormal,
-                                                                  const float dotNormalCamera,
-                                                                  const int depth) {
-  glm::vec3 diffuse = dotNormalCamera * getDiffuseColor(material, tex_coord);
-  
-  //shadow
-  float shadowVal = 1;
-  float pdf = 0;
-
-//  if (softShadows) {
-//
-//    shadowVal += shadow(worldPos, lightDir, glm::l2Norm(lightPos - worldPos));
-//
-//    for (int i = 0; i < lightShadowsSamples; i++) {
-//      const glm::vec3 lDir = hemisphereSampling(lightDir, pdf);
-//      shadowVal += shadow(worldPos, lDir, glm::l2Norm(lightPos - worldPos));
-//    }
-//
-//    shadowVal /= static_cast<float>(lightShadowsSamples + 1);
-//  } else {
-  //hard shadow
-  shadowVal = shadow(worldPos, lightDir, glm::l2Norm(lightPos));
-  //}
-  
-  const float dotNormalLight = glm::dot(shaderNormal, lightDir);
-  
-  return glm::vec4(
-      ((diffuse.x * shadowVal * dotNormalLight)),
-      ((diffuse.y * shadowVal * dotNormalLight)),
-      ((diffuse.z * shadowVal * dotNormalLight)),
-      1);
-}
-
-template<>
 glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::Mirror>(const RTCRayHitIor &rayHit,
                                                                  const std::shared_ptr<Material> &material,
                                                                  const glm::vec2 &tex_coord,
@@ -358,71 +372,6 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::Mirror>(const RTCRayHit
 }
 
 template<>
-glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::Phong>(const RTCRayHitIor &rayHit,
-                                                                const std::shared_ptr<Material> &material,
-                                                                const glm::vec2 &tex_coord,
-                                                                const glm::vec3 &origin,
-                                                                const glm::vec3 &direction,
-                                                                const glm::vec3 &worldPos,
-                                                                const glm::vec3 &directionToCamera,
-                                                                const glm::vec3 &lightPos,
-                                                                const glm::vec3 &lightDir,
-                                                                const glm::vec3 &shaderNormal,
-                                                                const float dotNormalCamera,
-                                                                const int depth) {
-  
-  
-  glm::vec4 reflected = traceMaterial<RTCShadingType::Mirror>(rayHit, material, tex_coord, origin, direction, worldPos,
-                                                              directionToCamera, lightPos, lightDir, shaderNormal,
-                                                              dotNormalCamera, depth);
-  
-  if (material->reflectivity >= 1.0) {
-    return reflected;
-  }
-  
-  //ambient
-  glm::vec3 ambient = colorToGlm(material->ambient_);
-  
-  //diffuse
-  float shadowVal = 0;
-  float pdf = 0;
-
-//  if (softShadows) {
-//
-//    shadowVal += shadow(worldPos, lightDir, glm::l2Norm(lightPos - worldPos));
-//
-//    for (int i = 0; i < lightShadowsSamples; i++) {
-//      const glm::vec3 lDir = hemisphereSampling(lightDir, pdf);
-//      shadowVal += shadow(worldPos, lDir, glm::l2Norm(lightPos - worldPos));
-//    }
-//
-//    shadowVal /= static_cast<float>(lightShadowsSamples + 1);
-//  } else {
-  //hard shadow
-  shadowVal = shadow(worldPos, lightDir, glm::l2Norm(lightPos));
-//  }
-  
-  glm::vec3 diffuse = shadowVal * dotNormalCamera * getDiffuseColor(material, tex_coord);
-  
-  //specular
-  //I - N * dot(N, I) * 2
-  //glm::vec3 lightReflectDir = glm::reflect(lightDir, shaderNormal);
-//  float spec = powf(glm::dot(direction, lightReflectDir), material->shininess);
-  
-  //blinn-phong lightning
-  glm::vec3 halfwayDir = glm::normalize(lightDir + direction);
-  float spec = powf(std::max<float>(glm::dot(shaderNormal, halfwayDir), 0.0), material->shininess);
-  
-  glm::vec3 specular = colorToGlm(material->specular_) * spec;
-
-//  glm::vec3 torranceSparrow = TorranceSparrowBRDF::getBRDF(material, shaderNormal, lightDir, directionToCamera,
-//                                                           worldPos);
-
-//  return glm::vec4(std::max<float>(glm::dot(shaderNormal, lightDir), 0) * torranceSparrow, 1);
-  return glm::vec4(diffuse + specular * spec, 1) + (reflected * material->reflectivity/* * spec*/);
-}
-
-template<>
 glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCRayHitIor &rayHit,
                                                                       const std::shared_ptr<Material> &material,
                                                                       const glm::vec2 &tex_coord,
@@ -436,6 +385,7 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
                                                                       const float dotNormalCamera,
                                                                       const int depth) {
   const int currentRecursion = recursionDepth_ - depth;
+  // Russian roulette
   if (currentRecursion > 2) {
     if (rng() >
         (std::max<float>(material->diffuse_.data[0], std::max<float>(material->diffuse_.data[1], material->diffuse_.data[2]))) * 0.95f) {
@@ -450,6 +400,8 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
   
   const RTCRayHitIor rayHitNew = generateRay(worldPos, omegaI);
   
+  const float brdf = getBRDF(glm::vec3(rayHitNew.ray.dir_x, rayHitNew.ray.dir_y, rayHitNew.ray.dir_z), directionToCamera, shaderNormal);
+  
   const glm::vec4 reflColor = traceRay(rayHitNew, depth - 1);
   
   const glm::vec3 diffuse = getDiffuseColor(material, tex_coord);
@@ -460,19 +412,18 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
 
 //  emmision += glm::vec3(reflColor.x, reflColor.y, reflColor.z) * diffuse;
   
-  //return glm::vec4(emmision.r, emmision.g, emmision.b, 1);
-  
-  glm::vec3 finalColor = emmision +
-                         glm::vec3(reflColor.x, reflColor.y, reflColor.z) *
-                         diffuse *
-                         (glm::dot(shaderNormal, omegaI) / pdf);
+  glm::vec3 finalColor(diffuse * glm::vec3(reflColor.x, reflColor.y, reflColor.z) * brdf);
+
+//  glm::vec3 finalColor = emmision +
+//                         glm::vec3(reflColor.x, reflColor.y, reflColor.z) *
+//                         diffuse *
+//                         (glm::dot(shaderNormal, omegaI) /*/ pdf*/);
   
   /*return glm::vec4(
       glm::vec3(reflColor.x, reflColor.y, reflColor.z) *
       glm::dot(shaderNormal, omegaI) *
       diffuse,
       1);*/
-  
   return glm::vec4(finalColor.x, finalColor.y, finalColor.z, 1);
 }
 

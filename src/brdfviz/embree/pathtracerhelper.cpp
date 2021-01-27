@@ -30,6 +30,7 @@ void PathTracerHelper::incrementTraces() {
 }
 
 void PathTracerHelper::resetTraces() {
+  traces_ = 0;
   for (int row = 0; row < height_; row++) {
     for (int col = 0; col < width_; col++) {
       const int offset = (row * width_ + col);
@@ -38,13 +39,6 @@ void PathTracerHelper::resetTraces() {
   }
 }
 
-int PathTracerHelper::getTracesCount() {
-  float max = 0;
-  for (int row = 0; row < height_; row++) {
-    for (int col = 0; col < width_; col++) {
-      const int offset = (row * width_ + col);
-      max = pixelsSum_[offset].w > max ? pixelsSum_[offset].w : max;
-    }
-  }
-  return static_cast<int>(max);
+int PathTracerHelper::getTracesCount() const {
+  return traces_;
 }

@@ -19,7 +19,7 @@ public:
   
   void setPixel(int row, int col, const glm::vec4 &pix);
   
-  int getTracesCount();
+  int getTracesCount() const;
 
 private:
   

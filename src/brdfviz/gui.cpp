@@ -147,7 +147,7 @@ void Gui::init() {
 
 //  LineVertexBufferObject::setupStaticObjects();
   renderer_ = std::make_unique<OpenGLRenderer>();
-  embreeRenderer_ = std::make_unique<EmbreeRenderer>(400, 400);
+  embreeRenderer_ = std::make_unique<EmbreeRenderer>(200, 200, 2.0f);
   
   fbo_ = std::make_unique<FrameBufferObject>(800, 800);
   
@@ -165,7 +165,7 @@ void Gui::init() {
   std::shared_ptr<Shader> normalShader = std::make_shared<NormalShader>("./Shaders/Normal/VertexShader.glsl", "./Shaders/Normal/FragmentShader.glsl");
   auto brdfShader = std::make_shared<BRDFShader>("./Shaders/brdf/VertexShader.glsl", "./Shaders/brdf/FragmentShader.glsl");
   brdfShader_ = brdfShader; // assign to weak ptr
-  
+  embreeRenderer_->getCommonShader()->brdfShader = brdfShader_;
   scene->addDefShader(defShader);
   
   defShader->addCamera(cam);
@@ -331,9 +331,6 @@ void Gui::ui() {
         
         yaw += glm::radians(io.MouseDelta.x);
         pitch += glm::radians(io.MouseDelta.y);
-
-//        pitch = std::min<float>(pitch, M_PI / 2.f);
-//        pitch = std::max<float>(pitch, -M_PI / 2.f);
         
         pitch = std::min<float>(pitch, 1.553);
         pitch = std::max<float>(pitch, -1.553);
@@ -468,7 +465,6 @@ void Gui::renderLoop() {
     
     auto cam = renderer_->getCurrentScene()->getCamera();
     cam->ratio = fbo_->getRatio();
-    
     
     glm::vec3 newCamPos;
     

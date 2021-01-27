@@ -11,14 +11,7 @@
 #include "rtcamera.h"
 #include "pathtracerhelper.h"
 
-static float yaw = M_PI / 4.0f;
-static float pitch = M_PI / 4.0f;
-static float dist = 5.0f;
-static bool mouseInput = false;
-static bool invalidate = false;
-static std::mutex invalidateLock_;
-
-EmbreeRenderer::EmbreeRenderer(const int width, const int height) : width_(width), height_(height) {
+EmbreeRenderer::EmbreeRenderer(const int width, const int height, const float renderScale) : width_(width), height_(height), renderScale_(renderScale) {
   texData_.reserve(width_ * height_);
   
   for (int y = 0; y < height_; ++y) {
@@ -39,11 +32,14 @@ EmbreeRenderer::EmbreeRenderer(const int width, const int height) : width_(width
   commonShader_->pathTracerHelper = std::make_unique<PathTracerHelper>(width, height);
   commonShader_->camera_ = std::make_unique<RTCamera>(width, height, deg2rad(45.0), glm::vec3(5, 5, 5), glm::vec3(0, 0, 0));
   auto mtl = std::make_shared<Material>();
-  mtl->diffuse_.data = {0.9, 0.9, 0.9};
+  mtl->diffuse_.data = {0.1, 0.5, 0.9};
   auto sphere = std::make_unique<Sphere>(glm::vec3(0, 0, 0), 1.0f, mtl);
   commonShader_->mathScene_ = std::make_unique<MathScene>();
   commonShader_->mathScene_->spheres.emplace_back(std::move(sphere));
-  commonShader_->useShader = RTCShadingType::Mirror;
+//  commonShader_->useShader = RTCShadingType::Mirror;
+//  commonShader_->useShader = RTCShadingType::Normals;
+//  commonShader_->useShader = RTCShadingType::None;
+  commonShader_->useShader = RTCShadingType::PathTracing;
 }
 
 
@@ -57,7 +53,7 @@ void EmbreeRenderer::ui() {
   }
   
   ImGui::Begin("Image", nullptr, ImGuiWindowFlags_NoResize);
-  ImGui::Image((void *) (intptr_t) texID_, ImVec2(float(width_), float(height_)));
+  ImGui::Image((void *) (intptr_t) texID_, ImVec2(float(width_) * renderScale_, float(height_) * renderScale_));
   
   if (ImGui::IsItemClicked(0)) {
     mouseInput = true;
@@ -148,9 +144,9 @@ void EmbreeRenderer::producer() {
         const glm::vec4 pixel = getPixel(x, y, t);
         const int offset = (y * width_ + x);
         
-        localData[offset].x = /*c_srgb(*/pixel.r/*, gamma_)*/;
-        localData[offset].y = /*c_srgb(*/pixel.g/*, gamma_)*/;
-        localData[offset].z = /*c_srgb(*/pixel.b/*, gamma_)*/;
+        localData[offset].x = c_srgb(pixel.r, gamma_);
+        localData[offset].y = c_srgb(pixel.g, gamma_);
+        localData[offset].z = c_srgb(pixel.b, gamma_);
         localData[offset].w = 1;//c_srgb(pixel.a);
         
         if (finishRequest_.load(std::memory_order_acquire)) {
@@ -168,6 +164,8 @@ void EmbreeRenderer::producer() {
         }
       }
     }
+    
+    commonShader_->pathTracerHelper->incrementTraces();
     
     // write rendering results
     {

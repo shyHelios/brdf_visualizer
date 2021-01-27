@@ -30,7 +30,8 @@ RTCShader::RTCShader() :
     mathScene_(nullptr),
     light_(std::make_unique<RTLight>(glm::vec3(10, 10, 10))),
 //    sphericalMap_(std::make_unique<RTSphericalMap>("data/sphereMap.jpg")),
-    sphericalMap_(std::make_unique<RTSphericalMap>("data/studio_small_03_4k.hdr")),
+//    sphericalMap_(std::make_unique<RTSphericalMap>("data/studio_small_03_4k.hdr")),
+    sphericalMap_(std::make_unique<RTSphericalMap>("data/outdoor_umbrellas_4k.hdr")),
     defaultBgColor_(glm::vec4(0.8, 0.8, 0.8, 1)) {
   
 }
@@ -68,55 +69,12 @@ glm::vec4 RTCShader::getPixel(const int x, const int y) {
   float offsetX;
   float offsetY;
   
-  switch (superSamplingType_) {
-    case SuperSamplingType::None: {
-      RTCRayHitIor ray = shootRay(static_cast<float>(x), static_cast<float>(y));
-      finalColor = traceRay(ray, recursionDepth_);
-      break;
-    }
-    case SuperSamplingType::Uniform: {
-      offsetX = -0.5f;
-      offsetY = -0.5f;
-      const float offsetAdditionX = 1.0f / static_cast<float>(samplingSizeX_);
-      const float offsetAdditionY = 1.0f / static_cast<float>(samplingSizeY_);
-      
-      for (int i = 0; i < samplingSizeX_; i++) {
-        for (int j = 0; j < samplingSizeY_; j++) {
-          RTCRayHitIor ray = shootRay(static_cast<float>(x) + offsetX, static_cast<float>(y) + offsetY);
-          finalColor += traceRay(ray, recursionDepth_);
-          offsetX += offsetAdditionX;
-        }
-        offsetX = -0.5f;
-        offsetY += offsetAdditionY;
-      }
-      break;
-    }
-    case SuperSamplingType::RandomFinite: {
-      offsetX = rng(-0.5f, 0.5f);
-      offsetY = rng(-0.5f, 0.5f);
-      
-      for (int i = 0; i < (samplingSize_) - 1; i++) {
-        RTCRayHitIor ray = shootRay(static_cast<float>(x) + offsetX, static_cast<float>(y) + offsetY);
-        finalColor += traceRay(ray, recursionDepth_);
-      }
-      {
-        RTCRayHitIor ray = shootRay(static_cast<float>(x), static_cast<float>(y));
-        finalColor += traceRay(ray, recursionDepth_);
-      }
-      break;
-    }
-    case SuperSamplingType::RandomInfinite: {
-      offsetX = rng(-0.5f, 0.5f);
-      offsetY = rng(-0.5f, 0.5f);
-      RTCRayHitIor ray = shootRay(static_cast<float>(x) + offsetX, static_cast<float>(y) + offsetY);
-      pathTracerHelper->setPixel(y, x, traceRay(ray, recursionDepth_));
-      
-      finalColor = pathTracerHelper->getInterpolatedPixel(y, x);
-    }
-    case SuperSamplingType::SuperSamplingCount: {
-      break;
-    }
-  }
+  offsetX = rng(-0.5f, 0.5f);
+  offsetY = rng(-0.5f, 0.5f);
+  RTCRayHitIor ray = shootRay(static_cast<float>(x) + offsetX, static_cast<float>(y) + offsetY);
+  pathTracerHelper->setPixel(y, x, traceRay(ray, recursionDepth_));
+  
+  finalColor = pathTracerHelper->getInterpolatedPixel(y, x);
   
   return finalColor / finalColor.a;
   
@@ -136,7 +94,7 @@ glm::vec4 RTCShader::getBackgroundColor(const RTCRayHitIor &rayHit) {
     return glm::vec4(sphericalMap_->texel(rayDir), 1.0f);
   }
   
-  return glm::vec4((defaultBgColor_).x, (defaultBgColor_).y, (defaultBgColor_).z, 1.0f);
+  return glm::vec4(defaultBgColor_.x, defaultBgColor_.y, defaultBgColor_.z, 1.0f);
 }
 
 RTCRayHitIor RTCShader::generateRay(const glm::vec3 &origin,
@@ -254,8 +212,7 @@ glm::vec3 RTCShader::hemisphereSampling(const glm::vec3 &normal, float &pdf) {
 //    omegaI *= -1;
     omegaI = -omegaI;
   }
-  pdf = 1.f / 2.f * M_PI;
-  
+  pdf = 1.f / M_2PI;
   return omegaI;
 }
 

@@ -9,7 +9,7 @@
 
 class EmbreeRenderer {
 public:
-  EmbreeRenderer(const int width = 400, const int height = 400);
+  EmbreeRenderer(const int width = 400, const int height = 400, const float renderScale = 1.0f);
   
   glm::vec4 getPixel(int x, int y, float t = 0.0f);
   
@@ -31,12 +31,22 @@ private:
   std::unique_ptr<RTCCommonShader> commonShader_;
   unsigned int texID_ = 0;
   float producerTime_;
-  int width_{400};
-  int height_{400};
+  int width_;
+  int height_;
+  float renderScale_;
   std::vector<glm::vec4> texData_;
   std::mutex texDataLock_;
-  float gamma_;
+  float gamma_{1.4f};
   std::atomic<bool> finishRequest_{false};
+  
+  
+  float yaw = M_PI / 4.0f;
+  float pitch = M_PI / 4.0f;
+  float dist = 3.0f;
+  bool mouseInput = false;
+  bool invalidate = false;
+  std::mutex invalidateLock_;
+  
 };
 
 
