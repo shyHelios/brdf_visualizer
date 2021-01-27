@@ -6,11 +6,13 @@ layout(location = 2)in vec2 in_TexCoords;
 layout(location = 3)in vec3 in_Tangent;
 
 #define M_PI   3.14159265358979323846264338327950288
+#define M_PI2   M_PI * M_PI
 
 #define PHONG_BRDF 0
 #define BLINN_PHONG_BRDF (PHONG_BRDF + 1)
 #define LAMBERT_BRDF (BLINN_PHONG_BRDF + 1)
 #define COOK_TORRANCE_BRDF (LAMBERT_BRDF + 1)
+#define OREN_NAYAR_BRDF (COOK_TORRANCE_BRDF + 1)
 
 uniform mat4 u_modelMat;
 uniform mat4 u_viewMat;
@@ -26,6 +28,9 @@ uniform float u_roughness = 0.1;
 uniform float u_f0 = 0.1;
 
 uniform float u_lambertReflectance = 0.5;
+
+uniform float u_orenNayarReflectance = 0.5;
+uniform float u_orenNayarRoughness = 0.1;
 
 uniform int u_brdf;
 
@@ -89,6 +94,37 @@ float cookTorranceBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, v
   return specVal;
 }
 
+float orenNayarBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
+  float toCamDotNormal = dot(toCamera, normal);
+  float toLightDotNormal = dot(toLight, normal);
+  float rough2 = u_orenNayarRoughness * u_orenNayarRoughness;
+  
+  float cosPhiri = dot(normalize(toCamera - normal * toCamDotNormal), normalize(toLight - normal * toLightDotNormal));
+  
+  float thetaI = acos(toLightDotNormal);
+  float thetaO = acos(toCamDotNormal);
+  
+  float alpha = max (thetaI, thetaO);
+  float beta = min (thetaI, thetaO);
+  
+  float C1 = 1. - 0.5 * (rough2 / (rough2 + 0.33));
+  
+  float C2;
+  if (cosPhiri >= 0){
+    C2 = 0.45 * (rough2 / (rough2 + 0.09)) * sin(alpha);
+  }
+  else {
+    C2 =  0.45 * (rough2 / (rough2 + 0.09)) * (sin(alpha) - pow(((2. * beta) / M_PI), 3));
+  }
+  
+  float C3 = 0.125 * (rough2 / (rough2 + 0.09))*((4 * alpha * beta) / M_PI2);
+  
+  float L1r = (u_orenNayarReflectance / M_PI) * (C1 + cosPhiri*C2*tan(beta) + (1. - abs(cosPhiri)) * C3 * tan((alpha+beta)/2.));
+  float L2r = 0.17 * ((u_orenNayarReflectance * u_orenNayarReflectance) / M_PI) * (rough2 / (rough2 + 0.09)) * pow(((4. * alpha * beta)/M_PI2), 2);
+  return L1r + L2r;
+}
+
+
 float BRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
   float res;
   switch (u_brdf){
@@ -109,6 +145,11 @@ float BRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangen
     
     case COOK_TORRANCE_BRDF:{
       res = cookTorranceBRDF(toLight, toCamera, normal, tangent, bitangent);
+      break;
+    }
+    
+    case OREN_NAYAR_BRDF:{
+      res = orenNayarBRDF(toLight, toCamera, normal, tangent, bitangent);
       break;
     }
   }

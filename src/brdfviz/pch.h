@@ -85,4 +85,6 @@
   }
 #endif
 
+#define M_PI2 (M_PI * M_PI)
+
 #endif //PCH_H

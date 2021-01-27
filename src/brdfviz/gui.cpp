@@ -272,6 +272,11 @@ void Gui::ui() {
     
     #pragma region "BRDF setting"
     if (auto brdfShader = brdfShader_.lock()) {
+      using Phong = BRDFShader::PhongUniformLocationsPack;
+      using TorranceSparrow = BRDFShader::TorranceSparrowUniformLocationsPack;
+      using Lambert = BRDFShader::LambertUniformLocationsPack;
+      using OrenNayar = BRDFShader::OrenNayarUniformLocationsPack;
+      
       ImGui::Text("BRDF");
       int *selectedIdx = reinterpret_cast<int *>(&brdfShader->currentBrdfIdx);
       
@@ -284,18 +289,24 @@ void Gui::ui() {
       switch (brdfShader->currentBrdfIdx) {
         case BRDFShader::BRDF::Phong:
         case BRDFShader::BRDF::BlinnPhong: {
-          shallInvalidateRTC |= ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().shininess.getData(), 1, 100);
+          shallInvalidateRTC |= ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().Phong::shininess.getData(), 1, 100);
           break;
         }
         
         case BRDFShader::BRDF::TorranceSparrow: {
-          shallInvalidateRTC |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().roughness.getData(), 0.001, 1.0);
-          shallInvalidateRTC |= ImGui::SliderFloat("f0", &brdfShader->getBrdfUniformLocations().f0.getData(), 0, 1);
+          shallInvalidateRTC |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().TorranceSparrow::roughness.getData(), 0.001, 1.0);
+          shallInvalidateRTC |= ImGui::SliderFloat("f0", &brdfShader->getBrdfUniformLocations().TorranceSparrow::f0.getData(), 0, 1);
           break;
         }
         
         case BRDFShader::BRDF::Lambert: {
-          shallInvalidateRTC |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().reflectance.getData(), 0., 1.0);
+          shallInvalidateRTC |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().Lambert::reflectance.getData(), 0., 1.0);
+          break;
+        };
+        
+        case BRDFShader::BRDF::OrenNayar: {
+          shallInvalidateRTC |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().OrenNayar::roughness.getData(), 0, 1.0);
+          shallInvalidateRTC |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().OrenNayar::reflectance.getData(), 0., 1.0);
           break;
         };
         

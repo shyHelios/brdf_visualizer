@@ -147,16 +147,17 @@ glm::vec4 RTCCommonShader::traceMaterial(const RTCRayHitIor &rayHit,
 
 float
 RTCCommonShader::getPhongBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal, const std::shared_ptr<BRDFShader> &brdfShaderPtr) {
+  using Phong = BRDFShader::PhongUniformLocationsPack;
   glm::vec3 reflectVector = reflect(-toLight, normal);
-  float specVal = std::pow(std::max(dot(toCamera, reflectVector), 0.0f), brdfShaderPtr->getBrdfUniformLocations().shininess.getData());
+  float specVal = std::pow(std::max(dot(toCamera, reflectVector), 0.0f), brdfShaderPtr->getBrdfUniformLocations().Phong::shininess.getData());
   return specVal;
 }
 
 float RTCCommonShader::getBlinnPhongBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal,
                                          const std::shared_ptr<BRDFShader> &brdfShaderPtr) {
+  using Phong = BRDFShader::PhongUniformLocationsPack;
   glm::vec3 halfVector = normalize(toLight + toCamera);
-  float specVal = std::pow(std::max(glm::dot(normal, halfVector), 0.0f), brdfShaderPtr->getBrdfUniformLocations().shininess.getData());
-  //  float specVal = pow(dot(normal, halfVector), u_phongShininess);
+  float specVal = std::pow(std::max(glm::dot(normal, halfVector), 0.0f), brdfShaderPtr->getBrdfUniformLocations().Phong::shininess.getData());
   return specVal;
 }
 
@@ -189,13 +190,14 @@ float RTCCommonShader::geometricAttenuation(const glm::vec3 &toLight, const glm:
 
 float RTCCommonShader::getTorranceSparrowBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal,
                                               const std::shared_ptr<BRDFShader> &brdfShaderPtr) {
+  using TorranceSparrow = BRDFShader::TorranceSparrowUniformLocationsPack;
   glm::vec3 halfVector = normalize(toLight + toCamera);
   
   float normDotHalf = dot(normal, halfVector);
   float toCamDotHalf = dot(toCamera, halfVector);
   
-  float D = beckmannDistribution(brdfShaderPtr->getBrdfUniformLocations().roughness.getData(), normDotHalf);
-  float F = schlick(brdfShaderPtr->getBrdfUniformLocations().f0.getData(), toCamDotHalf);
+  float D = beckmannDistribution(brdfShaderPtr->getBrdfUniformLocations().TorranceSparrow::roughness.getData(), normDotHalf);
+  float F = schlick(brdfShaderPtr->getBrdfUniformLocations().TorranceSparrow::f0.getData(), toCamDotHalf);
   float G = geometricAttenuation(toLight, toCamera, normal);
   
   float specVal = D * F * G;
@@ -210,6 +212,7 @@ float RTCCommonShader::getBRDF(const glm::vec3 &toLight, const glm::vec3 &toCame
       case BRDFShader::BRDF::BlinnPhong:return getBlinnPhongBRDF(toLight, toCamera, normal, brdfShaderPtr);
       case BRDFShader::BRDF::Lambert:return getLambertBRDF(toLight, toCamera, normal, brdfShaderPtr);
       case BRDFShader::BRDF::TorranceSparrow:return getTorranceSparrowBRDF(toLight, toCamera, normal, brdfShaderPtr);
+      case BRDFShader::BRDF::OrenNayar:return getOrenNayarBRDF(toLight, toCamera, normal, brdfShaderPtr);
       default: {
         spdlog::warn("[COMMON SHADER] invalid BRDF selected");
         return 0;
@@ -223,7 +226,45 @@ float RTCCommonShader::getBRDF(const glm::vec3 &toLight, const glm::vec3 &toCame
 
 float RTCCommonShader::getLambertBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal,
                                       const std::shared_ptr<BRDFShader> &brdfShaderPtr) {
-  return brdfShaderPtr->getBrdfUniformLocations().reflectance.getData() / M_PI;
+  using Lambert = BRDFShader::LambertUniformLocationsPack;
+  
+  return brdfShaderPtr->getBrdfUniformLocations().Lambert::reflectance.getData() / M_PI;
+}
+
+float RTCCommonShader::getOrenNayarBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal,
+                                        const std::shared_ptr<BRDFShader> &brdfShaderPtr) {
+  using OrenNayar = BRDFShader::OrenNayarUniformLocationsPack;
+  
+  float toCamDotNormal = dot(toCamera, normal);
+  float toLightDotNormal = dot(toLight, normal);
+  float rough2 =
+      brdfShaderPtr->getBrdfUniformLocations().OrenNayar::roughness.getData() * brdfShaderPtr->getBrdfUniformLocations().OrenNayar::roughness.getData();
+  
+  float cosPhiri = dot(normalize(toCamera - normal * toCamDotNormal), normalize(toLight - normal * toLightDotNormal));
+  
+  float thetaI = acos(toLightDotNormal);
+  float thetaO = acos(toCamDotNormal);
+  
+  float alpha = std::max(thetaI, thetaO);
+  float beta = std::min(thetaI, thetaO);
+  
+  float C1 = 1. - 0.5 * (rough2 / (rough2 + 0.33));
+  
+  float C2;
+  if (cosPhiri >= 0) {
+    C2 = 0.45 * (rough2 / (rough2 + 0.09)) * sin(alpha);
+  } else {
+    C2 = 0.45 * (rough2 / (rough2 + 0.09)) * (sin(alpha) - pow(((2 * beta) / M_PI), 3));
+  }
+  
+  float C3 = 0.125 * (rough2 / (rough2 + 0.09)) * ((4 * alpha * beta) / M_PI2);
+  
+  float L1r = (brdfShaderPtr->getBrdfUniformLocations().OrenNayar::reflectance.getData() / M_PI) *
+              (C1 + cosPhiri * C2 * tan(beta) + (1. - abs(cosPhiri)) * C3 * tan((alpha + beta) / 2.));
+  float L2r = 0.17 * ((brdfShaderPtr->getBrdfUniformLocations().OrenNayar::reflectance.getData() *
+                       brdfShaderPtr->getBrdfUniformLocations().OrenNayar::reflectance.getData()) / M_PI) * (rough2 / (rough2 + 0.09)) *
+              pow(((4 * alpha * beta) / M_PI2), 2);
+  return L1r + L2r;
 }
 
 

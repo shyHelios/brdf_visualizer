@@ -19,6 +19,7 @@ public:
     BlinnPhong,
     Lambert,
     TorranceSparrow,
+    OrenNayar,
     CountBrdf
   };
   
@@ -41,11 +42,19 @@ public:
     UniformLocationPair<float> f0;
   };
   
+  struct OrenNayarUniformLocationsPack : UniformLocations {
+    virtual void init(int shaderProgram) override;
+    
+    UniformLocationPair<float> roughness;
+    UniformLocationPair<float> reflectance;
+  };
+  
   struct BRDFUniformLocations :
       BasicUniformLocations,
       MaterialUniformLocations,
       PhongUniformLocationsPack,
       LambertUniformLocationsPack,
+      OrenNayarUniformLocationsPack,
       TorranceSparrowUniformLocationsPack {
     virtual void init(int shaderProgram) override;
     

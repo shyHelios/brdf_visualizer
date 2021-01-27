@@ -9,6 +9,7 @@ const std::pair<const char *, BRDFShader::BRDF> BRDFShader::brdfArray[static_cas
     {"BlinnPhong",       BRDF::BlinnPhong},
     {"Lambert",          BRDF::Lambert},
     {"Torrance-Sparrow", BRDF::TorranceSparrow},
+    {"Oren-Nayar",       BRDF::OrenNayar},
 };
 
 BRDFShader::BRDFShader(const char *vertex, const char *fragment) : Shader(vertex, fragment) {
@@ -16,13 +17,35 @@ BRDFShader::BRDFShader(const char *vertex, const char *fragment) : Shader(vertex
 }
 
 void BRDFShader::use(const std::shared_ptr<Material> &mtl) {
+  using Phong = PhongUniformLocationsPack;
+  using TorranceSparrow = TorranceSparrowUniformLocationsPack;
+  using Lambert = LambertUniformLocationsPack;
+  using OrenNayar = OrenNayarUniformLocationsPack;
+  
   Shader::use(mtl);
   
   setData(brdfUniformLocations_.incidentVector.getUniformLocation(), brdfUniformLocations_.incidentVector.getData());
-  setData(brdfUniformLocations_.shininess.getUniformLocation(), brdfUniformLocations_.shininess.getData());
-  setData(brdfUniformLocations_.roughness.getUniformLocation(), brdfUniformLocations_.roughness.getData());
-  setData(brdfUniformLocations_.f0.getUniformLocation(), brdfUniformLocations_.f0.getData());
-  setData(brdfUniformLocations_.reflectance.getUniformLocation(), brdfUniformLocations_.reflectance.getData());
+  
+  // Phong, Blinn Phong
+  setData(brdfUniformLocations_.Phong::shininess.getUniformLocation(),
+          brdfUniformLocations_.Phong::shininess.getData());
+  
+  // Torrance Sparrow
+  setData(brdfUniformLocations_.TorranceSparrow::roughness.getUniformLocation(),
+          brdfUniformLocations_.TorranceSparrow::roughness.getData());
+  setData(brdfUniformLocations_.TorranceSparrow::f0.getUniformLocation(),
+          brdfUniformLocations_.TorranceSparrow::f0.getData());
+  
+  // Lambert
+  setData(brdfUniformLocations_.Lambert::reflectance.getUniformLocation(),
+          brdfUniformLocations_.Lambert::reflectance.getData());
+  
+  // Oren Nayar
+  setData(brdfUniformLocations_.OrenNayar::roughness.getUniformLocation(),
+          brdfUniformLocations_.OrenNayar::roughness.getData());
+  setData(brdfUniformLocations_.OrenNayar::reflectance.getUniformLocation(),
+          brdfUniformLocations_.OrenNayar::reflectance.getData());
+  
   
   setData(brdfUniformLocations_.Brdf, static_cast<int>(currentBrdfIdx));
   
@@ -95,6 +118,7 @@ void BRDFShader::BRDFUniformLocations::init(int shaderProgram) {
   PhongUniformLocationsPack::init(shaderProgram);
   TorranceSparrowUniformLocationsPack::init(shaderProgram);
   LambertUniformLocationsPack::init(shaderProgram);
+  OrenNayarUniformLocationsPack::init(shaderProgram);
   
   incidentVector.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_incidentVector");
   Brdf = glGetUniformLocation(shaderProgram, "u_brdf");
@@ -126,4 +150,16 @@ void BRDFShader::LambertUniformLocationsPack::init(int shaderProgram) {
   reflectance.getData() = 0.5;
   
   if (reflectance.getUniformLocation() == -1) { spdlog::warn("[SHADER] u_lambertReflectance not found"); }
+}
+
+void BRDFShader::OrenNayarUniformLocationsPack::init(int shaderProgram) {
+  reflectance.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_orenNayarReflectance");
+  roughness.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_orenNayarRoughness");
+  
+  reflectance.getData() = 0.5;
+  roughness.getData() = 0.1;
+  
+  if (reflectance.getUniformLocation() == -1) { spdlog::warn("[SHADER] u_orenNayarReflectance not found"); }
+  if (roughness.getUniformLocation() == -1) { spdlog::warn("[SHADER]  u_orenNayarRoughness not found"); }
+  
 }
