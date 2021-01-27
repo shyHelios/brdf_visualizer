@@ -739,9 +739,10 @@ int Texture<T, F>::width() const {
 template<class T, FREE_IMAGE_TYPE F>
 T Texture<T, F>::texel(const float u, const float v) const {
   T value;
-
+  float clampedU = u - static_cast<int>(u);
+  float clampedV = v - static_cast<int>(v);
 #ifdef FAST_INTERP
-  value = pixel(int(u * width_), int(v * height_)); // nearest neighbour
+  value = pixel(int(clampedU * width_), int(clampedV * height_)); // nearest neighbour
 #else
   throw std::runtime_error("Bilinear interpolation not implemented yet");
 // TODO bilinear interpolation
