@@ -294,6 +294,11 @@ void Gui::ui() {
           break;
         }
         
+        case BRDFShader::BRDF::Lambert: {
+          shallInvalidateRTC |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().reflectance.getData(), 0., 1.0);
+          break;
+        };
+        
         case BRDFShader::BRDF::CountBrdf:break;
       }
     } else {

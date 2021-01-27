@@ -7,6 +7,7 @@
 const std::pair<const char *, BRDFShader::BRDF> BRDFShader::brdfArray[static_cast<int>(BRDF::CountBrdf)] = {
     {"Phong",            BRDF::Phong},
     {"BlinnPhong",       BRDF::BlinnPhong},
+    {"Lambert",          BRDF::Lambert},
     {"Torrance-Sparrow", BRDF::TorranceSparrow},
 };
 
@@ -21,6 +22,8 @@ void BRDFShader::use(const std::shared_ptr<Material> &mtl) {
   setData(brdfUniformLocations_.shininess.getUniformLocation(), brdfUniformLocations_.shininess.getData());
   setData(brdfUniformLocations_.roughness.getUniformLocation(), brdfUniformLocations_.roughness.getData());
   setData(brdfUniformLocations_.f0.getUniformLocation(), brdfUniformLocations_.f0.getData());
+  setData(brdfUniformLocations_.reflectance.getUniformLocation(), brdfUniformLocations_.reflectance.getData());
+  
   setData(brdfUniformLocations_.Brdf, static_cast<int>(currentBrdfIdx));
   
   setData(brdfUniformLocations_.ModelTransform, modelMatrix);
@@ -91,6 +94,7 @@ void BRDFShader::BRDFUniformLocations::init(int shaderProgram) {
   MaterialUniformLocations::init(shaderProgram);
   PhongUniformLocationsPack::init(shaderProgram);
   TorranceSparrowUniformLocationsPack::init(shaderProgram);
+  LambertUniformLocationsPack::init(shaderProgram);
   
   incidentVector.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_incidentVector");
   Brdf = glGetUniformLocation(shaderProgram, "u_brdf");
@@ -115,4 +119,11 @@ void BRDFShader::TorranceSparrowUniformLocationsPack::init(int shaderProgram) {
   
   if (roughness.getUniformLocation() == -1) { spdlog::warn("[SHADER]  roughness not found"); }
   if (f0.getUniformLocation() == -1) { spdlog::warn("[SHADER]  f0 not found"); }
+}
+
+void BRDFShader::LambertUniformLocationsPack::init(int shaderProgram) {
+  reflectance.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_lambertReflectance");
+  reflectance.getData() = 0.5;
+  
+  if (reflectance.getUniformLocation() == -1) { spdlog::warn("[SHADER] u_lambertReflectance not found"); }
 }

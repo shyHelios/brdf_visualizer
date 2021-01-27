@@ -17,8 +17,15 @@ public:
   enum class BRDF : int {
     Phong = 0,
     BlinnPhong,
+    Lambert,
     TorranceSparrow,
     CountBrdf
+  };
+  
+  struct LambertUniformLocationsPack : UniformLocations {
+    virtual void init(int shaderProgram) override;
+    
+    UniformLocationPair<float> reflectance;
   };
   
   struct PhongUniformLocationsPack : UniformLocations {
@@ -38,6 +45,7 @@ public:
       BasicUniformLocations,
       MaterialUniformLocations,
       PhongUniformLocationsPack,
+      LambertUniformLocationsPack,
       TorranceSparrowUniformLocationsPack {
     virtual void init(int shaderProgram) override;
     

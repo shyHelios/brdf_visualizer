@@ -5,9 +5,12 @@ layout(location = 1)in vec3 in_Normal;
 layout(location = 2)in vec2 in_TexCoords;
 layout(location = 3)in vec3 in_Tangent;
 
+#define M_PI   3.14159265358979323846264338327950288
+
 #define PHONG_BRDF 0
-#define BLINN_PHONG_BRDF 1
-#define COOK_TORRANCE_BRDF 2
+#define BLINN_PHONG_BRDF (PHONG_BRDF + 1)
+#define LAMBERT_BRDF (BLINN_PHONG_BRDF + 1)
+#define COOK_TORRANCE_BRDF (LAMBERT_BRDF + 1)
 
 uniform mat4 u_modelMat;
 uniform mat4 u_viewMat;
@@ -22,6 +25,8 @@ uniform int u_phongShininess;
 uniform float u_roughness = 0.1;
 uniform float u_f0 = 0.1;
 
+uniform float u_lambertReflectance = 0.5;
+
 uniform int u_brdf;
 
 float phongBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
@@ -35,6 +40,10 @@ float blinnPhongBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec
   float specVal = pow(max(dot(normal, halfVector), 0.0), u_phongShininess);
   //  float specVal = pow(dot(normal, halfVector), u_phongShininess);
   return specVal;
+}
+
+float lambertBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
+  return u_lambertReflectance / M_PI;
 }
 
 float beckmannDistribution(float roughness, float normDotHalf){
@@ -90,6 +99,11 @@ float BRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangen
     
     case BLINN_PHONG_BRDF:{
       res = blinnPhongBRDF(toLight, toCamera, normal, tangent, bitangent);
+      break;
+    }
+    
+    case LAMBERT_BRDF:{
+      res = lambertBRDF(toLight, toCamera, normal, tangent, bitangent);
       break;
     }
     

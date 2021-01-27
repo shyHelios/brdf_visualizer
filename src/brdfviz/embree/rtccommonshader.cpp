@@ -208,6 +208,7 @@ float RTCCommonShader::getBRDF(const glm::vec3 &toLight, const glm::vec3 &toCame
     switch (brdfShaderPtr->currentBrdfIdx) {
       case BRDFShader::BRDF::Phong:return getPhongBRDF(toLight, toCamera, normal, brdfShaderPtr);
       case BRDFShader::BRDF::BlinnPhong:return getBlinnPhongBRDF(toLight, toCamera, normal, brdfShaderPtr);
+      case BRDFShader::BRDF::Lambert:return getLambertBRDF(toLight, toCamera, normal, brdfShaderPtr);
       case BRDFShader::BRDF::TorranceSparrow:return getTorranceSparrowBRDF(toLight, toCamera, normal, brdfShaderPtr);
       default: {
         spdlog::warn("[COMMON SHADER] invalid BRDF selected");
@@ -218,6 +219,11 @@ float RTCCommonShader::getBRDF(const glm::vec3 &toLight, const glm::vec3 &toCame
     spdlog::warn("[COMMON SHADER] cannot cock brdf shader");
     return 0;
   }
+}
+
+float RTCCommonShader::getLambertBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal,
+                                      const std::shared_ptr<BRDFShader> &brdfShaderPtr) {
+  return brdfShaderPtr->getBrdfUniformLocations().reflectance.getData() / M_PI;
 }
 
 
