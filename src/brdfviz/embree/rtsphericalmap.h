@@ -10,9 +10,13 @@ public:
   explicit RTSphericalMap(const std::string &filename);
   
   glm::vec3 texel(const glm::vec3 &pos);
+  
+  glm::vec3 downsampledTexel(const glm::vec3 &pos);
 
 private:
+  
   std::unique_ptr<Texture3f> texture_;
+  std::unique_ptr<Texture3f> downsampledTexture_;
 };
 
 

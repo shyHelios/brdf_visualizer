@@ -403,33 +403,16 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
   
   float pdf;
   const glm::vec3 omegaI = hemisphereSampling(shaderNormal, pdf);
-  
+  const float brdf = getBRDF(omegaI, directionToCamera, shaderNormal);
   const RTCRayHitIor rayHitNew = generateRay(worldPos, omegaI);
   
-  const float brdf = getBRDF(glm::vec3(rayHitNew.ray.dir_x, rayHitNew.ray.dir_y, rayHitNew.ray.dir_z), directionToCamera, shaderNormal);
   
   const glm::vec4 reflColor = traceRay(rayHitNew, depth - 1);
   
   const glm::vec3 diffuse = getDiffuseColor(material, tex_coord);
   
-  const glm::vec3 fR = diffuse * glm::vec3(1. / M_PI);
-
-//  float shadowVal = shadow(worldPos, lightDir, glm::l2Norm(light_->getPosition()));
-
-//  emmision += glm::vec3(reflColor.x, reflColor.y, reflColor.z) * diffuse;
-  
   glm::vec3 finalColor(diffuse * glm::vec3(reflColor.x, reflColor.y, reflColor.z) * brdf);
-
-//  glm::vec3 finalColor = emmision +
-//                         glm::vec3(reflColor.x, reflColor.y, reflColor.z) *
-//                         diffuse *
-//                         (glm::dot(shaderNormal, omegaI) /*/ pdf*/);
   
-  /*return glm::vec4(
-      glm::vec3(reflColor.x, reflColor.y, reflColor.z) *
-      glm::dot(shaderNormal, omegaI) *
-      diffuse,
-      1);*/
   return glm::vec4(finalColor.x, finalColor.y, finalColor.z, 1);
 }
 

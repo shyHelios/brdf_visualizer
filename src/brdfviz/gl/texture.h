@@ -60,6 +60,8 @@ public:
   void setTextureUnit(unsigned int textureUnit);
   
   unsigned int getMaxLevel() const;
+  
+  std::vector<T> &getData();
 
 private:
   std::vector<T> data_;

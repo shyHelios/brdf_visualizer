@@ -836,6 +836,11 @@ unsigned int Texture<T, F>::getMaxLevel() const {
   return max_level;
 }
 
+template<class T, FREE_IMAGE_TYPE F>
+std::vector<T> &Texture<T, F>::getData() {
+  return data_;
+}
+
 template<>
 FIBITMAP *Texture3u::Convert(FIBITMAP *dib) {
   return FreeImage_ConvertTo24Bits(dib);
