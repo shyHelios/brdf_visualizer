@@ -91,6 +91,12 @@ void EmbreeRenderer::ui() {
     dist = std::max(dist, 0.0f);
   }
   
+  
+  if (ImGui::Button("Invalidate (TODO DETECT THIS)")) {
+    invalidateRendering();
+  }
+  
+  ImGui::Text("Samples: %d", commonShader_->pathTracerHelper->getTracesCount());
   ImGui::End();
   
   
@@ -105,11 +111,7 @@ void EmbreeRenderer::ui() {
   newCamPos *= dist;
   commonShader_->camera_->view_from_ = newCamPos;
   if (oldCamPos != newCamPos) {
-//    commonShader_->pathTracerHelper->resetTraces();
-    {
-      std::lock_guard<std::mutex> lock(invalidateLock_);
-      invalidate = true;
-    }
+    invalidateRendering();
   }
   
 }
@@ -181,4 +183,13 @@ const std::atomic<bool> &EmbreeRenderer::getFinishRequest() const {
 
 void EmbreeRenderer::finishRendering() {
   finishRequest_.store(true, std::memory_order_release);
+}
+
+std::unique_ptr<RTCCommonShader> &EmbreeRenderer::getCommonShader() {
+  return commonShader_;
+}
+
+void EmbreeRenderer::invalidateRendering() {
+  std::lock_guard<std::mutex> lock(invalidateLock_);
+  invalidate = true;
 }

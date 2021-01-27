@@ -22,6 +22,10 @@ public:
   void finishRendering();
   
   virtual void producer();
+  
+  void invalidateRendering();
+  
+  std::unique_ptr<RTCCommonShader> &getCommonShader();
 
 private:
   std::unique_ptr<RTCCommonShader> commonShader_;

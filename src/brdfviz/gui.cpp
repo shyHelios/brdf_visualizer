@@ -41,6 +41,7 @@ static float thetha = M_PI / 4.0f; // <0, PI/2>
 static float phi = M_PI - (M_PI / 4.0f); // <0, 2*PI>
 static bool mouseInput = false;
 static bool geometry = false;
+static bool shallInvalidateRTC = false;
 
 //static std::shared_ptr<LineVertexBufferObject> incidentVectorVBO = nullptr;
 //static std::shared_ptr<LineVertexBufferObject> reflectedVectorVBO = nullptr;
@@ -269,26 +270,27 @@ void Gui::ui() {
     
     ImGui::Separator();
     
+    #pragma region "BRDF setting"
     if (auto brdfShader = brdfShader_.lock()) {
       ImGui::Text("BRDF");
       int *selectedIdx = reinterpret_cast<int *>(&brdfShader->currentBrdfIdx);
       
-      ImGui::Combo("Selected BRDF",                           // const char* label,
-                   selectedIdx,                              // int* current_item,
-                   &BRDFShader::imguiSelectionGetter,         // bool(*items_getter)(void* data, int idx, const char** out_text),
-                   (void *) BRDFShader::brdfArray,            // void* data
-                   IM_ARRAYSIZE(BRDFShader::brdfArray));// int items_count
+      shallInvalidateRTC |= ImGui::Combo("Selected BRDF",                           // const char* label,
+                                         selectedIdx,                              // int* current_item,
+                                         &BRDFShader::imguiSelectionGetter,         // bool(*items_getter)(void* data, int idx, const char** out_text),
+                                         (void *) BRDFShader::brdfArray,            // void* data
+                                         IM_ARRAYSIZE(BRDFShader::brdfArray));// int items_count
       
       switch (brdfShader->currentBrdfIdx) {
         case BRDFShader::BRDF::Phong:
         case BRDFShader::BRDF::BlinnPhong: {
-          ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().shininess.getData(), 1, 100);
+          shallInvalidateRTC |= ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().shininess.getData(), 1, 100);
           break;
         }
         
         case BRDFShader::BRDF::TorranceSparrow: {
-          ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().roughness.getData(), 0.001, 0.2);
-          ImGui::SliderFloat("f0", &brdfShader->getBrdfUniformLocations().f0.getData(), 0, 1);
+          shallInvalidateRTC |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().roughness.getData(), 0.001, 1.0);
+          shallInvalidateRTC |= ImGui::SliderFloat("f0", &brdfShader->getBrdfUniformLocations().f0.getData(), 0, 1);
           break;
         }
         
@@ -297,6 +299,8 @@ void Gui::ui() {
     } else {
       spdlog::warn("[GUI] BRDFShader ptr expired");
     }
+    
+    #pragma endregion
     ImGui::End();
   }
   
@@ -513,15 +517,19 @@ void Gui::renderLoop() {
       }
     }
     
+    if (shallInvalidateRTC) {
+      embreeRenderer_->invalidateRendering();
+    }
+    
     fbo_->resize(winSize.x, winSize.y);
     fbo_->bind();
     renderer_->render(geometry);
     fbo_->unbind();
     if (shallSave) fbo_->saveScreen();
     
+    shallInvalidateRTC = false;
     ui();
     embreeRenderer_->ui();
-    
     
     // Rendering
     ImGui::Render();
