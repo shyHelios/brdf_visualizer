@@ -5,6 +5,6 @@
 #ifndef RNG_H
 #define RNG_H
 
-float rng(const float range_min = 0.0f, const float range_max = 1.1f);
+float rng(const float range_min = 0.0f, const float range_max = 1.0f);
 
 #endif //RNG_H
