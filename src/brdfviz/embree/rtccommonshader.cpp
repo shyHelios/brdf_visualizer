@@ -442,8 +442,9 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
   
   glm::vec3 emmision = glm::vec3{material->emission_.data[0], material->emission_.data[1], material->emission_.data[2]};
   
-  float pdf;
-  const glm::vec3 omegaI = hemisphereSampling(shaderNormal, pdf);
+  float pdf = 1;
+  const glm::vec3 omegaI = pathTracerHelper->getTracesCount() == 0 ? glm::reflect(direction, shaderNormal) : hemisphereSampling(shaderNormal, pdf);
+  
   const float brdf = getBRDF(omegaI, directionToCamera, shaderNormal);
   const RTCRayHitIor rayHitNew = generateRay(worldPos, omegaI);
   
