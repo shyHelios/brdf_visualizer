@@ -288,8 +288,26 @@ void Gui::ui() {
       
       switch (brdfShader->currentBrdfIdx) {
         case BRDFShader::BRDF::Phong:
-        case BRDFShader::BRDF::BlinnPhong: {
+        case BRDFShader::BRDF::BlinnPhong:
+        case BRDFShader::BRDF::PhongPhysCorrect: {
           shallInvalidateRTC |= ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().Phong::shininess.getData(), 1, 100);
+          if (brdfShader->currentBrdfIdx == BRDFShader::BRDF::PhongPhysCorrect) {
+            const bool specularChanged = ImGui::SliderFloat("Specular", &brdfShader->getBrdfUniformLocations().Phong::specular.getData(), 0,
+                                                            1);
+            const bool diffuseChanged = ImGui::SliderFloat("Diffuse", &brdfShader->getBrdfUniformLocations().Phong::diffuse.getData(), 0,
+                                                           1);
+            
+            if (specularChanged) {
+              brdfShader->getBrdfUniformLocations().Phong::diffuse.getData() = std::min(brdfShader->getBrdfUniformLocations().Phong::diffuse.getData(),
+                                                                                        1.f - brdfShader->getBrdfUniformLocations().Phong::specular.getData());
+            } else if (diffuseChanged) {
+              brdfShader->getBrdfUniformLocations().Phong::specular.getData() = std::min(brdfShader->getBrdfUniformLocations().Phong::specular.getData(),
+                                                                                         1.f - brdfShader->getBrdfUniformLocations().Phong::diffuse.getData());
+            }
+            
+            shallInvalidateRTC |= specularChanged;
+            shallInvalidateRTC |= diffuseChanged;
+          }
           break;
         }
         

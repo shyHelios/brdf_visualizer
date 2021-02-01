@@ -198,7 +198,6 @@ float RTCShader::shadow(const glm::vec3 &pos, const glm::vec3 &lightDir, const f
 }
 
 glm::vec3 RTCShader::hemisphereSampling(const glm::vec3 &normal, float &pdf) {
-  const float M_2PI = 2.f * M_PI;
   const float randomU = rng();
   const float randomV = rng();
   

@@ -5,12 +5,14 @@ layout(location = 1)in vec3 in_Normal;
 layout(location = 2)in vec2 in_TexCoords;
 layout(location = 3)in vec3 in_Tangent;
 
-#define M_PI   3.14159265358979323846264338327950288
-#define M_PI2   M_PI * M_PI
+#define M_PI    (3.14159265358979323846264338327950288)
+#define M_2PI   (M_PI + M_PI)
+#define M_PI2   (M_PI * M_PI)
 
 #define PHONG_BRDF 0
 #define BLINN_PHONG_BRDF (PHONG_BRDF + 1)
-#define LAMBERT_BRDF (BLINN_PHONG_BRDF + 1)
+#define PHONG_PHYS_CORRECT_BRDF (BLINN_PHONG_BRDF + 1)
+#define LAMBERT_BRDF (PHONG_PHYS_CORRECT_BRDF + 1)
 #define COOK_TORRANCE_BRDF (LAMBERT_BRDF + 1)
 #define OREN_NAYAR_BRDF (COOK_TORRANCE_BRDF + 1)
 
@@ -22,7 +24,9 @@ out vec3 o_objectColor;
 
 uniform vec3 u_incidentVector;
 
-uniform int u_phongShininess;
+uniform int u_phongShininess = 16;
+uniform float u_phongDiffuse = 0.5;
+uniform float u_phongSpecular = 0.5;
 
 uniform float u_roughness = 0.1;
 uniform float u_f0 = 0.1;
@@ -45,6 +49,13 @@ float blinnPhongBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec
   float specVal = pow(max(dot(normal, halfVector), 0.0), u_phongShininess);
   //  float specVal = pow(dot(normal, halfVector), u_phongShininess);
   return specVal;
+}
+
+float phongPhysicallyCorrectBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
+  vec3 reflectVector = reflect(-toLight, normal);
+  float specVal = pow(max(dot(toCamera, reflectVector), 0.0), u_phongShininess);
+  //  return (u_phongDiffuse / M_PI) + (((u_phongSpecular * (u_phongShininess + 2)) / M_2PI) * pow(max(dot(toCamera, reflectVector), 0.0), u_phongShininess));
+  return (u_phongDiffuse / M_PI) + (((u_phongSpecular * (u_phongShininess + 2)) / M_2PI) * specVal);
 }
 
 float lambertBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
@@ -135,6 +146,11 @@ float BRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangen
     
     case BLINN_PHONG_BRDF:{
       res = blinnPhongBRDF(toLight, toCamera, normal, tangent, bitangent);
+      break;
+    }
+    
+    case PHONG_PHYS_CORRECT_BRDF:{
+      res = phongPhysicallyCorrectBRDF(toLight, toCamera, normal, tangent, bitangent);
       break;
     }
     

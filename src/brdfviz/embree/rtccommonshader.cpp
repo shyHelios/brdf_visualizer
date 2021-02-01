@@ -210,6 +210,7 @@ float RTCCommonShader::getBRDF(const glm::vec3 &toLight, const glm::vec3 &toCame
     switch (brdfShaderPtr->currentBrdfIdx) {
       case BRDFShader::BRDF::Phong:return getPhongBRDF(toLight, toCamera, normal, brdfShaderPtr);
       case BRDFShader::BRDF::BlinnPhong:return getBlinnPhongBRDF(toLight, toCamera, normal, brdfShaderPtr);
+      case BRDFShader::BRDF::PhongPhysCorrect:return getPhysicallyCorrectPhongBRDF(toLight, toCamera, normal, brdfShaderPtr);
       case BRDFShader::BRDF::Lambert:return getLambertBRDF(toLight, toCamera, normal, brdfShaderPtr);
       case BRDFShader::BRDF::TorranceSparrow:return getTorranceSparrowBRDF(toLight, toCamera, normal, brdfShaderPtr);
       case BRDFShader::BRDF::OrenNayar:return getOrenNayarBRDF(toLight, toCamera, normal, brdfShaderPtr);
@@ -265,6 +266,16 @@ float RTCCommonShader::getOrenNayarBRDF(const glm::vec3 &toLight, const glm::vec
                        brdfShaderPtr->getBrdfUniformLocations().OrenNayar::reflectance.getData()) / M_PI) * (rough2 / (rough2 + 0.09)) *
               pow(((4 * alpha * beta) / M_PI2), 2);
   return L1r + L2r;
+}
+
+float RTCCommonShader::getPhysicallyCorrectPhongBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal,
+                                                     const std::shared_ptr<BRDFShader> &brdfShaderPtr) {
+  using Phong = BRDFShader::PhongUniformLocationsPack;
+  glm::vec3 reflectVector = glm::reflect(-toLight, normal);
+  float specVal = std::pow(std::max(glm::dot(toCamera, reflectVector), 0.0f), brdfShaderPtr->getBrdfUniformLocations().Phong::shininess.getData());
+  //  return (u_phongDiffuse / M_PI) + (((u_phongSpecular * (u_phongShininess + 2)) / M_2PI) * pow(max(dot(toCamera, reflectVector), 0.0), u_phongShininess));
+  return (brdfShaderPtr->getBrdfUniformLocations().Phong::diffuse.getData() / M_PI) + (((brdfShaderPtr->getBrdfUniformLocations().Phong::specular.getData() * (brdfShaderPtr->getBrdfUniformLocations().Phong::shininess.getData() + 2)) / M_2PI) * specVal);
+  
 }
 
 

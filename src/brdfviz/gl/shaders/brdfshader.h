@@ -17,6 +17,7 @@ public:
   enum class BRDF : int {
     Phong = 0,
     BlinnPhong,
+    PhongPhysCorrect,
     Lambert,
     TorranceSparrow,
     OrenNayar,
@@ -33,6 +34,8 @@ public:
     virtual void init(int shaderProgram) override;
     
     UniformLocationPair<int> shininess;
+    UniformLocationPair<float> diffuse;
+    UniformLocationPair<float> specular;
   };
   
   struct TorranceSparrowUniformLocationsPack : UniformLocations {

@@ -5,11 +5,12 @@
 #include "brdfshader.h"
 
 const std::pair<const char *, BRDFShader::BRDF> BRDFShader::brdfArray[static_cast<int>(BRDF::CountBrdf)] = {
-    {"Phong",            BRDF::Phong},
-    {"BlinnPhong",       BRDF::BlinnPhong},
-    {"Lambert",          BRDF::Lambert},
-    {"Torrance-Sparrow", BRDF::TorranceSparrow},
-    {"Oren-Nayar",       BRDF::OrenNayar},
+    {"Phong",                    BRDF::Phong},
+    {"BlinnPhong",               BRDF::BlinnPhong},
+    {"Physically correct Phong", BRDF::PhongPhysCorrect},
+    {"Lambert",                  BRDF::Lambert},
+    {"Torrance-Sparrow",         BRDF::TorranceSparrow},
+    {"Oren-Nayar",               BRDF::OrenNayar},
 };
 
 BRDFShader::BRDFShader(const char *vertex, const char *fragment) : Shader(vertex, fragment) {
@@ -29,6 +30,10 @@ void BRDFShader::use(const std::shared_ptr<Material> &mtl) {
   // Phong, Blinn Phong
   setData(brdfUniformLocations_.Phong::shininess.getUniformLocation(),
           brdfUniformLocations_.Phong::shininess.getData());
+  setData(brdfUniformLocations_.Phong::specular.getUniformLocation(),
+          brdfUniformLocations_.Phong::specular.getData());
+  setData(brdfUniformLocations_.Phong::diffuse.getUniformLocation(),
+          brdfUniformLocations_.Phong::diffuse.getData());
   
   // Torrance Sparrow
   setData(brdfUniformLocations_.TorranceSparrow::roughness.getUniformLocation(),
@@ -129,9 +134,17 @@ void BRDFShader::BRDFUniformLocations::init(int shaderProgram) {
 
 void BRDFShader::PhongUniformLocationsPack::init(int shaderProgram) {
   shininess.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_phongShininess");
-  shininess.getData() = 32;
+  diffuse.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_phongDiffuse");
+  specular.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_phongSpecular");
   
-  if (shininess.getUniformLocation() == -1) { spdlog::warn("[SHADER]  PhongShininess not found"); }
+  shininess.getData() = 32;
+  diffuse.getData() = 0.5;
+  specular.getData() = 0.5;
+  
+  
+  if (shininess.getUniformLocation() == -1) { spdlog::warn("[SHADER]  u_phongShininess not found"); }
+  if (specular.getUniformLocation() == -1) { spdlog::warn("[SHADER]  PhongShininess not found"); }
+  if (diffuse.getUniformLocation() == -1) { spdlog::warn("[SHADER]  PhongShininess not found"); }
 }
 
 void BRDFShader::TorranceSparrowUniformLocationsPack::init(int shaderProgram) {
