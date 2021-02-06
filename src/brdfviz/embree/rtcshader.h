@@ -56,6 +56,10 @@ public:
   glm::vec3 getDiffuseColor(const std::shared_ptr<Material> &material, const glm::vec2 &tex_coord);
   
   static float fresnel(float n1, float n2, float Q1, float Q2);
+  
+  bool &getUseSphereMapRef();
+  
+  glm::vec4 &getDefaultBgColorRef();
 
 protected:
   std::unique_ptr<RTLight> light_;

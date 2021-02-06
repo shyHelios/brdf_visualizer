@@ -11,6 +11,7 @@ const std::pair<const char *, BRDFShader::BRDF> BRDFShader::brdfArray[static_cas
     {"Lambert",                  BRDF::Lambert},
     {"Torrance-Sparrow",         BRDF::TorranceSparrow},
     {"Oren-Nayar",               BRDF::OrenNayar},
+    {"Mirror",                   BRDF::Mirror},
 };
 
 BRDFShader::BRDFShader(const char *vertex, const char *fragment) : Shader(vertex, fragment) {

@@ -274,7 +274,9 @@ float RTCCommonShader::getPhysicallyCorrectPhongBRDF(const glm::vec3 &toLight, c
   glm::vec3 reflectVector = glm::reflect(-toLight, normal);
   float specVal = std::pow(std::max(glm::dot(toCamera, reflectVector), 0.0f), brdfShaderPtr->getBrdfUniformLocations().Phong::shininess.getData());
   //  return (u_phongDiffuse / M_PI) + (((u_phongSpecular * (u_phongShininess + 2)) / M_2PI) * pow(max(dot(toCamera, reflectVector), 0.0), u_phongShininess));
-  return (brdfShaderPtr->getBrdfUniformLocations().Phong::diffuse.getData() / M_PI) + (((brdfShaderPtr->getBrdfUniformLocations().Phong::specular.getData() * (brdfShaderPtr->getBrdfUniformLocations().Phong::shininess.getData() + 2)) / M_2PI) * specVal);
+  return (brdfShaderPtr->getBrdfUniformLocations().Phong::diffuse.getData() / M_PI) +
+         (((brdfShaderPtr->getBrdfUniformLocations().Phong::specular.getData() * (brdfShaderPtr->getBrdfUniformLocations().Phong::shininess.getData() + 2)) /
+           M_2PI) * specVal);
   
 }
 
@@ -450,7 +452,11 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
       return glm::vec4(0, 0, 0, 0);
     }
   }
-  
+  if (brdfShader.lock()->currentBrdfIdx == BRDFShader::BRDF::Mirror) {
+    return traceMaterial<RTCShadingType::Mirror>(rayHit, material, tex_coord, origin, direction, worldPos,
+                                                 directionToCamera, lightPos, lightDir, shaderNormal,
+                                                 dotNormalCamera, depth);
+  }
   glm::vec3 emmision = glm::vec3{material->emission_.data[0], material->emission_.data[1], material->emission_.data[2]};
   
   float pdf = 1;
@@ -464,7 +470,7 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
   
   const glm::vec3 diffuse = getDiffuseColor(material, tex_coord);
   
-  glm::vec3 finalColor(diffuse * glm::vec3(reflColor.x, reflColor.y, reflColor.z) * brdf);
+  glm::vec3 finalColor(/*diffuse * */glm::vec3(reflColor.x, reflColor.y, reflColor.z) * brdf);
   
   return glm::vec4(finalColor.x, finalColor.y, finalColor.z, 1);
 }

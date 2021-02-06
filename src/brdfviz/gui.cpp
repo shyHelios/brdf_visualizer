@@ -31,6 +31,7 @@
 
 static bool show_demo_window = false;
 static ImVec4 clear_color = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
+//static ImVec4 rtcFurnaceBackground = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
 static ImVec2 winSize;
 
 static float yaw = M_PI / 4.0f;
@@ -42,7 +43,7 @@ static float phi = M_PI - (M_PI / 4.0f); // <0, 2*PI>
 static bool mouseInput = false;
 static bool geometry = false;
 static bool shallInvalidateRTC = false;
-
+//static bool furnaceTest = false;
 //static std::shared_ptr<LineVertexBufferObject> incidentVectorVBO = nullptr;
 //static std::shared_ptr<LineVertexBufferObject> reflectedVectorVBO = nullptr;
 //static std::shared_ptr<BRDFShader> brdfShader = nullptr;
@@ -148,6 +149,7 @@ void Gui::init() {
 //  LineVertexBufferObject::setupStaticObjects();
   renderer_ = std::make_unique<OpenGLRenderer>();
   embreeRenderer_ = std::make_unique<EmbreeRenderer>(200, 200, 2.0f);
+//  embreeRenderer_ = std::make_unique<EmbreeRenderer>(400, 400, 1.0f);
   
   fbo_ = std::make_unique<FrameBufferObject>(800, 800);
   
@@ -267,6 +269,13 @@ void Gui::ui() {
     ImGui::Text("Incident beam");
     ImGui::SliderFloat("thetha", &thetha, 0, M_PI / 2.);
     ImGui::SliderFloat("phi", &phi, 0, 2. * M_PI);
+    
+    ImGui::Separator();
+    bool &furnaceTest = embreeRenderer_->getCommonShader()->getUseSphereMapRef();
+    glm::vec4 &rtcFurnaceBackground = embreeRenderer_->getCommonShader()->getDefaultBgColorRef();
+    shallInvalidateRTC |= ImGui::Checkbox("Enable IBL", &furnaceTest);
+    if (!furnaceTest)
+      shallInvalidateRTC |= ImGui::ColorEdit3("Furnace test bg", (float *) &rtcFurnaceBackground); // Edit 3 floats representing a color
     
     ImGui::Separator();
     
@@ -396,12 +405,6 @@ Gui::~Gui() {
   
   auto fboRaw = fbo_.release();
   delete fboRaw;
-//  auto incidentVectorVBOraw = incidentVectorVBO.release();
-//  auto reflectedVectorVBOraw = reflectedVectorVBO.release();
-//  auto brdfShaderraw = brdfShader.release();
-
-//  LineVertexBufferObject::deleteStaticObjects();
-//  VertexBufferObject::deleteStaticObjects();
   
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();

@@ -15,6 +15,7 @@ layout(location = 3)in vec3 in_Tangent;
 #define LAMBERT_BRDF (PHONG_PHYS_CORRECT_BRDF + 1)
 #define COOK_TORRANCE_BRDF (LAMBERT_BRDF + 1)
 #define OREN_NAYAR_BRDF (COOK_TORRANCE_BRDF + 1)
+#define MIRROR (OREN_NAYAR_BRDF + 1)
 
 uniform mat4 u_modelMat;
 uniform mat4 u_viewMat;
@@ -166,6 +167,11 @@ float BRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangen
     
     case OREN_NAYAR_BRDF:{
       res = orenNayarBRDF(toLight, toCamera, normal, tangent, bitangent);
+      break;
+    }
+    
+    case MIRROR:{
+      res = 0.;
       break;
     }
   }

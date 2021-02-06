@@ -21,6 +21,7 @@ public:
     Lambert,
     TorranceSparrow,
     OrenNayar,
+    Mirror,
     CountBrdf
   };
   

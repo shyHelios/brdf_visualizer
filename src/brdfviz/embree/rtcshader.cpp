@@ -215,3 +215,11 @@ glm::vec3 RTCShader::hemisphereSampling(const glm::vec3 &normal, float &pdf) {
   return omegaI;
 }
 
+bool &RTCShader::getUseSphereMapRef() {
+  return sphereMap_;
+}
+
+glm::vec4 &RTCShader::getDefaultBgColorRef() {
+  return defaultBgColor_;
+}
+
