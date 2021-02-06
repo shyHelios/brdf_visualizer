@@ -26,7 +26,7 @@ public:
          const std::shared_ptr<ObjectTransformation> &transformation = nullptr,
          const std::shared_ptr<Material> &material = nullptr);
   
-  //bool hasShader();
+  virtual //bool hasShader();
   void draw(const bool geometry = false);
   
   void setShader(const std::shared_ptr<Shader> &shader);

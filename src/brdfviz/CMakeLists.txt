@@ -4,6 +4,7 @@ add_executable(${PROJECT_NAME}
                main.cpp
                gui.cpp
                gui.h
+
                gl/vertexbufferobject.cpp
                gl/vertexbufferobject.h
                gl/vertex.h
@@ -56,6 +57,8 @@ add_executable(${PROJECT_NAME}
                gl/shaders/brdfshader.cpp
                gl/shaders/brdfshader.h
                gl/uniformlocationpair.h
+               gl/samplervisualizerobject.h
+               gl/samplervisualizerobject.cpp
 
                embree/embreerenderer.cpp
                embree/embreerenderer.h
@@ -70,12 +73,24 @@ add_executable(${PROJECT_NAME}
                embree/rtcrayhitior.h
                embree/pathtracerhelper.cpp
                embree/pathtracerhelper.h
+               embree/sphere.cpp
+               embree/sphere.h
+               embree/mathscene.cpp
+               embree/mathscene.h
+               embree/rtccommonshader.cpp
+               embree/rtccommonshader.h
+               embree/rtcshadingtype.h
 
                common/utils/rng.cpp
                common/utils/rng.h
                common/utils/timer.cpp
                common/utils/timer.h
-               common/utils/math.h embree/sphere.cpp embree/sphere.h embree/mathscene.cpp embree/mathscene.h common/utils/rgb.cpp common/utils/rgb.h embree/rtccommonshader.cpp embree/rtccommonshader.h embree/rtcshadingtype.h)
+               common/utils/math.h
+               common/utils/rgb.cpp
+               common/utils/rgb.h
+               common/sampler.h
+               common/sampler.cpp
+               )
 
 target_include_directories(${PROJECT_NAME}
                            PUBLIC ${CMAKE_CURRENT_LIST_DIR})

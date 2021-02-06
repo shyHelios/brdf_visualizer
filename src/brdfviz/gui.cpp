@@ -8,6 +8,7 @@
 #include <gl/shaders/diffuseshader.h>
 #include <gl/shaders/normalshader.h>
 #include <gl/shaders/brdfshader.h>
+#include <gl/samplervisualizerobject.h>
 
 #include "gl/camera.h"
 #include "gl/object.h"
@@ -43,10 +44,9 @@ static float phi = M_PI - (M_PI / 4.0f); // <0, 2*PI>
 static bool mouseInput = false;
 static bool geometry = false;
 static bool shallInvalidateRTC = false;
-//static bool furnaceTest = false;
-//static std::shared_ptr<LineVertexBufferObject> incidentVectorVBO = nullptr;
-//static std::shared_ptr<LineVertexBufferObject> reflectedVectorVBO = nullptr;
-//static std::shared_ptr<BRDFShader> brdfShader = nullptr;
+
+static std::shared_ptr<SamplerVisualizerObject> samplerVisualizerObject = nullptr;
+static std::shared_ptr<Object> brdfVizObject = nullptr;
 
 static bool shallSave = false;
 
@@ -170,6 +170,7 @@ void Gui::init() {
   embreeRenderer_->getCommonShader()->brdfShader = brdfShader_;
   scene->addDefShader(defShader);
   
+  
   defShader->addCamera(cam);
   defShader->addLight(scene->getLights());
   cam->addShader(defShader);
@@ -208,11 +209,16 @@ void Gui::init() {
                                                           Color3f{{0.1f, 0.1f, 0.1f}},
                                                           Color3f{{0.0f, 0.349, 1.0f}})));
   
+  
+  samplerVisualizerObject = std::make_shared<SamplerVisualizerObject>(nullptr, normalShader);
+  samplerVisualizerObject->setVisible(false);
+  scene->addObject(samplerVisualizerObject);
   scene->addObject(std::make_shared<Object>(disk, defShader));
 //  scene->addObject(std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(0), normalShader));
 //  scene->addObject(std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(3), defShader));
 //  scene->addObject(std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(3), normalShader));
-  scene->addObject(std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(6), brdfShader));
+  brdfVizObject = std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(6), brdfShader);
+  scene->addObject(brdfVizObject);
   scene->addObject(std::make_shared<Object>(gizmo, normalShader));
   
   scene->addLight(std::make_shared<Light>(
@@ -278,6 +284,17 @@ void Gui::ui() {
       shallInvalidateRTC |= ImGui::ColorEdit3("Furnace test bg", (float *) &rtcFurnaceBackground); // Edit 3 floats representing a color
     
     ImGui::Separator();
+    ImGui::Text("Rendering");
+    
+    static bool renderSampling = false;
+    ImGui::Checkbox("Render sampling", &renderSampling);
+    
+    brdfVizObject->setVisible(!renderSampling);
+    samplerVisualizerObject->setVisible(renderSampling);
+    
+    
+    ImGui::Separator();
+    
     
     #pragma region "BRDF setting"
     if (auto brdfShader = brdfShader_.lock()) {
