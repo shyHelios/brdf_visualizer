@@ -45,8 +45,6 @@ static bool mouseInput = false;
 static bool geometry = false;
 static bool shallInvalidateRTC = false;
 
-static std::shared_ptr<SamplerVisualizerObject> samplerVisualizerObject = nullptr;
-static std::shared_ptr<Object> brdfVizObject = nullptr;
 
 static bool shallSave = false;
 
@@ -194,6 +192,7 @@ void Gui::init() {
   auto incidentVectorVBO = std::make_shared<LineVertexBufferObject>(vertices, indices, 4);
   auto reflectedVectorVBO = std::make_shared<LineVertexBufferObject>(vertices, indices, 4);
   
+  
   incidentVectorVBO_ = incidentVectorVBO; // Assign to weak ptr
   reflectedVectorVBO_ = reflectedVectorVBO; // Assign to weak ptr
   
@@ -210,14 +209,17 @@ void Gui::init() {
                                                           Color3f{{0.0f, 0.349, 1.0f}})));
   
   
-  samplerVisualizerObject = std::make_shared<SamplerVisualizerObject>(nullptr, normalShader);
+  auto samplerVisualizerObject = std::make_shared<SamplerVisualizerObject>(nullptr, normalShader);
   samplerVisualizerObject->setVisible(false);
+  samplerVisualizerObject_ = samplerVisualizerObject;
   scene->addObject(samplerVisualizerObject);
   scene->addObject(std::make_shared<Object>(disk, defShader));
 //  scene->addObject(std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(0), normalShader));
 //  scene->addObject(std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(3), defShader));
 //  scene->addObject(std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(3), normalShader));
-  brdfVizObject = std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(6), brdfShader);
+  
+  auto brdfVizObject = std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(6), brdfShader);
+  brdfVizObject_ = brdfVizObject;
   scene->addObject(brdfVizObject);
   scene->addObject(std::make_shared<Object>(gizmo, normalShader));
   
@@ -289,9 +291,20 @@ void Gui::ui() {
     static bool renderSampling = false;
     ImGui::Checkbox("Render sampling", &renderSampling);
     
-    brdfVizObject->setVisible(!renderSampling);
-    samplerVisualizerObject->setVisible(renderSampling);
     
+    if (auto brdfVizObjPtr = brdfVizObject_.lock()) {
+      brdfVizObjPtr->setVisible(!renderSampling);
+    }
+    
+    if (auto samplerVisualizerObjPtr = samplerVisualizerObject_.lock()) {
+      samplerVisualizerObjPtr->setVisible(renderSampling);
+      if (renderSampling) {
+        bool changed = ImGui::SliderInt("Resolution", &samplerVisualizerObjPtr->getResolution(), 10, 100);
+        if (changed) {
+          samplerVisualizerObjPtr->update();
+        }
+      }
+    }
     
     ImGui::Separator();
     

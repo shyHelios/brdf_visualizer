@@ -82,3 +82,7 @@ const std::shared_ptr<Sampler> &SamplerVisualizerObject::getSampler() const {
 void SamplerVisualizerObject::setSampler(const std::shared_ptr<Sampler> &sampler) {
   sampler_ = sampler;
 }
+
+int &SamplerVisualizerObject::getResolution() {
+  return resolution;
+}

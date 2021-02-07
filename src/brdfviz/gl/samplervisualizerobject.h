@@ -24,6 +24,9 @@ public:
   void setSampler(const std::shared_ptr<Sampler> &sampler);
   
   glm::vec3 normal = glm::vec3(0, 0, 1);
+  
+  int &getResolution();
+
 private:
   void recreate();
   

@@ -20,6 +20,10 @@ class EmbreeRenderer;
 
 class OpenGLRenderer;
 
+class SamplerVisualizerObject;
+
+class Object;
+
 /**
  * @brief Main GUI class for BRDF viz
  */
@@ -38,6 +42,8 @@ protected:
   std::weak_ptr<LineVertexBufferObject> incidentVectorVBO_;
   std::weak_ptr<LineVertexBufferObject> reflectedVectorVBO_;
   std::weak_ptr<BRDFShader> brdfShader_;
+  std::weak_ptr<SamplerVisualizerObject> samplerVisualizerObject_;
+  std::weak_ptr<Object> brdfVizObject_;
   
   virtual void ui();
   
