@@ -54,6 +54,10 @@ protected:
 private:
   void init();
   
+  void drawMainRender();
+  
+  void drawBRDFSettings();
+  
   const char *winName_;
   
   GLFWwindow *window;

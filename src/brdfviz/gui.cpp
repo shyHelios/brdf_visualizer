@@ -308,119 +308,12 @@ void Gui::ui() {
     
     ImGui::Separator();
     
+    drawBRDFSettings();
     
-    #pragma region "BRDF setting"
-    if (auto brdfShader = brdfShader_.lock()) {
-      using Phong = BRDFShader::PhongUniformLocationsPack;
-      using TorranceSparrow = BRDFShader::TorranceSparrowUniformLocationsPack;
-      using Lambert = BRDFShader::LambertUniformLocationsPack;
-      using OrenNayar = BRDFShader::OrenNayarUniformLocationsPack;
-      
-      ImGui::Text("BRDF");
-      int *selectedIdx = reinterpret_cast<int *>(&brdfShader->currentBrdfIdx);
-      
-      shallInvalidateRTC |= ImGui::Combo("Selected BRDF",                           // const char* label,
-                                         selectedIdx,                              // int* current_item,
-                                         &BRDFShader::imguiSelectionGetter,         // bool(*items_getter)(void* data, int idx, const char** out_text),
-                                         (void *) BRDFShader::brdfArray,            // void* data
-                                         IM_ARRAYSIZE(BRDFShader::brdfArray));// int items_count
-      
-      switch (brdfShader->currentBrdfIdx) {
-        case BRDFShader::BRDF::Phong:
-        case BRDFShader::BRDF::BlinnPhong:
-        case BRDFShader::BRDF::PhongPhysCorrect: {
-          shallInvalidateRTC |= ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().Phong::shininess.getData(), 1, 100);
-          if (brdfShader->currentBrdfIdx == BRDFShader::BRDF::PhongPhysCorrect) {
-            const bool specularChanged = ImGui::SliderFloat("Specular", &brdfShader->getBrdfUniformLocations().Phong::specular.getData(), 0,
-                                                            1);
-            const bool diffuseChanged = ImGui::SliderFloat("Diffuse", &brdfShader->getBrdfUniformLocations().Phong::diffuse.getData(), 0,
-                                                           1);
-            
-            if (specularChanged) {
-              brdfShader->getBrdfUniformLocations().Phong::diffuse.getData() = std::min(brdfShader->getBrdfUniformLocations().Phong::diffuse.getData(),
-                                                                                        1.f - brdfShader->getBrdfUniformLocations().Phong::specular.getData());
-            } else if (diffuseChanged) {
-              brdfShader->getBrdfUniformLocations().Phong::specular.getData() = std::min(brdfShader->getBrdfUniformLocations().Phong::specular.getData(),
-                                                                                         1.f - brdfShader->getBrdfUniformLocations().Phong::diffuse.getData());
-            }
-            
-            shallInvalidateRTC |= specularChanged;
-            shallInvalidateRTC |= diffuseChanged;
-          }
-          break;
-        }
-        
-        case BRDFShader::BRDF::TorranceSparrow: {
-          shallInvalidateRTC |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().TorranceSparrow::roughness.getData(), 0.001, 1.0);
-          shallInvalidateRTC |= ImGui::SliderFloat("f0", &brdfShader->getBrdfUniformLocations().TorranceSparrow::f0.getData(), 0, 1);
-          break;
-        }
-        
-        case BRDFShader::BRDF::Lambert: {
-          shallInvalidateRTC |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().Lambert::reflectance.getData(), 0., 1.0);
-          break;
-        };
-        
-        case BRDFShader::BRDF::OrenNayar: {
-          shallInvalidateRTC |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().OrenNayar::roughness.getData(), 0, 1.0);
-          shallInvalidateRTC |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().OrenNayar::reflectance.getData(), 0., 1.0);
-          break;
-        };
-        
-        case BRDFShader::BRDF::CountBrdf:break;
-      }
-    } else {
-      spdlog::warn("[GUI] BRDFShader ptr expired");
-    }
-    
-    #pragma endregion
     ImGui::End();
   }
   
-  
-  {
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollWithMouse;
-    ImGui::Begin("Test drawing into window", nullptr, window_flags);
-    ImGuiIO &io = ImGui::GetIO();
-    
-    glm::vec2 fboUv = fbo_->getUV();
-    ImGui::Image((void *) (intptr_t) fbo_->getFrameBufferColorId(),
-                 ImVec2(fbo_->getWidth(), fbo_->getHeight()),
-                 ImVec2(0, 0),
-                 ImVec2(fboUv.x, fboUv.y));
-    
-    
-    if (ImGui::IsItemClicked(0)) {
-      mouseInput = true;
-    }
-    
-    if (mouseInput) {
-      if (!io.MouseDown[0]) {
-        mouseInput = false;
-      } else {
-        // Draw debug line
-        ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button),
-                                                4.0f);
-        
-        yaw += glm::radians(io.MouseDelta.x);
-        pitch += glm::radians(io.MouseDelta.y);
-        
-        pitch = std::min<float>(pitch, 1.553);
-        pitch = std::max<float>(pitch, -1.553);
-        
-        if (yaw > 2 * M_PI) yaw -= 2 * M_PI;
-        if (yaw < -2 * M_PI) yaw += 2 * M_PI;
-        
-      }
-    }
-    if (ImGui::IsItemHovered()) {
-      dist -= (io.MouseWheel * 0.5f);
-      dist = std::max(dist, 0.0f);
-    }
-    winSize = ImGui::GetWindowSize();
-    ImGui::End();
-  }
-  
+  drawMainRender();
   
 }
 
@@ -616,4 +509,116 @@ void Gui::renderLoop() {
   }
   embreeRenderer_->finishRendering();
   producerThread.join();
+}
+
+void Gui::drawMainRender() {
+  ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollWithMouse;
+  ImGui::Begin("Test drawing into window", nullptr, window_flags);
+  ImGuiIO &io = ImGui::GetIO();
+  
+  glm::vec2 fboUv = fbo_->getUV();
+  ImGui::Image((void *) (intptr_t) fbo_->getFrameBufferColorId(),
+               ImVec2(fbo_->getWidth(), fbo_->getHeight()),
+               ImVec2(0, 0),
+               ImVec2(fboUv.x, fboUv.y));
+  
+  
+  if (ImGui::IsItemClicked(0)) {
+    mouseInput = true;
+  }
+  
+  if (mouseInput) {
+    if (!io.MouseDown[0]) {
+      mouseInput = false;
+    } else {
+      // Draw debug line
+      ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button),
+                                              4.0f);
+      
+      yaw += glm::radians(io.MouseDelta.x);
+      pitch += glm::radians(io.MouseDelta.y);
+      
+      pitch = std::min<float>(pitch, 1.553);
+      pitch = std::max<float>(pitch, -1.553);
+      
+      if (yaw > 2 * M_PI) yaw -= 2 * M_PI;
+      if (yaw < -2 * M_PI) yaw += 2 * M_PI;
+    }
+  }
+  
+  if (ImGui::IsItemHovered()) {
+    dist -= (io.MouseWheel * 0.5f);
+    dist = std::max(dist, 0.0f);
+  }
+  
+  winSize = ImGui::GetWindowSize();
+  ImGui::End();
+}
+
+void Gui::drawBRDFSettings() {
+  #pragma region "BRDF setting"
+  if (auto brdfShader = brdfShader_.lock()) {
+    using Phong = BRDFShader::PhongUniformLocationsPack;
+    using TorranceSparrow = BRDFShader::TorranceSparrowUniformLocationsPack;
+    using Lambert = BRDFShader::LambertUniformLocationsPack;
+    using OrenNayar = BRDFShader::OrenNayarUniformLocationsPack;
+    
+    ImGui::Text("BRDF");
+    int *selectedIdx = reinterpret_cast<int *>(&brdfShader->currentBrdfIdx);
+    
+    shallInvalidateRTC |= ImGui::Combo("Selected BRDF",                           // const char* label,
+                                       selectedIdx,                              // int* current_item,
+                                       &BRDFShader::imguiSelectionGetter,         // bool(*items_getter)(void* data, int idx, const char** out_text),
+                                       (void *) BRDFShader::brdfArray,            // void* data
+                                       IM_ARRAYSIZE(BRDFShader::brdfArray));// int items_count
+    
+    switch (brdfShader->currentBrdfIdx) {
+      case BRDFShader::BRDF::Phong:
+      case BRDFShader::BRDF::BlinnPhong:
+      case BRDFShader::BRDF::PhongPhysCorrect: {
+        shallInvalidateRTC |= ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().Phong::shininess.getData(), 1, 100);
+        if (brdfShader->currentBrdfIdx == BRDFShader::BRDF::PhongPhysCorrect) {
+          const bool specularChanged = ImGui::SliderFloat("Specular", &brdfShader->getBrdfUniformLocations().Phong::specular.getData(), 0,
+                                                          1);
+          const bool diffuseChanged = ImGui::SliderFloat("Diffuse", &brdfShader->getBrdfUniformLocations().Phong::diffuse.getData(), 0,
+                                                         1);
+          
+          if (specularChanged) {
+            brdfShader->getBrdfUniformLocations().Phong::diffuse.getData() = std::min(brdfShader->getBrdfUniformLocations().Phong::diffuse.getData(),
+                                                                                      1.f - brdfShader->getBrdfUniformLocations().Phong::specular.getData());
+          } else if (diffuseChanged) {
+            brdfShader->getBrdfUniformLocations().Phong::specular.getData() = std::min(brdfShader->getBrdfUniformLocations().Phong::specular.getData(),
+                                                                                       1.f - brdfShader->getBrdfUniformLocations().Phong::diffuse.getData());
+          }
+          
+          shallInvalidateRTC |= specularChanged;
+          shallInvalidateRTC |= diffuseChanged;
+        }
+        break;
+      }
+      
+      case BRDFShader::BRDF::TorranceSparrow: {
+        shallInvalidateRTC |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().TorranceSparrow::roughness.getData(), 0.001, 1.0);
+        shallInvalidateRTC |= ImGui::SliderFloat("f0", &brdfShader->getBrdfUniformLocations().TorranceSparrow::f0.getData(), 0, 1);
+        break;
+      }
+      
+      case BRDFShader::BRDF::Lambert: {
+        shallInvalidateRTC |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().Lambert::reflectance.getData(), 0., 1.0);
+        break;
+      };
+      
+      case BRDFShader::BRDF::OrenNayar: {
+        shallInvalidateRTC |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().OrenNayar::roughness.getData(), 0, 1.0);
+        shallInvalidateRTC |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().OrenNayar::reflectance.getData(), 0., 1.0);
+        break;
+      };
+      
+      case BRDFShader::BRDF::CountBrdf:break;
+    }
+  } else {
+    spdlog::warn("[GUI] BRDFShader ptr expired");
+  }
+  
+  #pragma endregion
 }
