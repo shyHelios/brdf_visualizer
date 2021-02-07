@@ -31,7 +31,7 @@
 #include "embree/embreerenderer.h"
 
 static bool show_demo_window = false;
-static ImVec4 clear_color = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
+//static ImVec4 clear_color = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
 //static ImVec4 rtcFurnaceBackground = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
 static ImVec2 winSize;
 
@@ -250,11 +250,11 @@ void Gui::ui() {
     
     ImGui::Checkbox("Show Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
     
-    ImGui::ColorEdit3("clear color", (float *) &clear_color); // Edit 3 floats representing a color
-    
-    renderer_->clearColor[0] = clear_color.x;
-    renderer_->clearColor[1] = clear_color.y;
-    renderer_->clearColor[2] = clear_color.z;
+    ImGui::ColorEdit3("clear color", (float *) &renderer_->clearColor); // Edit 3 floats representing a color
+
+//    renderer_->clearColor[0] = clear_color.x;
+//    renderer_->clearColor[1] = clear_color.y;
+//    renderer_->clearColor[2] = clear_color.z;
     
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                 ImGui::GetIO().Framerate);
@@ -264,33 +264,41 @@ void Gui::ui() {
     ImGui::Text("Rendering");
     ImGui::Checkbox("Render edges", &geometry);
     shallSave = ImGui::Button("Save");
+    
     ImGui::Separator();
     
+    #pragma region "Camera settings"
     ImGui::Text("Camera info");
 //    ImGui::SliderFloat("pitch", &pitch, -M_PI / 2., M_PI / 2.);
     ImGui::SliderFloat("yaw", &yaw, -2. * M_PI, 2. * M_PI);
     ImGui::SliderFloat("pitch", &pitch, -1.553, 1.553);
     ImGui::SliderFloat("dist", &dist, 0.0f, 100);
+    #pragma endregion
     
     ImGui::Separator();
     
+    #pragma region "Light input"
     ImGui::Text("Incident beam");
     ImGui::SliderFloat("thetha", &thetha, 0, M_PI / 2.);
     ImGui::SliderFloat("phi", &phi, 0, 2. * M_PI);
+    #pragma endregion
     
     ImGui::Separator();
+    
+    #pragma region "Furnace test"
     bool &furnaceTest = embreeRenderer_->getCommonShader()->getUseSphereMapRef();
     glm::vec4 &rtcFurnaceBackground = embreeRenderer_->getCommonShader()->getDefaultBgColorRef();
     shallInvalidateRTC |= ImGui::Checkbox("Enable IBL", &furnaceTest);
     if (!furnaceTest)
       shallInvalidateRTC |= ImGui::ColorEdit3("Furnace test bg", (float *) &rtcFurnaceBackground); // Edit 3 floats representing a color
+    #pragma endregion
     
     ImGui::Separator();
-    ImGui::Text("Rendering");
     
+    #pragma region "Render type"
+    ImGui::Text("Rendering");
     static bool renderSampling = false;
     ImGui::Checkbox("Render sampling", &renderSampling);
-    
     
     if (auto brdfVizObjPtr = brdfVizObject_.lock()) {
       brdfVizObjPtr->setVisible(!renderSampling);
@@ -305,6 +313,7 @@ void Gui::ui() {
         }
       }
     }
+    #pragma endregion
     
     ImGui::Separator();
     
@@ -492,7 +501,8 @@ void Gui::renderLoop() {
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
-    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+//    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     
