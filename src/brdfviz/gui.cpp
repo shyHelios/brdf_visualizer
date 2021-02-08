@@ -9,6 +9,7 @@
 #include <gl/shaders/normalshader.h>
 #include <gl/shaders/brdfshader.h>
 #include <gl/samplervisualizerobject.h>
+#include <common/utils/coordsystem.h>
 
 #include "gl/camera.h"
 #include "gl/object.h"
@@ -30,23 +31,6 @@
 #include "gl/openglrenderer.h"
 #include "embree/embreerenderer.h"
 
-static bool show_demo_window = false;
-//static ImVec4 clear_color = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
-//static ImVec4 rtcFurnaceBackground = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
-static ImVec2 winSize;
-
-static float yaw = M_PI / 4.0f;
-static float pitch = M_PI / 4.0f;
-//static float pitch = 0.3f;
-static float dist = 7.0f;
-static float thetha = M_PI / 4.0f; // <0, PI/2>
-static float phi = M_PI - (M_PI / 4.0f); // <0, 2*PI>
-static bool mouseInput = false;
-static bool geometry = false;
-static bool shallInvalidateRTC = false;
-
-
-static bool shallSave = false;
 
 void Gui::init() {
   glfwSetErrorCallback(glfw_error_callback);
@@ -209,9 +193,14 @@ void Gui::init() {
                                                           Color3f{{0.0f, 0.349, 1.0f}})));
   
   
-  auto samplerVisualizerObject = std::make_shared<SamplerVisualizerObject>(nullptr, normalShader);
+  auto samplerVisualizerObject = std::make_shared<SamplerVisualizerObject>(normalVector,
+                                                                           incidentVector,
+                                                                           reflectedVector,
+                                                                           nullptr,
+                                                                           normalShader);
   samplerVisualizerObject->setVisible(false);
   samplerVisualizerObject_ = samplerVisualizerObject;
+//  samplerVisualizerObject->normal
   scene->addObject(samplerVisualizerObject);
   scene->addObject(std::make_shared<Object>(disk, defShader));
 //  scene->addObject(std::make_shared<Object>(std::make_shared<IcosphereVertexBufferObject>(0), normalShader));
@@ -233,6 +222,12 @@ void Gui::init() {
                   cube); //Intenzita
   
   renderer_->addScene(scene, true);
+  
+  hemisphereSampler_ = std::make_shared<HemisphereSampler>();
+  hemisphereCosWeightedSampler_ = std::make_shared<HemisphereCosWeightedSampler>();
+  phongSampler_ = std::make_shared<PhongSampler>();
+  
+  embreeRenderer_->getCommonShader()->setSampler(hemisphereCosWeightedSampler_);
 }
 
 void Gui::glfw_error_callback(int error, const char *description) {
@@ -241,20 +236,17 @@ void Gui::glfw_error_callback(int error, const char *description) {
 
 void Gui::ui() {
   // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-  if (show_demo_window)
-    ImGui::ShowDemoWindow(&show_demo_window);
+  if (showDemoWindow_)
+    ImGui::ShowDemoWindow(&showDemoWindow_);
   
   // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
   {
     ImGui::Begin("Hello, world!");// Create a window called "Hello, world!" and append into it.
     
-    ImGui::Checkbox("Show Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+    ImGui::Checkbox("Show Demo Window", &showDemoWindow_);      // Edit bools storing our window open/close state
     
     ImGui::ColorEdit3("clear color", (float *) &renderer_->clearColor); // Edit 3 floats representing a color
-
-//    renderer_->clearColor[0] = clear_color.x;
-//    renderer_->clearColor[1] = clear_color.y;
-//    renderer_->clearColor[2] = clear_color.z;
+    
     
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                 ImGui::GetIO().Framerate);
@@ -262,25 +254,25 @@ void Gui::ui() {
     
     ImGui::Separator();
     ImGui::Text("Rendering");
-    ImGui::Checkbox("Render edges", &geometry);
-    shallSave = ImGui::Button("Save");
+    ImGui::Checkbox("Render edges", &geometry_);
+    shallSave_ = ImGui::Button("Save");
     
     ImGui::Separator();
     
     #pragma region "Camera settings"
     ImGui::Text("Camera info");
 //    ImGui::SliderFloat("pitch", &pitch, -M_PI / 2., M_PI / 2.);
-    ImGui::SliderFloat("yaw", &yaw, -2. * M_PI, 2. * M_PI);
-    ImGui::SliderFloat("pitch", &pitch, -1.553, 1.553);
-    ImGui::SliderFloat("dist", &dist, 0.0f, 100);
+    ImGui::SliderFloat("yaw", &yaw_, -2. * M_PI, 2. * M_PI);
+    ImGui::SliderFloat("pitch", &pitch_, -1.553, 1.553);
+    ImGui::SliderFloat("dist", &dist_, 0.0f, 100);
     #pragma endregion
     
     ImGui::Separator();
     
     #pragma region "Light input"
     ImGui::Text("Incident beam");
-    ImGui::SliderFloat("thetha", &thetha, 0, M_PI / 2.);
-    ImGui::SliderFloat("phi", &phi, 0, 2. * M_PI);
+    shallInvalidateSampler_ |= ImGui::SliderFloat("theta", &theta_, 0, M_PI / 2.);
+    shallInvalidateSampler_ |= ImGui::SliderFloat("phi", &phi_, 0, 2. * M_PI);
     #pragma endregion
     
     ImGui::Separator();
@@ -288,29 +280,25 @@ void Gui::ui() {
     #pragma region "Furnace test"
     bool &furnaceTest = embreeRenderer_->getCommonShader()->getUseSphereMapRef();
     glm::vec4 &rtcFurnaceBackground = embreeRenderer_->getCommonShader()->getDefaultBgColorRef();
-    shallInvalidateRTC |= ImGui::Checkbox("Enable IBL", &furnaceTest);
+    shallInvalidateRTC_ |= ImGui::Checkbox("Enable IBL", &furnaceTest);
     if (!furnaceTest)
-      shallInvalidateRTC |= ImGui::ColorEdit3("Furnace test bg", (float *) &rtcFurnaceBackground); // Edit 3 floats representing a color
+      shallInvalidateRTC_ |= ImGui::ColorEdit3("Furnace test bg", (float *) &rtcFurnaceBackground); // Edit 3 floats representing a color
     #pragma endregion
     
     ImGui::Separator();
     
     #pragma region "Render type"
     ImGui::Text("Rendering");
-    static bool renderSampling = false;
-    ImGui::Checkbox("Render sampling", &renderSampling);
+    ImGui::Checkbox("Render sampling", &renderSampling_);
     
     if (auto brdfVizObjPtr = brdfVizObject_.lock()) {
-      brdfVizObjPtr->setVisible(!renderSampling);
+      brdfVizObjPtr->setVisible(!renderSampling_);
     }
     
     if (auto samplerVisualizerObjPtr = samplerVisualizerObject_.lock()) {
-      samplerVisualizerObjPtr->setVisible(renderSampling);
-      if (renderSampling) {
-        bool changed = ImGui::SliderInt("Resolution", &samplerVisualizerObjPtr->getResolution(), 10, 100);
-        if (changed) {
-          samplerVisualizerObjPtr->update();
-        }
+      samplerVisualizerObjPtr->setVisible(renderSampling_);
+      if (renderSampling_) {
+        shallInvalidateSampler_ |= ImGui::SliderInt("Resolution", &samplerVisualizerObjPtr->getResolution(), 10, 100);
       }
     }
     #pragma endregion
@@ -437,12 +425,12 @@ void Gui::renderLoop() {
     
     glm::vec3 newCamPos;
     
-    newCamPos.x = std::cos(yaw) * std::cos(pitch);
-    newCamPos.y = std::sin(yaw) * std::cos(pitch);
-    newCamPos.z = std::sin(pitch);
+    newCamPos.x = std::cos(yaw_) * std::cos(pitch_);
+    newCamPos.y = std::sin(yaw_) * std::cos(pitch_);
+    newCamPos.z = std::sin(pitch_);
     
     glm::normalize(newCamPos);
-    newCamPos *= dist;
+    newCamPos *= dist_;
     
     cam->transformation->setPosition(newCamPos);
     {
@@ -450,17 +438,15 @@ void Gui::renderLoop() {
       std::vector<Vertex> reflectedVertices;
       std::vector<unsigned int> indices = {0, 1};
       
-      glm::vec3 incidentVector = glm::vec3(
-          std::sin(thetha) * std::cos(phi),
-          std::sin(thetha) * std::sin(phi),
-          std::cos(thetha));
+      incidentVector = sphericalToCartesian(theta_, phi_);
+      
       if (auto brdfShader = brdfShader_.lock()) {
         brdfShader->getBrdfUniformLocations().incidentVector.getData() = incidentVector;
       } else {
         spdlog::warn("[GUI] BRDFShader ptr expired");
       }
       
-      glm::vec3 reflectedVector = glm::vec3(-incidentVector[0], -incidentVector[1], incidentVector[2]);
+      reflectedVector = glm::vec3(-incidentVector[0], -incidentVector[1], incidentVector[2]);
       
       incidentVertices.emplace_back(glm::vec3(0, 0, 0));
       incidentVertices.emplace_back(incidentVector);
@@ -482,17 +468,26 @@ void Gui::renderLoop() {
       }
     }
     
-    if (shallInvalidateRTC) {
+    if (shallInvalidateRTC_) {
       embreeRenderer_->invalidateRendering();
+      shallInvalidateRTC_ = false;
     }
     
-    fbo_->resize(winSize.x, winSize.y);
-    fbo_->bind();
-    renderer_->render(geometry);
-    fbo_->unbind();
-    if (shallSave) fbo_->saveScreen();
+    if (auto samplerVisualizerObjPtr = samplerVisualizerObject_.lock()) {
+      if (renderSampling_ && shallInvalidateSampler_) {
+        samplerVisualizerObjPtr->update();
+        shallInvalidateSampler_ = false;
+      }
+    }
     
-    shallInvalidateRTC = false;
+    fbo_->resize(mainRenderCanvasSize_.x, mainRenderCanvasSize_.y);
+    fbo_->bind();
+    renderer_->render(geometry_);
+    fbo_->unbind();
+    if (shallSave_) fbo_->saveScreen();
+
+//    shallInvalidateRTC_ = false;
+//    shallInvalidateSampler_ = false;
     ui();
     embreeRenderer_->ui();
     
@@ -534,39 +529,38 @@ void Gui::drawMainRender() {
   
   
   if (ImGui::IsItemClicked(0)) {
-    mouseInput = true;
+    mouseInput_ = true;
   }
   
-  if (mouseInput) {
+  if (mouseInput_) {
     if (!io.MouseDown[0]) {
-      mouseInput = false;
+      mouseInput_ = false;
     } else {
       // Draw debug line
       ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button),
                                               4.0f);
       
-      yaw += glm::radians(io.MouseDelta.x);
-      pitch += glm::radians(io.MouseDelta.y);
+      yaw_ += glm::radians(io.MouseDelta.x);
+      pitch_ += glm::radians(io.MouseDelta.y);
       
-      pitch = std::min<float>(pitch, 1.553);
-      pitch = std::max<float>(pitch, -1.553);
+      pitch_ = std::min<float>(pitch_, 1.553);
+      pitch_ = std::max<float>(pitch_, -1.553);
       
-      if (yaw > 2 * M_PI) yaw -= 2 * M_PI;
-      if (yaw < -2 * M_PI) yaw += 2 * M_PI;
+      if (yaw_ > 2 * M_PI) yaw_ -= 2 * M_PI;
+      if (yaw_ < -2 * M_PI) yaw_ += 2 * M_PI;
     }
   }
   
   if (ImGui::IsItemHovered()) {
-    dist -= (io.MouseWheel * 0.5f);
-    dist = std::max(dist, 0.0f);
+    dist_ -= (io.MouseWheel * 0.5f);
+    dist_ = std::max(dist_, 0.0f);
   }
   
-  winSize = ImGui::GetWindowSize();
+  mainRenderCanvasSize_ = ImGui::GetWindowSize();
   ImGui::End();
 }
 
 void Gui::drawBRDFSettings() {
-  #pragma region "BRDF setting"
   if (auto brdfShader = brdfShader_.lock()) {
     using Phong = BRDFShader::PhongUniformLocationsPack;
     using TorranceSparrow = BRDFShader::TorranceSparrowUniformLocationsPack;
@@ -576,17 +570,16 @@ void Gui::drawBRDFSettings() {
     ImGui::Text("BRDF");
     int *selectedIdx = reinterpret_cast<int *>(&brdfShader->currentBrdfIdx);
     
-    shallInvalidateRTC |= ImGui::Combo("Selected BRDF",                           // const char* label,
-                                       selectedIdx,                              // int* current_item,
-                                       &BRDFShader::imguiSelectionGetter,         // bool(*items_getter)(void* data, int idx, const char** out_text),
-                                       (void *) BRDFShader::brdfArray,            // void* data
-                                       IM_ARRAYSIZE(BRDFShader::brdfArray));// int items_count
-    
+    shallInvalidateRTC_ |= ImGui::Combo("Selected BRDF",                           // const char* label,
+                                        selectedIdx,                              // int* current_item,
+                                        &BRDFShader::imguiSelectionGetter,         // bool(*items_getter)(void* data, int idx, const char** out_text),
+                                        (void *) BRDFShader::brdfArray,            // void* data
+                                        IM_ARRAYSIZE(BRDFShader::brdfArray));// int items_count
     switch (brdfShader->currentBrdfIdx) {
       case BRDFShader::BRDF::Phong:
       case BRDFShader::BRDF::BlinnPhong:
       case BRDFShader::BRDF::PhongPhysCorrect: {
-        shallInvalidateRTC |= ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().Phong::shininess.getData(), 1, 100);
+        shallInvalidateRTC_ |= ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().Phong::shininess.getData(), 1, 100);
         if (brdfShader->currentBrdfIdx == BRDFShader::BRDF::PhongPhysCorrect) {
           const bool specularChanged = ImGui::SliderFloat("Specular", &brdfShader->getBrdfUniformLocations().Phong::specular.getData(), 0,
                                                           1);
@@ -601,26 +594,26 @@ void Gui::drawBRDFSettings() {
                                                                                        1.f - brdfShader->getBrdfUniformLocations().Phong::diffuse.getData());
           }
           
-          shallInvalidateRTC |= specularChanged;
-          shallInvalidateRTC |= diffuseChanged;
+          shallInvalidateRTC_ |= specularChanged;
+          shallInvalidateRTC_ |= diffuseChanged;
         }
         break;
       }
       
       case BRDFShader::BRDF::TorranceSparrow: {
-        shallInvalidateRTC |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().TorranceSparrow::roughness.getData(), 0.001, 1.0);
-        shallInvalidateRTC |= ImGui::SliderFloat("f0", &brdfShader->getBrdfUniformLocations().TorranceSparrow::f0.getData(), 0, 1);
+        shallInvalidateRTC_ |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().TorranceSparrow::roughness.getData(), 0.001, 1.0);
+        shallInvalidateRTC_ |= ImGui::SliderFloat("f0", &brdfShader->getBrdfUniformLocations().TorranceSparrow::f0.getData(), 0, 1);
         break;
       }
       
       case BRDFShader::BRDF::Lambert: {
-        shallInvalidateRTC |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().Lambert::reflectance.getData(), 0., 1.0);
+        shallInvalidateRTC_ |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().Lambert::reflectance.getData(), 0., 1.0);
         break;
       };
       
       case BRDFShader::BRDF::OrenNayar: {
-        shallInvalidateRTC |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().OrenNayar::roughness.getData(), 0, 1.0);
-        shallInvalidateRTC |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().OrenNayar::reflectance.getData(), 0., 1.0);
+        shallInvalidateRTC_ |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().OrenNayar::roughness.getData(), 0, 1.0);
+        shallInvalidateRTC_ |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().OrenNayar::reflectance.getData(), 0., 1.0);
         break;
       };
       
@@ -629,6 +622,4 @@ void Gui::drawBRDFSettings() {
   } else {
     spdlog::warn("[GUI] BRDFShader ptr expired");
   }
-  
-  #pragma endregion
 }

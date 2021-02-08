@@ -81,6 +81,8 @@ add_executable(${PROJECT_NAME}
                embree/rtccommonshader.h
                embree/rtcshadingtype.h
 
+               common/utils/coordsystem.h
+               common/utils/coordsystem.cpp
                common/utils/rng.cpp
                common/utils/rng.h
                common/utils/timer.cpp

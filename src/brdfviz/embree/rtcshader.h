@@ -19,6 +19,7 @@
 #include "pathtracerhelper.h"
 #include "mathscene.h"
 #include "gl/material.h"
+#include "common/sampler.h"
 
 //class RTSurface;
 
@@ -47,6 +48,7 @@ public:
   SuperSamplingType superSamplingType_;
   std::unique_ptr<RTCamera> camera_;
   std::unique_ptr<MathScene> mathScene_;
+  std::shared_ptr<Sampler> sampler_;
   
   
   virtual glm::vec4 getPixel(int x, int y);
@@ -60,6 +62,10 @@ public:
   bool &getUseSphereMapRef();
   
   glm::vec4 &getDefaultBgColorRef();
+  
+  const std::shared_ptr<Sampler> &getSampler() const;
+  
+  void setSampler(const std::shared_ptr<Sampler> &sampler);
 
 protected:
   std::unique_ptr<RTLight> light_;

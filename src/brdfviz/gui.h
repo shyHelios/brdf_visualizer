@@ -24,6 +24,12 @@ class SamplerVisualizerObject;
 
 class Object;
 
+class HemisphereSampler;
+
+class HemisphereCosWeightedSampler;
+
+class PhongSampler;
+
 /**
  * @brief Main GUI class for BRDF viz
  */
@@ -44,6 +50,29 @@ protected:
   std::weak_ptr<BRDFShader> brdfShader_;
   std::weak_ptr<SamplerVisualizerObject> samplerVisualizerObject_;
   std::weak_ptr<Object> brdfVizObject_;
+  
+  std::shared_ptr<HemisphereSampler> hemisphereSampler_;
+  std::shared_ptr<HemisphereCosWeightedSampler> hemisphereCosWeightedSampler_;
+  std::shared_ptr<PhongSampler> phongSampler_;
+  
+  bool showDemoWindow_ = false;
+  ImVec2 mainRenderCanvasSize_;
+  float yaw_ = M_PI / 4.0f;
+  float pitch_ = M_PI / 4.0f;
+  float dist_ = 7.0f;
+  float theta_ = M_PI / 4.0f; // <0, PI/2>
+  float phi_ = M_PI - (M_PI / 4.0f); // <0, 2*PI>
+  bool mouseInput_ = false;
+  bool geometry_ = false;
+  bool shallInvalidateRTC_ = false;
+  bool shallInvalidateSampler_ = false;
+  bool shallSave_ = false;
+  bool renderSampling_ = false; // TODO back to false
+  
+  glm::vec3 normalVector = glm::vec3(0, 0, 1);
+  glm::vec3 incidentVector = glm::vec3(0.5, 0.5, 0.5);
+  glm::vec3 reflectedVector = glm::vec3(-0.5, -0.5, 0.5);;
+  
   
   virtual void ui();
   

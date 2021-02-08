@@ -198,20 +198,22 @@ float RTCShader::shadow(const glm::vec3 &pos, const glm::vec3 &lightDir, const f
 }
 
 glm::vec3 RTCShader::hemisphereSampling(const glm::vec3 &normal, float &pdf) {
-  const float randomU = rng();
-  const float randomV = rng();
-  
-  const float x = 2.f * cosf(M_2PI * randomU) * sqrtf(randomV * (1.f - randomV));
-  const float y = 2.f * sinf(M_2PI * randomU) * sqrtf(randomV * (1.f - randomV));
-  const float z = 1.f - 2.f * randomV;
-  
-  glm::vec3 omegaI = glm::normalize(glm::vec3(x, y, z));
-  
-  if (glm::dot(omegaI, normal) < 0) {
-//    omegaI *= -1;
-    omegaI = -omegaI;
-  }
-  pdf = 1.f / M_2PI;
+//  const float randomU = rng();
+//  const float randomV = rng();
+//
+//  const float x = 2.f * cosf(M_2PI * randomU) * sqrtf(randomV * (1.f - randomV));
+//  const float y = 2.f * sinf(M_2PI * randomU) * sqrtf(randomV * (1.f - randomV));
+//  const float z = 1.f - 2.f * randomV;
+//
+//  glm::vec3 omegaI = glm::normalize(glm::vec3(x, y, z));
+//
+//  if (glm::dot(omegaI, normal) < 0) {
+////    omegaI *= -1;
+//    omegaI = -omegaI;
+//  }
+//  pdf = 1.f / M_2PI;
+//  return omegaI;
+  glm::vec3 omegaI = sampler_->sample(normal, pdf);
   return omegaI;
 }
 
@@ -221,5 +223,13 @@ bool &RTCShader::getUseSphereMapRef() {
 
 glm::vec4 &RTCShader::getDefaultBgColorRef() {
   return defaultBgColor_;
+}
+
+const std::shared_ptr<Sampler> &RTCShader::getSampler() const {
+  return sampler_;
+}
+
+void RTCShader::setSampler(const std::shared_ptr<Sampler> &sampler) {
+  sampler_ = sampler;
 }
 

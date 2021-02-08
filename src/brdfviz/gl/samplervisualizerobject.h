@@ -11,8 +11,13 @@
 
 class SamplerVisualizerObject : public Object {
 public:
-  SamplerVisualizerObject(const std::shared_ptr<VertexBufferObject> &innerObject = nullptr, const std::shared_ptr<Shader> &shader = nullptr,
-                          const std::shared_ptr<ObjectTransformation> &transformation = nullptr, const std::shared_ptr<Material> &material = nullptr);
+  SamplerVisualizerObject(glm::vec3 &normalRef,
+                          glm::vec3 &incidentVectorRef,
+                          glm::vec3 &reflectVectorRef,
+                          const std::shared_ptr<VertexBufferObject> &innerObject = nullptr,
+                          const std::shared_ptr<Shader> &shader = nullptr,
+                          const std::shared_ptr<ObjectTransformation> &transformation = nullptr,
+                          const std::shared_ptr<Material> &material = nullptr);
   
   
   void update();
@@ -23,7 +28,9 @@ public:
   
   void setSampler(const std::shared_ptr<Sampler> &sampler);
   
-  glm::vec3 normal = glm::vec3(0, 0, 1);
+  glm::vec3 &normal;
+  glm::vec3 &incidentVector;
+  glm::vec3 &reflectVector;
   
   int &getResolution();
 

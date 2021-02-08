@@ -88,4 +88,8 @@
 #define M_2PI (M_PI + M_PI)
 #define M_PI2 (M_PI * M_PI)
 
+#define UP (glm::vec3(0.f,0.f,1.f))
+#define TANG (glm::vec3(1.f,0.f,0.f))
+#define BITANG (glm::vec3(0.f,1.f,0.f))
+
 #endif //PCH_H
