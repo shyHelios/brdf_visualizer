@@ -470,7 +470,12 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
   
   const glm::vec3 diffuse = getDiffuseColor(material, tex_coord);
   
-  glm::vec3 finalColor(/*diffuse * */glm::vec3(reflColor.x, reflColor.y, reflColor.z) * brdf);
+  glm::vec3 ei = reflColor * glm::dot(shaderNormal, omegaI) / pdf;
+  
+  glm::vec3 finalColor = ei * brdf;
+
+
+//  glm::vec3 finalColor(/*diffuse * */glm::vec3(reflColor.x, reflColor.y, reflColor.z) * brdf);
   
   return glm::vec4(finalColor.x, finalColor.y, finalColor.z, 1);
 }
