@@ -14,6 +14,7 @@ public:
   SamplerVisualizerObject(glm::vec3 &normalRef,
                           glm::vec3 &incidentVectorRef,
                           glm::vec3 &reflectVectorRef,
+                          const std::shared_ptr<Sampler> &sampler,
                           const std::shared_ptr<VertexBufferObject> &innerObject = nullptr,
                           const std::shared_ptr<Shader> &shader = nullptr,
                           const std::shared_ptr<ObjectTransformation> &transformation = nullptr,
@@ -33,11 +34,15 @@ public:
   glm::vec3 &reflectVector;
   
   int &getResolution();
+  
+  bool &getMultiplyByPdf();
 
 private:
   void recreate();
   
   void recompute();
+  
+  bool multiplyByPdf = false;
   
   std::unique_ptr<Object> &at(int x, int y);
   

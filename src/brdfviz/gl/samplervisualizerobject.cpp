@@ -12,6 +12,7 @@
 SamplerVisualizerObject::SamplerVisualizerObject(glm::vec3 &normalRef,
                                                  glm::vec3 &incidentVectorRef,
                                                  glm::vec3 &reflectVectorRef,
+                                                 const std::shared_ptr<Sampler> &sampler,
                                                  const std::shared_ptr<VertexBufferObject> &innerObject,
                                                  const std::shared_ptr<Shader> &shader,
                                                  const std::shared_ptr<ObjectTransformation> &transformation,
@@ -19,8 +20,8 @@ SamplerVisualizerObject::SamplerVisualizerObject(glm::vec3 &normalRef,
     : Object(innerObject, shader, transformation, material),
       normal(normalRef),
       incidentVector(incidentVectorRef),
-      reflectVector(reflectVectorRef) {
-  sampler_ = std::make_unique<HemisphereCosWeightedSampler>();
+      reflectVector(reflectVectorRef),
+      sampler_(sampler) {
   update();
 }
 
@@ -52,18 +53,22 @@ std::unique_ptr<Object> &SamplerVisualizerObject::at(int x, int y) {
 }
 
 void SamplerVisualizerObject::recompute() {
-  const double incrementStep = 1. / static_cast<double>(resolution - 1);
+  const double incrementStep = 1. / static_cast<double>(resolution );
   const std::vector<unsigned int> indices = {0, 1};
   
   float pdf = 0;
-  for (int y = 0; y < resolution; y++) {
-    for (int x = 0; x < resolution; x++) {
+  for (int y = 1; y < resolution; y++) {
+    for (int x = 1; x < resolution; x++) {
       float u = x * incrementStep;
       float v = y * incrementStep;
-
-//      const auto &sample = sampler_->sampleImpl(u, v, normal, pdf);
-      const auto &sample = sampler_->sampleImpl(u, v, reflectVector, pdf);
-      const std::vector<Vertex> vertices = {glm::vec3(0, 0, 0), sample};
+      
+      auto sample = sampler_->sample(u, v, normal, reflectVector, pdf);
+      if (multiplyByPdf) {
+        sample *= pdf;
+      }
+      
+      const std::vector<Vertex> vertices = {{glm::vec3(0, 0, 0), sample},
+                                            {sample,             sample}};
       at(x, y)->innerObject->recreate(vertices, indices);
     }
   }
@@ -94,4 +99,8 @@ void SamplerVisualizerObject::setSampler(const std::shared_ptr<Sampler> &sampler
 
 int &SamplerVisualizerObject::getResolution() {
   return resolution;
+}
+
+bool &SamplerVisualizerObject::getMultiplyByPdf() {
+  return multiplyByPdf;
 }

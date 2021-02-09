@@ -83,8 +83,8 @@ protected:
   virtual glm::vec4 traceRay(const RTCRayHitIor &rayHit, int depth);
   
   glm::vec4 getBackgroundColor(const RTCRayHitIor &rayHit);
-  
-  glm::vec3 hemisphereSampling(const glm::vec3 &normal, float &pdf);
+
+//  glm::vec3 hemisphereSampling(const glm::vec3 &normal, float &pdf);
 };
 
 

@@ -24,11 +24,7 @@ class SamplerVisualizerObject;
 
 class Object;
 
-class HemisphereSampler;
-
-class HemisphereCosWeightedSampler;
-
-class PhongSampler;
+class Sampler;
 
 /**
  * @brief Main GUI class for BRDF viz
@@ -51,9 +47,7 @@ protected:
   std::weak_ptr<SamplerVisualizerObject> samplerVisualizerObject_;
   std::weak_ptr<Object> brdfVizObject_;
   
-  std::shared_ptr<HemisphereSampler> hemisphereSampler_;
-  std::shared_ptr<HemisphereCosWeightedSampler> hemisphereCosWeightedSampler_;
-  std::shared_ptr<PhongSampler> phongSampler_;
+  std::shared_ptr<Sampler> sampler_;
   
   bool showDemoWindow_ = false;
   ImVec2 mainRenderCanvasSize_;

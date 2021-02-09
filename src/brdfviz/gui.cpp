@@ -193,9 +193,13 @@ void Gui::init() {
                                                           Color3f{{0.0f, 0.349, 1.0f}})));
   
   
+  sampler_ = std::make_shared<Sampler>(brdfShader);
+  embreeRenderer_->getCommonShader()->setSampler(sampler_);
+  
   auto samplerVisualizerObject = std::make_shared<SamplerVisualizerObject>(normalVector,
                                                                            incidentVector,
                                                                            reflectedVector,
+                                                                           sampler_,
                                                                            nullptr,
                                                                            normalShader);
   samplerVisualizerObject->setVisible(false);
@@ -223,11 +227,6 @@ void Gui::init() {
   
   renderer_->addScene(scene, true);
   
-  hemisphereSampler_ = std::make_shared<HemisphereSampler>();
-  hemisphereCosWeightedSampler_ = std::make_shared<HemisphereCosWeightedSampler>();
-  phongSampler_ = std::make_shared<PhongSampler>();
-  
-  embreeRenderer_->getCommonShader()->setSampler(hemisphereCosWeightedSampler_);
 }
 
 void Gui::glfw_error_callback(int error, const char *description) {
@@ -298,6 +297,20 @@ void Gui::ui() {
     if (auto samplerVisualizerObjPtr = samplerVisualizerObject_.lock()) {
       samplerVisualizerObjPtr->setVisible(renderSampling_);
       if (renderSampling_) {
+        bool samplerSelected = false;
+        
+        int *selectedIdx = reinterpret_cast<int *>(&sampler_->getCurrentType());
+        
+        samplerSelected |= ImGui::Combo("Selected sampler",                                 // const char* label,
+                                        selectedIdx,                                              // int* current_item,
+                                        &Sampler::imguiSelectionGetter,                           // bool(*items_getter)(void* data, int idx, const char** out_text),
+                                        (void *) Sampler::samplerTypeArray,                       // void* data
+                                        IM_ARRAYSIZE(Sampler::samplerTypeArray));// int items_count
+        shallInvalidateSampler_ |= samplerSelected;
+        shallInvalidateRTC_ |= samplerSelected;
+        
+        shallInvalidateSampler_ |= ImGui::Checkbox("Multiply by pdf", &samplerVisualizerObjPtr->getMultiplyByPdf());
+        
         shallInvalidateSampler_ |= ImGui::SliderInt("Resolution", &samplerVisualizerObjPtr->getResolution(), 10, 100);
       }
     }
@@ -579,7 +592,9 @@ void Gui::drawBRDFSettings() {
       case BRDFShader::BRDF::Phong:
       case BRDFShader::BRDF::BlinnPhong:
       case BRDFShader::BRDF::PhongPhysCorrect: {
-        shallInvalidateRTC_ |= ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().Phong::shininess.getData(), 1, 100);
+        bool shininessChanged = ImGui::SliderInt("Shininess", &brdfShader->getBrdfUniformLocations().Phong::shininess.getData(), 1, 100);
+        shallInvalidateRTC_ |= shininessChanged;
+        shallInvalidateSampler_ |= shininessChanged;
         if (brdfShader->currentBrdfIdx == BRDFShader::BRDF::PhongPhysCorrect) {
           const bool specularChanged = ImGui::SliderFloat("Specular", &brdfShader->getBrdfUniformLocations().Phong::specular.getData(), 0,
                                                           1);
@@ -596,6 +611,8 @@ void Gui::drawBRDFSettings() {
           
           shallInvalidateRTC_ |= specularChanged;
           shallInvalidateRTC_ |= diffuseChanged;
+          shallInvalidateSampler_ |= specularChanged;
+          shallInvalidateSampler_ |= diffuseChanged;
         }
         break;
       }

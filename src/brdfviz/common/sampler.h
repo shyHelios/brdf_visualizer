@@ -5,37 +5,47 @@
 #ifndef SAMPLER_H
 #define SAMPLER_H
 
+#include <gl/shaders/brdfshader.h>
 
 class Sampler {
 public:
-  friend class SamplerVisualizerObject;
-
-//  Sampler(glm::vec3 &normal, glm::vec3 &incidentVector, glm::vec3 &reflectVector);
+  enum class Type {
+    Hemisphere,
+    HemisphereCosWeightConcentric,
+    HemisphereGlossy,
+    Phong,
+    Count
+  };
   
-  glm::vec3 sample(const glm::vec3 &normal, float &pdf) const;
+  Sampler(const std::shared_ptr<BRDFShader> &brdfShaderPtr);
+  
+  friend class SamplerVisualizerObject;
+  
+  glm::vec3 sample(const glm::vec3 &normal, const glm::vec3 &reflectVector, float &pdf) const;
+  
+  glm::vec3 sample(const float randomU, const float randomV, const glm::vec3 &normal, const glm::vec3 &reflectVector, float &pdf) const;
+  
+  Type &getCurrentType();
+  
+  void setCurrentType(Type currentType);
+  
+  static const std::pair<const char *, Type> samplerTypeArray[static_cast<int>(Type::Count)];
+  
+  static bool imguiSelectionGetter(void *data, int idx, const char **out_str);
 
 protected:
-//  glm::vec3 &normal_;
-//  glm::vec3 &incidentVector_;
-//  glm::vec3 &reflectVector_;
-private:
-  virtual glm::vec3 sampleImpl(const float randomU, const float randomV, const glm::vec3 &normal, float &pdf) const = 0;
-};
+  Type currentType_ = Type::HemisphereCosWeightConcentric;
+  const std::shared_ptr<BRDFShader> brdfShaderPtr;
 
-class HemisphereSampler : public Sampler {
 private:
-  virtual glm::vec3 sampleImpl(const float randomU, const float randomV, const glm::vec3 &normal, float &pdf) const override;
+  glm::vec3 sampleImplHemisphere(const float randomU, const float randomV, const glm::vec3 &normal, const glm::vec3 &reflectVector, float &pdf) const;
+  
+  glm::vec3
+  sampleImplHemisphereCosWeightConcentric(const float randomU, const float randomV, const glm::vec3 &normal, const glm::vec3 &reflectVector, float &pdf) const;
+  
+  glm::vec3 sampleImplHemisphereGlossy(const float randomU, const float randomV, const glm::vec3 &normal, const glm::vec3 &reflectVector, float &pdf) const;
+  
+  glm::vec3 sampleImplPhong(const float randomU, const float randomV, const glm::vec3 &normal, const glm::vec3 &reflectVector, float &pdf) const;
 };
-
-class HemisphereCosWeightedSampler : public Sampler {
-private:
-  virtual glm::vec3 sampleImpl(const float randomU, const float randomV, const glm::vec3 &normal, float &pdf) const override;
-};
-
-class PhongSampler : public Sampler {
-private:
-  virtual glm::vec3 sampleImpl(const float randomU, const float randomV, const glm::vec3 &normal, float &pdf) const override;
-};
-
 
 #endif //SAMPLER_H
