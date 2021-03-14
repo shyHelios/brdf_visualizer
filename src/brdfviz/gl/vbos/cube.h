@@ -111,7 +111,7 @@ namespace vbo {
         21, 22, 23
     };
   }
-};
+}
 
 
 #endif //CUBE_H

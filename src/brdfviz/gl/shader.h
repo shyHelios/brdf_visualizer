@@ -37,8 +37,8 @@ public:
   virtual void addLight(const std::vector<std::shared_ptr<Light>> &light);
   
   virtual void notify(const CameraInfo &c);
-  
-  virtual void notify(const LightInfo &l);
+
+//  virtual void notify(const LightInfo &l);
 
 protected:
   
@@ -118,9 +118,9 @@ protected:
     
     virtual void init(int shaderProgram) override;
     
-    void addLight(const std::shared_ptr<Light> &light, int shaderProgram);
+    void addLight(const std::shared_ptr<Light> &light, int shaderProgramId);
     
-    void addLight(const std::vector<std::shared_ptr<Light>> &lights, int shaderProgram);
+    void addLight(const std::vector<std::shared_ptr<Light>> &lights, int shaderProgramId);
   };
   
   CameraInfo camInfo;

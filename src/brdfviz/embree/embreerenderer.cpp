@@ -88,7 +88,7 @@ void EmbreeRenderer::ui() {
   }
   
   
-  if (ImGui::Button("Invalidate (TODO DETECT THIS)")) {
+  if (ImGui::Button("Invalidate")) {
     invalidateRendering();
   }
   
@@ -112,7 +112,7 @@ void EmbreeRenderer::ui() {
   
 }
 
-glm::vec4 EmbreeRenderer::getPixel(int x, int y, float t) {
+glm::vec4 EmbreeRenderer::getPixel(int x, int y) {
   try {
     return commonShader_->getPixel(x, y);
   }
@@ -141,7 +141,7 @@ void EmbreeRenderer::producer() {
 #pragma omp parallel for schedule(dynamic, 4) shared(localData)
     for (int y = 0; y < height_; ++y) {
       for (int x = 0; x < width_; ++x) {
-        const glm::vec4 pixel = getPixel(x, y, t);
+        const glm::vec4 pixel = getPixel(x, y);
         const int offset = (y * width_ + x);
         
         localData[offset].x = c_srgb(pixel.r, gamma_);

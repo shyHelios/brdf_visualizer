@@ -189,7 +189,6 @@ void main(void){
   vec3 normIncident = normalize(u_incidentVector);
   
   float brdf = BRDF(normIncident, normPos, normal, tangent, bitangent);
-  //float offVal = (lumimance.x * brdf.x) + (lumimance.y * brdf.y)+ (lumimance.z * brdf.z);
   vec3 newPos = normPos * brdf;
   
   gl_Position = u_projMat * u_viewMat * u_modelMat * vec4(newPos, 1.0);

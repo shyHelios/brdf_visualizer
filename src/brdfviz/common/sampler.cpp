@@ -95,10 +95,9 @@ glm::vec3 Sampler::sampleImplHemisphereCosWeightConcentric(const float randomU, 
     concentricPhi = r * std::sin(concTh);
   }
   
-  
-  float z = std::sqrt(std::max((float) 0, 1 - sqr(concentricTheta) - sqr(concentricPhi)));
-  
-  return glm::vec3(concentricTheta, concentricPhi, z);
+  glm::vec3 omegaI = glm::vec3(concentricTheta, concentricPhi, std::sqrt(std::max((float) 0, 1 - sqr(concentricTheta) - sqr(concentricPhi))));
+  pdf = glm::dot(normal, omegaI) / M_PI;
+  return omegaI;
 }
 
 glm::vec3
@@ -114,32 +113,14 @@ Sampler::sampleImplHemisphereGlossy(const float randomU, const float randomV, co
 glm::vec3 Sampler::sampleImplPhong(const float randomU, const float randomV, const glm::vec3 &normal, const glm::vec3 &reflectVector, float &pdf) const {
   const float diffuse = brdfShaderPtr->getBrdfUniformLocations().diffuse.getData();
   const float specular = brdfShaderPtr->getBrdfUniformLocations().specular.getData();
-  const float shininess = brdfShaderPtr->getBrdfUniformLocations().shininess.getData();
-  const float randSample = rng();
-
-//  const float n = brdfShaderPtr->getBrdfUniformLocations().shininess.getData();
-  
-  const float diffTheta = acos(randomU);
-  const float specTheta = acos(std::pow(randomU, 1.f / (shininess + 1)));
-  
-  const float phi = M_2PI * randomV;
-  
-  const float diffusePdf = sqrt(randomU) / M_2PI;
-  const float specularPdf = ((shininess + 1.f) / M_2PI) * std::pow(cos(specTheta), shininess);
-
-//  const float pd = diffuse / (diffuse + specular);
-//  const float ps = specular / (diffuse + specular);
-
-//  pdf = pd * diffusePdf + ps * specularPdf;
+  const float randSample = rng(0, diffuse + specular);
   
   if (randSample < diffuse) {
     // take a diffuse sample and compute its contribution
-    pdf = diffusePdf;
-    return sphericalToCartesian(diffTheta, phi);
+    return sampleImplHemisphereCosWeightConcentric(randomU, randomV, normal, reflectVector, pdf);
   } else {
     // take a specular sample and compute its contribution
-    pdf = specularPdf;
-    return localToWorld(sphericalToCartesian(specTheta, phi), reflectVector);
+    return sampleImplHemisphereGlossy(randomU, randomV, normal, reflectVector, pdf);
   }
 }
 

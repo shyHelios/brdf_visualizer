@@ -124,11 +124,11 @@ void FrameBufferObject::saveScreen() const {
   unbind();
 }
 
-const uint32_t FrameBufferObject::getRealWidth() const {
+uint32_t FrameBufferObject::getRealWidth() const {
   return realWidth_;
 }
 
-const uint32_t FrameBufferObject::getRealHeight() const {
+uint32_t FrameBufferObject::getRealHeight() const {
   return realHeight_;
 }
 

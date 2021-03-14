@@ -53,14 +53,15 @@ std::unique_ptr<Object> &SamplerVisualizerObject::at(int x, int y) {
 }
 
 void SamplerVisualizerObject::recompute() {
-  const double incrementStep = 1. / static_cast<double>(resolution );
+  const float incrementStep = 1. / static_cast<float>(resolution);
   const std::vector<unsigned int> indices = {0, 1};
   
   float pdf = 0;
-  for (int y = 1; y < resolution; y++) {
-    for (int x = 1; x < resolution; x++) {
-      float u = x * incrementStep;
-      float v = y * incrementStep;
+//  int idx = 0;
+  for (int y = 0; y < resolution - 1; y++) {
+    for (int x = 0; x < resolution - 1; x++) {
+      float u = (x + 1) * incrementStep;
+      float v = (y + 1) * incrementStep;
       
       auto sample = sampler_->sample(u, v, normal, reflectVector, pdf);
       if (multiplyByPdf) {
@@ -81,8 +82,8 @@ void SamplerVisualizerObject::update() {
 
 void SamplerVisualizerObject::draw(const bool geometry) {
   if (!visible) return;
-  for (int y = 0; y < resolution; y++) {
-    for (int x = 0; x < resolution; x++) {
+  for (int y = 0; y < resolution - 1; y++) {
+    for (int x = 0; x < resolution - 1; x++) {
       const auto &obj = at(x, y);
       obj->draw(geometry);
     }

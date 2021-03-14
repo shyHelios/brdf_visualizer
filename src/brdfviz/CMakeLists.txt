@@ -100,6 +100,14 @@ target_link_libraries(${PROJECT_NAME} PUBLIC libimgui glfw glad glm spdlog::spdl
 target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD)
 target_precompile_headers(${PROJECT_NAME} PUBLIC pch.h)
 
+target_compile_options(${PROJECT_NAME}
+                       PUBLIC
+                       -Wall
+                       -Wextra
+                       #                       -pedantic
+                       #                       -Werror
+                       -Wno-unknown-pragmas
+                       )
 
 pvs_studio_add_target(TARGET ${PROJECT_NAME}.analyze ALL
                       OUTPUT FORMAT errorfile

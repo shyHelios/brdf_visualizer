@@ -48,7 +48,7 @@ glm::mat4 Camera::getViewMatrix() {
   return viewMatrix;
 }
 
-glm::mat4 Camera::getProjectionMatrix() {
+glm::mat4 Camera::getProjectionMatrix() const {
   return glm::perspective(glm::radians(45.0f), ratio, 0.1f, 100.0f);
 }
 
@@ -73,74 +73,7 @@ void Camera::notifyObservers() {
 }
 
 glm::vec3 Camera::getTarget() {
-//  if (transformation->overrideTarget.second) {
-//    target = transformation->overrideTarget.first;
-//  } else {
-//    glm::vec2 offset = Controller::getInstance()->getCursorPos();
-//    double xpos = offset.x;
-//    double ypos = offset.y;
-//    if (firstMouse) {
-//      lastX = xpos;
-//      lastY = ypos;
-//      firstMouse = false;
-//    }
-//
-//    double xoffset = xpos - lastX;
-//    double yoffset = lastY - ypos;
-//    lastX = xpos;
-//    lastY = ypos;
-//
-//    double sensitivity = 0.1;
-//    xoffset *= sensitivity;
-//    yoffset *= sensitivity;
-//
-//    yaw += xoffset;
-//    pitch -= yoffset;
-//
-//    if (pitch > 89.0f)
-//      pitch = 89.0f;
-//    if (pitch < -89.0f)
-//      pitch = -89.0f;
-//
-//    glm::vec3 direction;
-//    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-//    direction.y = sin(glm::radians(pitch));
-//    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-//    target = glm::normalize(direction);
-//  }
-  
   return target;
-}
-
-void Camera::mouse_callback(GLFWwindow *window, double xpos, double ypos) {
-  if (firstMouse) {
-    lastX = xpos;
-    lastY = ypos;
-    firstMouse = false;
-  }
-  
-  double xoffset = xpos - lastX;
-  double yoffset = lastY - ypos;
-  lastX = xpos;
-  lastY = ypos;
-  
-  double sensitivity = 0.05;
-  xoffset *= sensitivity;
-  yoffset *= sensitivity;
-  
-  yaw += xoffset;
-  pitch += yoffset;
-  
-  if (pitch > 89.0f)
-    pitch = 89.0f;
-  if (pitch < -89.0f)
-    pitch = -89.0f;
-  
-  glm::vec3 direction;
-  direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-  direction.y = sin(glm::radians(pitch));
-  direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-  target = glm::normalize(direction);
 }
 
 float Camera::getRatio() const {

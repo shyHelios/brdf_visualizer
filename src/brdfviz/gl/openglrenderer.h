@@ -13,6 +13,8 @@ class OpenGLRenderer : public Renderer {
 public:
   virtual void render(const bool geometry = false) override;
   
+  virtual ~OpenGLRenderer() = default;
+  
   unsigned int getCurrentSceneIndex() const;
   
   void setCurrentSceneIndex(unsigned int index);

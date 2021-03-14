@@ -11,7 +11,9 @@ class EmbreeRenderer {
 public:
   EmbreeRenderer(const int width = 400, const int height = 400, const float renderScale = 1.0f);
   
-  glm::vec4 getPixel(int x, int y, float t = 0.0f);
+  virtual ~EmbreeRenderer() = default;
+  
+  glm::vec4 getPixel(int x, int y);
   
   void ui();
   
@@ -46,7 +48,6 @@ private:
   bool mouseInput = false;
   bool invalidate = false;
   std::mutex invalidateLock_;
-  
 };
 
 

@@ -37,21 +37,9 @@ void Gui::init() {
   if (!glfwInit())
     throw "Unable to init GLFW";
   
-  // Decide GL+GLSL versions
-#if __APPLE__
-  // GL 3.2 + GLSL 150
-    const char* glsl_version = "#version 150";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-#else
   glsl_version = "#version 460";
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-//  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-//  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
-#endif
   
   // Create window with graphics context
   window = glfwCreateWindow(1280, 720, winName_, NULL, NULL);
@@ -61,15 +49,8 @@ void Gui::init() {
   glfwSwapInterval(1); // Enable vsync
   
   // Initialize OpenGL loader
-#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
-  bool err = gl3wInit() != 0;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
-  bool err = glewInit() != GLEW_OK;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
   bool err = gladLoadGL() == 0;
-#else
-  bool err = false; // If you use IMGUI_IMPL_OPENGL_LOADER_CUSTOM, your loader is likely to requires some form of initialization.
-#endif
+  
   if (err) {
     fprintf(stderr, "Failed to initialize OpenGL loader!\n");
     throw "Failed to initialize OpenGL loader";
@@ -103,13 +84,13 @@ void Gui::init() {
   {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    const unsigned int resolution = 20;
+    const unsigned int resolution = 80;
     double radiansAngle = 0;
     const double radiansFullAngle = 2. * M_PI;
     const double radius = 1.;
     const double radiansStep = radiansFullAngle / static_cast<double>(resolution);
     vertices.emplace_back(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)); // center
-    for (int i = 0; i < resolution; i++) {
+    for (unsigned int i = 0; i < resolution; i++) {
       vertices.emplace_back(glm::vec3(radius * std::cos(radiansAngle), radius * std::sin(radiansAngle), 0), glm::vec3(0, 1, 0));
 //      vertices.emplace_back(glm::vec3(radius * std::cos(radiansAngle), 0, radius * std::sin(radiansAngle)), glm::vec3(std::cos(radiansAngle), 0, std::sin(radiansAngle)));
       radiansAngle += radiansStep;
@@ -311,7 +292,7 @@ void Gui::ui() {
         
         shallInvalidateSampler_ |= ImGui::Checkbox("Multiply by pdf", &samplerVisualizerObjPtr->getMultiplyByPdf());
         
-        shallInvalidateSampler_ |= ImGui::SliderInt("Resolution", &samplerVisualizerObjPtr->getResolution(), 10, 100);
+        shallInvalidateSampler_ |= ImGui::SliderInt("Resolution", &samplerVisualizerObjPtr->getResolution(), 0, 100);
       }
     }
     #pragma endregion
@@ -493,11 +474,21 @@ void Gui::renderLoop() {
       }
     }
     
+    // If saving screen, resize fbo to real size, render again and resize it back.
+    if (shallSave_) {
+      fbo_->resize(fbo_->getRealWidth(), fbo_->getRealHeight());
+      fbo_->bind();
+      renderer_->render(geometry_);
+      fbo_->unbind();
+      fbo_->saveScreen();
+      shallSave_ = false;
+    }
+    
     fbo_->resize(mainRenderCanvasSize_.x, mainRenderCanvasSize_.y);
     fbo_->bind();
     renderer_->render(geometry_);
     fbo_->unbind();
-    if (shallSave_) fbo_->saveScreen();
+
 
 //    shallInvalidateRTC_ = false;
 //    shallInvalidateSampler_ = false;
@@ -626,15 +617,16 @@ void Gui::drawBRDFSettings() {
       case BRDFShader::BRDF::Lambert: {
         shallInvalidateRTC_ |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().Lambert::reflectance.getData(), 0., 1.0);
         break;
-      };
+      }
       
       case BRDFShader::BRDF::OrenNayar: {
         shallInvalidateRTC_ |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().OrenNayar::roughness.getData(), 0, 1.0);
         shallInvalidateRTC_ |= ImGui::SliderFloat("Reflectance", &brdfShader->getBrdfUniformLocations().OrenNayar::reflectance.getData(), 0., 1.0);
         break;
-      };
+      }
       
-      case BRDFShader::BRDF::CountBrdf:break;
+      case BRDFShader::BRDF::Mirror: { break; }
+      case BRDFShader::BRDF::CountBrdf: { break; }
     }
   } else {
     spdlog::warn("[GUI] BRDFShader ptr expired");

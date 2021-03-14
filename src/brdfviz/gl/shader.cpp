@@ -181,6 +181,7 @@ Shader::~Shader() {
 }
 
 void Shader::use(const std::shared_ptr<Material> &mtl) {
+  static_cast<void>(mtl);
   if (currentShaderID != this->id) {
     currentShaderID = this->id;
     glCall(glUseProgram(shaderProgram));
@@ -217,9 +218,10 @@ void Shader::notify(const CameraInfo &c) {
   this->camInfo = c;
 }
 
-void Shader::notify(const LightInfo &l) {
-  //this->lightInfo = l;
-}
+//void Shader::notify(const LightInfo &l) {
+//  //this->lightInfo = l;
+//
+//}
 
 void Shader::checkCompilation() {
   spdlog::info("[SHADER] Checking shader linker");
@@ -249,6 +251,8 @@ void Shader::setData<bool>(const std::string &name, const bool &value, const int
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_BOOL);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniform1i(location, (int) value));
 }
@@ -262,6 +266,8 @@ void Shader::setData<int>(const std::string &name, const int &value, const int o
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_INT);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniform1i(location, value));
 }
@@ -275,6 +281,8 @@ void Shader::setData<float>(const std::string &name, const float &value, const i
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_FLOAT);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniform1f(location, value));
 }
@@ -288,6 +296,8 @@ void Shader::setData<double>(const std::string &name, const double &value, const
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_DOUBLE);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniform1d(location, value));
 }
@@ -301,6 +311,8 @@ void Shader::setData<glm::vec3>(const std::string &name, const glm::vec3 &value,
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_FLOAT_VEC3);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniform3f(location, value.r, value.g, value.b));
 }
@@ -314,6 +326,8 @@ void Shader::setData<glm::vec4>(const std::string &name, const glm::vec4 &value,
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_FLOAT_VEC4);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniform4f(location, value.r, value.g, value.b, value.a));
 }
@@ -327,6 +341,8 @@ void Shader::setData<glm::mat4x4>(const std::string &name, const glm::mat4x4 &va
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_FLOAT_MAT4);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value)));
 }
@@ -340,6 +356,8 @@ void Shader::setData<glm::mat3x3>(const std::string &name, const glm::mat3x3 &va
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_FLOAT_MAT3);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(value)));
 }
@@ -357,6 +375,8 @@ void Shader::setData<bool>(const int location, const bool &value, const int over
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_BOOL);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniform1i(location, (int) value));
 }
@@ -369,6 +389,8 @@ void Shader::setData<int>(const int location, const int &value, const int overri
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_INT);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniform1i(location, value));
 }
@@ -381,6 +403,8 @@ void Shader::setData<float>(const int location, const float &value, const int ov
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_FLOAT);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniform1f(location, value));
 }
@@ -393,6 +417,8 @@ void Shader::setData<double>(const int location, const double &value, const int 
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_DOUBLE);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniform1d(location, value));
 }
@@ -405,6 +431,8 @@ void Shader::setData<glm::vec3>(const int location, const glm::vec3 &value, cons
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_FLOAT_VEC3);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniform3f(location, value.r, value.g, value.b));
 }
@@ -417,6 +445,8 @@ void Shader::setData<glm::vec4>(const int location, const glm::vec4 &value, cons
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_FLOAT_VEC4);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniform4f(location, value.r, value.g, value.b, value.a));
 }
@@ -429,6 +459,8 @@ void Shader::setData<glm::mat4x4>(const int location, const glm::mat4x4 &value, 
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_FLOAT_MAT4);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value)));
 }
@@ -441,6 +473,8 @@ void Shader::setData<glm::mat3x3>(const int location, const glm::mat3x3 &value, 
     checkUniformCallValidity(shaderProgram, location, overrideType);
   else
     checkUniformCallValidity(shaderProgram, location, GL_FLOAT_MAT3);
+  #else
+  static_cast<void>(overrideType);
   #endif
   glCall(glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(value)));
 }
@@ -515,19 +549,18 @@ void Shader::LightUniformLocations::init(int shaderProgram) {
   if (LightCount == -1) { spdlog::warn("[SHADER] LightCount not found"); }
 }
 
-void Shader::LightUniformLocations::addLight(const std::shared_ptr<Light> &light, int shaderProgram) {
+void Shader::LightUniformLocations::addLight(const std::shared_ptr<Light> &light, int shaderProgramId) {
   int idx = lightInfo.size();
   std::string number = std::to_string(idx);
-  LightInfo info = light->getLigthInfo();
   
   ShaderLightInfo phongLightInfo;
-  phongLightInfo.position = glGetUniformLocation(shaderProgram, ("u_light[" + number + "].position").c_str());
-  phongLightInfo.ambient = glGetUniformLocation(shaderProgram, ("u_light[" + number + "].ambient").c_str());
-  phongLightInfo.diffuse = glGetUniformLocation(shaderProgram, ("u_light[" + number + "].diffuse").c_str());
-  phongLightInfo.specular = glGetUniformLocation(shaderProgram, ("u_light[" + number + "].specular").c_str());
-  phongLightInfo.constant = glGetUniformLocation(shaderProgram, ("u_light[" + number + "].constant").c_str());
-  phongLightInfo.linear = glGetUniformLocation(shaderProgram, ("u_light[" + number + "].linear").c_str());
-  phongLightInfo.quadratic = glGetUniformLocation(shaderProgram, ("u_light[" + number + "].quadratic").c_str());
+  phongLightInfo.position = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].position").c_str());
+  phongLightInfo.ambient = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].ambient").c_str());
+  phongLightInfo.diffuse = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].diffuse").c_str());
+  phongLightInfo.specular = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].specular").c_str());
+  phongLightInfo.constant = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].constant").c_str());
+  phongLightInfo.linear = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].linear").c_str());
+  phongLightInfo.quadratic = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].quadratic").c_str());
   
   if (phongLightInfo.position == -1) { spdlog::warn("[SHADER]  lightInfo.position at index {} not found", idx); }
   if (phongLightInfo.ambient == -1) { spdlog::warn("[SHADER]  lightInfo.ambient at index {} not found", idx); }
@@ -540,8 +573,8 @@ void Shader::LightUniformLocations::addLight(const std::shared_ptr<Light> &light
   lightInfo.emplace_back(phongLightInfo);
 }
 
-void Shader::LightUniformLocations::addLight(const std::vector<std::shared_ptr<Light>> &lights, int shaderProgram) {
+void Shader::LightUniformLocations::addLight(const std::vector<std::shared_ptr<Light>> &lights, int shaderProgramId) {
   for (const auto &light : lights) {
-    addLight(light, shaderProgram);
+    addLight(light, shaderProgramId);
   }
 }

@@ -32,9 +32,9 @@ public:
   
   uint32_t getFrameBufferDepthId() const;
   
-  const uint32_t getRealWidth() const;
+  uint32_t getRealWidth() const;
   
-  const uint32_t getRealHeight() const;
+  uint32_t getRealHeight() const;
   
   glm::vec2 getUV() const;
   
@@ -43,8 +43,8 @@ public:
 private:
   uint32_t width_;
   uint32_t height_;
-  const uint32_t realWidth_ = 2048;
-  const uint32_t realHeight_ = 2048;
+  const uint32_t realWidth_ = 800;
+  const uint32_t realHeight_ = 800;
   uint32_t frameBufferID = 0;
   uint32_t frameBufferColorID = 0;
   uint32_t frameBufferDepthID = 0;

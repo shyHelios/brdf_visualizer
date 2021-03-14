@@ -61,8 +61,8 @@
 
 
 VertexBufferObject::VertexBufferObject(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices) :
-    indices_(indices),
-    vertices_(vertices) {
+    vertices_(vertices),
+    indices_(indices) {
   
   glCall(glGenVertexArrays(1, &VAO));
   glCall(glGenBuffers(1, &VBO));

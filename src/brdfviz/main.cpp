@@ -5,7 +5,7 @@
 #include <pch.h>
 #include "gui.h"
 
-int main(int argc, const char **argv) {
+int main() {
   Gui gui("Example window");
   gui.render();
   return 0;

@@ -61,11 +61,11 @@ protected:
   bool shallInvalidateRTC_ = false;
   bool shallInvalidateSampler_ = false;
   bool shallSave_ = false;
-  bool renderSampling_ = false; // TODO back to false
+  bool renderSampling_ = false;
   
-  glm::vec3 normalVector = glm::vec3(0, 0, 1);
+  glm::vec3 normalVector = UP;
   glm::vec3 incidentVector = glm::vec3(0.5, 0.5, 0.5);
-  glm::vec3 reflectedVector = glm::vec3(-0.5, -0.5, 0.5);;
+  glm::vec3 reflectedVector = glm::vec3(-0.5, -0.5, 0.5);
   
   
   virtual void ui();

@@ -86,6 +86,6 @@ namespace vbo {
 //        7, 11, 2,
     };
   }
-};
+}
 
 #endif //HALFICOSAHEDRON_H
