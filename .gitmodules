@@ -28,3 +28,8 @@
 	url = https://github.com/gabime/spdlog.git
 	branch = master
 
+[submodule "imguifiledialog"]
+	path = lib/imguifiledialog
+	url = https://github.com/aiekick/ImGuiFileDialog.git
+	branch = master
+
