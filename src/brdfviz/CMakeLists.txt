@@ -1,9 +1,13 @@
 project(brdfviz)
 
+
 add_executable(${PROJECT_NAME}
                main.cpp
                gui.cpp
                gui.h
+
+               ${IMGUI_SRC}
+               ${IMGUI_FD_SRC}
 
                gl/vertexbufferobject.cpp
                gl/vertexbufferobject.h
@@ -83,6 +87,7 @@ add_executable(${PROJECT_NAME}
 
                common/utils/coordsystem.h
                common/utils/coordsystem.cpp
+               common/utils/utils.h
                common/utils/rng.cpp
                common/utils/rng.h
                common/utils/timer.cpp
@@ -90,13 +95,22 @@ add_executable(${PROJECT_NAME}
                common/utils/math.h
                common/utils/rgb.cpp
                common/utils/rgb.h
+               common/utils/assimploading.cpp
+               common/utils/assimploading.h
+
+
                common/sampler.h
                common/sampler.cpp
                )
 
 target_include_directories(${PROJECT_NAME}
-                           PUBLIC ${CMAKE_CURRENT_LIST_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC libimgui glfw glad glm spdlog::spdlog freeimage ${EMBREE_LIBRARY})
+                           PUBLIC
+                           ${CMAKE_CURRENT_LIST_DIR}
+                           ${IMGUI_FD_ROOT}
+                           ${LIB_DIR}/imgui
+                           ${LIB_DIR}/imgui/backends)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC glfw glad glm spdlog::spdlog freeimage assimp embree ${EMBREE_LIBRARY})
 target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD)
 target_precompile_headers(${PROJECT_NAME} PUBLIC pch.h)
 

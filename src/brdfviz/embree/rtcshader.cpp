@@ -15,6 +15,7 @@
 #include "pathtracerhelper.h"
 #include "mathscene.h"
 
+
 RTCShader::RTCShader() :
     pathTracerHelper(nullptr),
     flipTextureU_(false),
@@ -45,7 +46,7 @@ RTCRayHitIor RTCShader::shootRay(const float x, const float y) {
 }
 
 glm::vec3 RTCShader::getDiffuseColor(const std::shared_ptr<Material> &material, const glm::vec2 &tex_coord) {
-  Texture3f *diffTexture = material->texture(TextureSlot::diffuseSlot);
+  const auto &diffTexture = material->texture(TextureSlot::diffuseSlot);
   glm::vec3 geomDiffuse;
   
   if (diffTexture != nullptr) {
@@ -120,38 +121,45 @@ RTCRayHitIor RTCShader::generateRay(const glm::vec3 &origin,
   rayHit.hit.Ng_y = 0.0f;
   rayHit.hit.Ng_z = 0.0f;
   
-  /*
-   * Embree intersect
-   * */
-  // intersect ray with the scene
-//  RTCIntersectContext context;
-//  rtcInitIntersectContext(&context);
-//  rtcIntersect1(*rtcScene_, &context, &rayHit);
+  if (rtcScene_ != nullptr) {
+    /*
+     * Embree intersect
+     * */
+    // intersect ray with the scene
+    
+    RTCIntersectContext context;
+    rtcInitIntersectContext(&context);
+    rtcIntersect1(rtcScene_, &context, &rayHit);
+  }
   
-  /*
-   * My intersect
-   * */
+  
   if (mathScene_ != nullptr) {
+    /*
+     * My intersect
+     * */
     mathScene_->intersect(rayHit);
   }
   
   return rayHit;
 }
 
-//glm::vec3 RTCShader::getNormal(const std::unique_ptr<RTCGeometryTy> &geometry, const RTCRayHitIor &rayHit) {
-//  glm::vec3 normal;
-//  rtcInterpolate0(geometry.get(), rayHit.hit.primID, rayHit.hit.u, rayHit.hit.v,
-//                  RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 0, &normal.x, 3);
-//  return normal;
-//
-//}
-//
-//glm::vec2 RTCShader::getTexCoords(const std::unique_ptr<RTCGeometryTy> &geometry, const RTCRayHitIor &rayHit) {
-//  glm::vec2 tex_coord;
-//  rtcInterpolate0(geometry.get(), rayHit.hit.primID, rayHit.hit.u, rayHit.hit.v,
-//                  RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 1, &tex_coord.x, 2);
-//  return tex_coord;
-//}
+glm::vec3 RTCShader::getNormal(const RTCGeometry geometry, const RTCRayHitIor &rayHit) {
+  glm::vec3 normal;
+  normal.x = rayHit.hit.Ng_x;
+  normal.y = rayHit.hit.Ng_y;
+  normal.z = rayHit.hit.Ng_z;
+//  rtcInterpolate0(geometry, rayHit.hit.primID, rayHit.hit.u, rayHit.hit.v,
+//                  RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, NORMAL_SLOT, &normal.x, 3);
+  return normal;
+  
+}
+
+glm::vec2 RTCShader::getTexCoords(const RTCGeometry geometry, const RTCRayHitIor &rayHit) {
+  glm::vec2 tex_coord;
+  rtcInterpolate0(geometry, rayHit.hit.primID, rayHit.hit.u, rayHit.hit.v,
+                  RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, TEXCOORD_SLOT, &tex_coord.x, 2);
+  return tex_coord;
+}
 
 float RTCShader::fresnel(const float n1, const float n2, const float Q1, const float Q2) {
   float Rs = sqr((n1 * Q2 - n2 * Q1) / (n1 * Q2 + n2 * Q1));
@@ -183,12 +191,28 @@ float RTCShader::shadow(const glm::vec3 &pos, const glm::vec3 &lightDir, const f
   ray.mask = 0; // can be used to mask out some geometries for some rays
   ray.id = 0; // identify a ray inside a callback function
   ray.flags = 0; // reserved
-
-//  RTCIntersectContext context;
-//  rtcInitIntersectContext(&context);
-//  rtcOccluded1(*rtcScene_, &context, &ray);
   
-  spdlog::warn("[EMBREE SHADER] Shadows removed, always false");
+  if (rtcScene_ != nullptr) {
+    /*
+     * Embree intersect
+     * */
+    // intersect ray with the scene
+    
+    
+    RTCIntersectContext context;
+    rtcInitIntersectContext(&context);
+    rtcOccluded1(rtcScene_, &context, &ray);
+  }
+  
+  if (mathScene_ != nullptr) {
+    /*
+     * My intersect
+     * */
+    mathScene_->occlude(ray);
+  }
+
+
+//  spdlog::warn("[EMBREE SHADER] Shadows removed, always false");
   
   if (ray.tfar < dist) {
     return 0.0;
@@ -196,26 +220,6 @@ float RTCShader::shadow(const glm::vec3 &pos, const glm::vec3 &lightDir, const f
     return 1.0;
   }
 }
-
-//glm::vec3 RTCShader::hemisphereSampling(const glm::vec3 &normal, float &pdf) {
-////  const float randomU = rng();
-////  const float randomV = rng();
-////
-////  const float x = 2.f * cosf(M_2PI * randomU) * sqrtf(randomV * (1.f - randomV));
-////  const float y = 2.f * sinf(M_2PI * randomU) * sqrtf(randomV * (1.f - randomV));
-////  const float z = 1.f - 2.f * randomV;
-////
-////  glm::vec3 omegaI = glm::normalize(glm::vec3(x, y, z));
-////
-////  if (glm::dot(omegaI, normal) < 0) {
-//////    omegaI *= -1;
-////    omegaI = -omegaI;
-////  }
-////  pdf = 1.f / M_2PI;
-////  return omegaI;
-//  glm::vec3 omegaI = sampler_->sample(normal, pdf);
-//  return omegaI;
-//}
 
 bool &RTCShader::getUseSphereMapRef() {
   return sphereMap_;

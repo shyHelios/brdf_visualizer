@@ -6,10 +6,17 @@
 #define VERTEX_H
 
 struct Vertex {
-  explicit Vertex(
-      float posx = 0.f,
-      float posy = 0.f,
-      float posz = 0.f,
+  Vertex() :
+      Position{glm::vec3(0, 0, 0)},
+      Normal{glm::vec3(0, 0, 0)},
+      Texture{glm::vec2(0, 0)},
+      Tangent{glm::vec3(0, 0, 0)} {
+  }
+  
+  Vertex(
+      float posx,
+      float posy,
+      float posz,
       float normx = 0.f,
       float normy = 0.f,
       float normz = 0.f,
@@ -24,7 +31,7 @@ struct Vertex {
       Tangent{glm::vec3(tanx, tany, tanz)} {
   }
   
-  Vertex(const glm::vec3 &position = glm::vec3(0.f, 0.f, 0.f),
+  Vertex(const glm::vec3 &position,
          const glm::vec3 &normal = glm::vec3(0.f, 0.f, 0.f),
          const glm::vec2 &texture = glm::vec2(0.f, 0.f),
          const glm::vec3 &tangent = glm::vec3(0.f, 0.f, 0.f)) :
@@ -50,8 +57,6 @@ struct Vertex {
   const glm::vec3 Normal;
   const glm::vec2 Texture;
   const glm::vec3 Tangent;
-  
-  
 };
 
 

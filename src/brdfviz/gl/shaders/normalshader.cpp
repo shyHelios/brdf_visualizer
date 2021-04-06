@@ -16,7 +16,7 @@ void NormalShader::use(const std::shared_ptr<Material> &mtl) {
   setData(normalUniformLocations_.ProjectionTransform, camInfo.projectionMatrix);
   setData(normalUniformLocations_.ViewTransform, camInfo.viewMatrix);
   for (int i = 0; i < NO_TEXTURES; i++) {
-    auto *texture = mtl->texture(i);
+    const auto &texture = mtl->texture(i);
     if (texture != nullptr) {
       glActiveTexture(texture->getTextureUnit());
       glBindTexture(GL_TEXTURE_2D, texture->getTextureId());

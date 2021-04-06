@@ -6,12 +6,13 @@
 #define EMBREERENDERER_H
 
 #include "rtccommonshader.h"
+#include <common/utils/assimploading.h>
 
 class EmbreeRenderer {
 public:
   EmbreeRenderer(const int width = 400, const int height = 400, const float renderScale = 1.0f);
   
-  virtual ~EmbreeRenderer() = default;
+  virtual ~EmbreeRenderer();
   
   glm::vec4 getPixel(int x, int y);
   
@@ -30,6 +31,16 @@ public:
   std::unique_ptr<RTCCommonShader> &getCommonShader();
 
 private:
+  void initRTC(const char *config = "threads=0,verbose=4");
+  
+  void releaseRTC();
+  
+  void loadScene(const std::string filename);
+  
+  void loadTestScene();
+  
+  static void rtcErrHandler(void *user_ptr, const RTCError code, const char *str);
+  
   std::unique_ptr<RTCCommonShader> commonShader_;
   unsigned int texID_ = 0;
   float producerTime_;
@@ -40,6 +51,12 @@ private:
   std::mutex texDataLock_;
   float gamma_{1.4f};
   std::atomic<bool> finishRequest_{false};
+  std::vector<AssimpLoadedModel> models;
+  std::shared_ptr<RTCamera> camera_;
+  std::shared_ptr<Material> defaultMtl_;
+  RTCScene rtcScene_;
+  RTCDevice rtcDevice_;
+  std::shared_ptr<MathScene> mathScene_;
   
   
   float yaw = M_PI / 4.0f;
@@ -48,6 +65,7 @@ private:
   bool mouseInput = false;
   bool invalidate = false;
   std::mutex invalidateLock_;
+  std::mutex sceneLock_;
 };
 
 

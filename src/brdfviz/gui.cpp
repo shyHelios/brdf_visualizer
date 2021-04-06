@@ -278,28 +278,42 @@ void Gui::ui() {
     if (auto samplerVisualizerObjPtr = samplerVisualizerObject_.lock()) {
       samplerVisualizerObjPtr->setVisible(renderSampling_);
       if (renderSampling_) {
-        bool samplerSelected = false;
-        
-        int *selectedIdx = reinterpret_cast<int *>(&sampler_->getCurrentType());
-        
-        samplerSelected |= ImGui::Combo("Selected sampler",                                 // const char* label,
-                                        selectedIdx,                                              // int* current_item,
-                                        &Sampler::imguiSelectionGetter,                           // bool(*items_getter)(void* data, int idx, const char** out_text),
-                                        (void *) Sampler::samplerTypeArray,                       // void* data
-                                        IM_ARRAYSIZE(Sampler::samplerTypeArray));// int items_count
-        shallInvalidateSampler_ |= samplerSelected;
-        shallInvalidateRTC_ |= samplerSelected;
         
         shallInvalidateSampler_ |= ImGui::Checkbox("Multiply by pdf", &samplerVisualizerObjPtr->getMultiplyByPdf());
         
         shallInvalidateSampler_ |= ImGui::SliderInt("Resolution", &samplerVisualizerObjPtr->getResolution(), 0, 100);
       }
     }
+    
     #pragma endregion
     
     ImGui::Separator();
     
     drawBRDFSettings();
+    
+    #pragma region "Sampler"
+    
+    ImGui::Separator();
+    ImGui::Text("Sampling");
+    
+    bool samplerSelected = false;
+    
+    int *selectedIdx = reinterpret_cast<int *>(&sampler_->getCurrentType());
+    
+    samplerSelected |= ImGui::Combo("Selected sampler",                                 // const char* label,
+                                    selectedIdx,                                              // int* current_item,
+                                    &Sampler::imguiSelectionGetter,                           // bool(*items_getter)(void* data, int idx, const char** out_text),
+                                    (void *) Sampler::samplerTypeArray,                       // void* data
+                                    IM_ARRAYSIZE(Sampler::samplerTypeArray));// int items_count
+    shallInvalidateSampler_ |= samplerSelected;
+    shallInvalidateRTC_ |= samplerSelected;
+    
+    bool sampleLights = false;
+    
+    shallInvalidateRTC_ |= ImGui::Checkbox("Sample lights", &sampleLights);
+    
+    
+    #pragma endregion
     
     ImGui::End();
   }
@@ -313,18 +327,13 @@ Gui::Gui(const char *winName) : winName_{winName} {
 }
 
 Gui::~Gui() {
-  // Delete pointers before GLFW
-  auto rendererRaw = renderer_.release();
-  delete rendererRaw;
-  
-  auto fboRaw = fbo_.release();
-  delete fboRaw;
-  
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
   glfwDestroyWindow(window);
-  glfwTerminate();
+  
+  // GLFW has to be terminated AFTER destructor
+  //glfwTerminate();
 }
 
 void Gui::render() {

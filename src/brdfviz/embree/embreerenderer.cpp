@@ -6,10 +6,12 @@
 #include <common/utils/rng.h>
 #include <common/utils/rgb.h>
 #include <common/utils/math.h>
+#include <common/utils/assimploading.h>
 #include "embreerenderer.h"
 #include "rtccommonshader.h"
 #include "rtcamera.h"
 #include "pathtracerhelper.h"
+
 
 EmbreeRenderer::EmbreeRenderer(const int width, const int height, const float renderScale) : width_(width), height_(height), renderScale_(renderScale) {
   texData_.reserve(width_ * height_);
@@ -28,17 +30,22 @@ EmbreeRenderer::EmbreeRenderer(const int width, const int height, const float re
   glCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width_, height_, 0, GL_RGBA, GL_FLOAT, texData_.data()));
   glCall(glBindTexture(GL_TEXTURE_2D, 0));
   
+  defaultMtl_ = std::make_shared<Material>();
+  
   commonShader_ = std::make_unique<RTCCommonShader>();
   commonShader_->pathTracerHelper = std::make_unique<PathTracerHelper>(width, height);
-  commonShader_->camera_ = std::make_unique<RTCamera>(width, height, deg2rad(45.0), glm::vec3(5, 5, 5), glm::vec3(0, 0, 0));
-  auto mtl = std::make_shared<Material>();
-  mtl->diffuse_.data = {0.1, 0.5, 0.9};
-  auto sphere = std::make_unique<Sphere>(glm::vec3(0, 0, 0), 1.0f, mtl);
-  commonShader_->mathScene_ = std::make_unique<MathScene>();
-  commonShader_->mathScene_->spheres.emplace_back(std::move(sphere));
-//  commonShader_->useShader = RTCShadingType::Mirror;
-//  commonShader_->useShader = RTCShadingType::Normals;
-//  commonShader_->useShader = RTCShadingType::None;
+  
+  camera_ = std::make_shared<RTCamera>(width, height, deg2rad(45.0), glm::vec3(5, 5, 5), glm::vec3(0, 0, 0));
+  commonShader_->camera_ = camera_;
+  
+  mathScene_ = std::make_shared<MathScene>();
+  mathScene_->initDefaultScene();
+  commonShader_->mathScene_ = mathScene_;
+  
+  rtcScene_ = nullptr;
+  commonShader_->rtcScene_ = nullptr;
+  rtcDevice_ = nullptr;
+  
   commonShader_->useShader = RTCShadingType::PathTracing;
 }
 
@@ -51,6 +58,8 @@ void EmbreeRenderer::ui() {
     glCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width_, height_, 0, GL_RGBA, GL_FLOAT, texData_.data()));
     glCall(glBindTexture(GL_TEXTURE_2D, 0));
   }
+  
+  glm::vec3 oldCamPos = commonShader_->camera_->getViewFrom();
   
   ImGui::Begin("Image", nullptr, ImGuiWindowFlags_NoResize);
   ImGui::Image((void *) (intptr_t) texID_, ImVec2(float(width_) * renderScale_, float(height_) * renderScale_));
@@ -68,7 +77,7 @@ void EmbreeRenderer::ui() {
       ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button),
                                               4.0f);
       
-      yaw += glm::radians(io.MouseDelta.x);
+      yaw += glm::radians(-io.MouseDelta.x);
       pitch += glm::radians(io.MouseDelta.y);
 
 //        pitch = std::min<float>(pitch, M_PI / 2.f);
@@ -92,11 +101,55 @@ void EmbreeRenderer::ui() {
     invalidateRendering();
   }
   
+  if (ImGui::Button("Reset scene")) {
+    std::lock_guard<std::mutex> lockScene(sceneLock_);
+    releaseRTC();
+    mathScene_->initDefaultScene();
+    invalidateRendering();
+  }
+  
+  if (ImGui::Button("Load scene")) {
+    ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose Scene", ".obj", ".");
+  }
+  
+  if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) {
+    // action if OK
+    if (ImGuiFileDialog::Instance()->IsOk()) {
+      std::lock_guard<std::mutex> lockScene(sceneLock_);
+      std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+//      std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+      
+      mathScene_->clearScene();
+      initRTC();
+      loadScene(filePathName);
+      
+      invalidateRendering();
+    }
+    
+    // close
+    ImGuiFileDialog::Instance()->Close();
+  }
+  
+  if (ImGui::Button("Load test embree scene")) {
+    std::lock_guard<std::mutex> lockScene(sceneLock_);
+    mathScene_->clearScene();
+    initRTC();
+    loadTestScene();
+    invalidateRendering();
+  }
+  
   ImGui::Text("Samples: %d", commonShader_->pathTracerHelper->getTracesCount());
+  
+  ImGui::Separator();
+  glm::vec3 camTarget = commonShader_->camera_->view_at_;
+  ImGui::Text("Camera info: ");
+  ImGui::Text("  Zoom: %f", dist);
+  ImGui::Text("  Pos: [%f,%f,%f]", oldCamPos[0], oldCamPos[1], oldCamPos[2]);
+  ImGui::Text("  target: [%f,%f,%f]", camTarget[0], camTarget[1], camTarget[2]);
+  
   ImGui::End();
   
   
-  glm::vec3 oldCamPos = commonShader_->camera_->getViewFrom();
   glm::vec3 newCamPos;
   
   newCamPos.x = std::cos(yaw) * std::cos(pitch);
@@ -117,6 +170,7 @@ glm::vec4 EmbreeRenderer::getPixel(int x, int y) {
     return commonShader_->getPixel(x, y);
   }
   catch (const std::exception &e) {
+    spdlog::error("[EMBREE RENDERER] {}", e.what());
     return glm::vec4{rng(), rng(), rng(), 1.0f};
   }
 }
@@ -128,7 +182,6 @@ void EmbreeRenderer::producer() {
   float t = 0.0f; // time
   auto t0 = std::chrono::high_resolution_clock::now();
   
-  // refinenment loop
   while (!finishRequest_.load(std::memory_order_acquire)) {
     auto t1 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> dt = t1 - t0;
@@ -141,6 +194,7 @@ void EmbreeRenderer::producer() {
 #pragma omp parallel for schedule(dynamic, 4) shared(localData)
     for (int y = 0; y < height_; ++y) {
       for (int x = 0; x < width_; ++x) {
+        std::lock_guard<std::mutex> lockScene(sceneLock_);
         const glm::vec4 pixel = getPixel(x, y);
         const int offset = (y * width_ + x);
         
@@ -190,4 +244,220 @@ std::unique_ptr<RTCCommonShader> &EmbreeRenderer::getCommonShader() {
 void EmbreeRenderer::invalidateRendering() {
   std::lock_guard<std::mutex> lock(invalidateLock_);
   invalidate = true;
+}
+
+EmbreeRenderer::~EmbreeRenderer() {
+  releaseRTC();
+}
+
+void EmbreeRenderer::initRTC(const char *config) {
+  rtcDevice_ = rtcNewDevice(config);
+  rtcErrHandler(nullptr, rtcGetDeviceError(rtcDevice_), "Unable to create a new device.\n");
+  rtcSetDeviceErrorFunction(rtcDevice_, rtcErrHandler, nullptr);
+  
+  ssize_t triangle_supported = rtcGetDeviceProperty(rtcDevice_, RTC_DEVICE_PROPERTY_TRIANGLE_GEOMETRY_SUPPORTED);
+  
+  // create a new scene bound to the specified device
+  rtcScene_ = rtcNewScene(rtcDevice_);
+  
+  //robust ray tracing
+  rtcSetSceneFlags(rtcScene_, RTC_SCENE_FLAG_ROBUST);
+  
+  rtcSetSceneBuildQuality(rtcScene_, RTC_BUILD_QUALITY_HIGH);
+}
+
+void EmbreeRenderer::loadTestScene() {
+  
+  // geometries are objects that represent an array of primitives of the same type, so lets create a triangle
+  RTCGeometry mesh = rtcNewGeometry(rtcDevice_, RTC_GEOMETRY_TYPE_TRIANGLE);
+  
+  rtcSetGeometryUserData(mesh, &defaultMtl_);
+  
+  // and depending on the geometry type, different buffers must be bound (typically, vertex and index buffer is required)
+  
+  // set vertices in the newly created buffer
+  glm::vec3 *vertices = (glm::vec3 *) rtcSetNewGeometryBuffer(
+      mesh, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, sizeof(glm::vec3), 3);
+  vertices[0].x = 0;
+  vertices[0].y = 0;
+  vertices[0].z = 0;
+  
+  vertices[1].x = 2;
+  vertices[1].y = 0;
+  vertices[1].z = 0;
+  
+  vertices[2].x = 0;
+  vertices[2].y = 3;
+  vertices[2].z = 0;
+  
+  // set triangle indices
+  glm::vec<3, unsigned int> *triangles = (glm::vec<3, unsigned int> *) rtcSetNewGeometryBuffer(mesh, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3,
+                                                                                               sizeof(glm::vec<3, unsigned int>), 1);
+  triangles[0].x = 0;
+  triangles[0].y = 1;
+  triangles[0].z = 2;
+  
+  // see also rtcSetSharedGeometryBuffer, rtcSetGeometryBuffer
+  
+  /*
+  The parametrization of a triangle uses the first vertex p0 as base point, the vector (p1 - p0) as u-direction and the vector (p2 - p0) as v-direction.
+  Thus vertex attributes t0, t1, t2 can be linearly interpolated over the triangle the following way:
+
+  t_uv = (1-u-v)*t0 + u*t1 + v*t2	= t0 + u*(t1-t0) + v*(t2-t0)
+  */
+  
+  // sets the number of slots (vertexAttributeCount parameter) for vertex attribute buffers (RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE)
+  rtcSetGeometryVertexAttributeCount(mesh, 2);
+  
+  // set vertex normals
+  glm::vec3 *normals = (glm::vec3 *) rtcSetNewGeometryBuffer(mesh, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 0,
+                                                             RTC_FORMAT_FLOAT3,
+                                                             sizeof(glm::vec3), 3);
+  normals[0].x = 0;
+  normals[0].y = 0;
+  normals[0].z = 1;
+  
+  normals[1].x = 0;
+  normals[1].y = 0;
+  normals[1].z = 1;
+  
+  normals[2].x = 0;
+  normals[2].y = 0;
+  normals[2].z = 1;
+  
+  // set texture coordinates
+  glm::vec2 *tex_coords = (glm::vec2 *) rtcSetNewGeometryBuffer(mesh, RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE, 1,
+                                                                RTC_FORMAT_FLOAT2, sizeof(glm::vec2), 3);
+  tex_coords[0].x = 0;
+  tex_coords[0].y = 1;
+  
+  tex_coords[1].x = 1;
+  tex_coords[1].y = 1;
+  
+  tex_coords[2].x = 0;
+  tex_coords[2].y = 0;
+  
+  // changes to the geometry must be always committed
+  rtcCommitGeometry(mesh);
+  
+  // geometries can be attached to a single scene
+  unsigned int geom_id = rtcAttachGeometry(rtcScene_, mesh);
+  // release geometry handle
+  rtcReleaseGeometry(mesh);
+  
+  // commit changes to scene
+  rtcCommitScene(rtcScene_);
+  commonShader_->rtcScene_ = rtcScene_;
+}
+
+void EmbreeRenderer::loadScene(const std::string filename) {
+  ObjLoaderSettings loaderSettings = {filename};
+//  std::vector<AssimpLoadedModel> models;
+  loadModel(loaderSettings, models);
+
+//  using vec3ui = glm::vec<3, unsigned int>;
+  
+  for (const auto &model : models) {
+    RTCGeometry mesh = rtcNewGeometry(rtcDevice_, RTC_GEOMETRY_TYPE_TRIANGLE);
+    
+    // and depending on the geometry type, different buffers must be bound (typically, vertex and index buffer is required)
+    
+    // set vertices in the newly created buffer
+    glm::vec3 *vertices = (glm::vec3 *) rtcSetNewGeometryBuffer(
+        mesh,
+        RTC_BUFFER_TYPE_VERTEX,
+        0,
+        RTC_FORMAT_FLOAT3,
+        sizeof(glm::vec3),
+        model.vertices.size());
+    
+    // set triangle indices
+    glm::vec<3, unsigned int> *triangles = (glm::vec<3, unsigned int> *) rtcSetNewGeometryBuffer(
+        mesh,
+        RTC_BUFFER_TYPE_INDEX,
+        0,
+        RTC_FORMAT_UINT3,
+        sizeof(glm::vec<3, unsigned int>),
+        model.indices.size());
+    
+    // see also rtcSetSharedGeometryBuffer, rtcSetGeometryBuffer
+    rtcSetGeometryVertexAttributeCount(mesh, 2);
+    
+    glm::vec3 *normals = (glm::vec3 *) rtcSetNewGeometryBuffer(
+        mesh,
+        RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE,
+        NORMAL_SLOT,
+        RTC_FORMAT_FLOAT3,
+        sizeof(glm::vec3),
+        model.vertices.size());
+    
+    glm::vec2 *texcoords = (glm::vec2 *) rtcSetNewGeometryBuffer(
+        mesh,
+        RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE,
+        TEXCOORD_SLOT,
+        RTC_FORMAT_FLOAT2,
+        sizeof(glm::vec2),
+        model.vertices.size());
+    
+    rtcSetGeometryUserData(mesh, (void *) (&model.material));
+    
+    for (size_t i = 0; i < model.vertices.size(); i++) {
+      const auto &vertex = model.vertices.at(i);
+      
+      vertices[i].x = vertex.Position.x;
+      vertices[i].y = vertex.Position.y;
+      vertices[i].z = vertex.Position.z;
+      
+      normals[i].x = vertex.Normal.x;
+      normals[i].y = vertex.Normal.y;
+      normals[i].z = vertex.Normal.z;
+      
+      texcoords[i].x = vertex.Texture.x;
+      texcoords[i].y = vertex.Texture.y;
+    }
+    
+    for (size_t i = 0; i < model.indices.size(); i++) {
+      triangles[i].x = model.indices.at(i).x;
+      triangles[i].y = model.indices.at(i).z;
+      triangles[i].z = model.indices.at(i).y;
+    }
+    
+    rtcCommitGeometry(mesh);
+    unsigned int geomId = rtcAttachGeometry(rtcScene_, mesh);
+    spdlog::info("[EMBREE RENDERER] Adding geometry {} to embree", geomId);
+    rtcReleaseGeometry(mesh);
+  }
+  
+  rtcCommitScene(rtcScene_);
+  commonShader_->rtcScene_ = rtcScene_;
+}
+
+void EmbreeRenderer::releaseRTC() {
+  commonShader_->rtcScene_ = nullptr;
+  if (rtcScene_) {
+    rtcReleaseScene(rtcScene_);
+    rtcScene_ = nullptr;
+  }
+  
+  if (rtcDevice_) {
+    rtcReleaseDevice(rtcDevice_);
+    rtcDevice_ = nullptr;
+  }
+  
+}
+
+void EmbreeRenderer::rtcErrHandler(void *user_ptr, const RTCError code, const char *str) {
+  if (code != RTC_ERROR_NONE) {
+    std::string descr = str ? ": " + std::string(str) : "";
+    
+    switch (code) {
+      case RTC_ERROR_UNKNOWN: throw std::runtime_error("RTC_ERROR_UNKNOWN" + descr);
+      case RTC_ERROR_INVALID_ARGUMENT: throw std::runtime_error("RTC_ERROR_INVALID_ARGUMENT" + descr);
+      case RTC_ERROR_INVALID_OPERATION: throw std::runtime_error("RTC_ERROR_INVALID_OPERATION" + descr);
+      case RTC_ERROR_OUT_OF_MEMORY: throw std::runtime_error("RTC_ERROR_OUT_OF_MEMORY" + descr);
+      case RTC_ERROR_UNSUPPORTED_CPU: throw std::runtime_error("RTC_ERROR_UNSUPPORTED_CPU" + descr);
+      case RTC_ERROR_CANCELLED: throw std::runtime_error("RTC_ERROR_CANCELLED" + descr);
+      default: throw std::runtime_error("invalid error code" + descr);
+    }
+  }
 }

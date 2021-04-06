@@ -5,8 +5,18 @@
 #include <pch.h>
 #include "gui.h"
 
+#include "xmmintrin.h"
+#include "pmmintrin.h"
+
 int main() {
-  Gui gui("Example window");
-  gui.render();
+  _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
+  
+  std::unique_ptr<Gui> gui = std::make_unique<Gui>("Example window");
+  gui->render();
+  gui = nullptr;
+  
+  // GLFW has to be terminated AFTER deleting GUI
+  glfwTerminate();
   return 0;
 }

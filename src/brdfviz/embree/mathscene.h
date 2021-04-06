@@ -14,11 +14,17 @@ class MathScene {
 public:
   bool intersect(RTCRayHitIor &ray) const;
   
+  bool occlude(RTCRay &ray) const;
+  
   glm::vec3 getNormal(const RTCRayHitIor &ray) const;
   
   std::shared_ptr<Material> getMaterial(const RTCRayHitIor &ray) const;
   
   std::vector<std::unique_ptr<Sphere>> spheres;
+  
+  void clearScene();
+  
+  void initDefaultScene();
 };
 
 

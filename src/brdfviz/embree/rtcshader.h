@@ -5,13 +5,6 @@
 #ifndef RTCSHADER_H
 #define RTCSHADER_H
 
-
-//#include <vector>
-//#include <array>
-////#include <glm/vec2.hpp>
-//#include <glm/vec3.hpp>
-//#include <glm/vec4.hpp>
-
 #include "rtcrayhitior.h"
 #include "rtcamera.h"
 #include "rtlight.h"
@@ -46,8 +39,9 @@ public:
   int recursionDepth_;
   float tNear_;
   SuperSamplingType superSamplingType_;
-  std::unique_ptr<RTCamera> camera_;
-  std::unique_ptr<MathScene> mathScene_;
+  std::shared_ptr<RTCamera> camera_;
+  RTCScene rtcScene_;
+  std::shared_ptr<MathScene> mathScene_;
   std::shared_ptr<Sampler> sampler_;
   
   
@@ -71,10 +65,10 @@ protected:
   std::unique_ptr<RTLight> light_;
   std::unique_ptr<RTSphericalMap> sphericalMap_;
   glm::vec4 defaultBgColor_;
-
-//  static glm::vec3 getNormal(const std::unique_ptr<RTCGeometryTy> &geometry, const RTCRayHitIor &rayHit);
-//
-//  static glm::vec2 getTexCoords(const std::unique_ptr<RTCGeometryTy> &geometry, const RTCRayHitIor &rayHit);
+  
+  static glm::vec3 getNormal(const RTCGeometry geometry, const RTCRayHitIor &rayHit);
+  
+  static glm::vec2 getTexCoords(const RTCGeometry geometry, const RTCRayHitIor &rayHit);
   
   float shadow(const glm::vec3 &pos, const glm::vec3 &lightDir, const float dist);
   

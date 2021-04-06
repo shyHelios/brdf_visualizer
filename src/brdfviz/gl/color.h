@@ -55,6 +55,11 @@ public:
     return *this;
   }
   
+  
+  T &operator[](const size_t idx) {
+    return data[idx];
+  }
+  
   friend Color<N, T> operator-(Color<N, T> lhs, const Color<N, T> &rhs) {
     // passing lhs by value helps optimize chained a + b + c
     // otherwise, both parameters may be const references

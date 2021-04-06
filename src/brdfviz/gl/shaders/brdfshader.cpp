@@ -59,7 +59,7 @@ void BRDFShader::use(const std::shared_ptr<Material> &mtl) {
   setData(brdfUniformLocations_.ProjectionTransform, camInfo.projectionMatrix);
   setData(brdfUniformLocations_.ViewTransform, camInfo.viewMatrix);
   for (int i = 0; i < NO_TEXTURES; i++) {
-    auto *texture = mtl->texture(i);
+    const auto &texture = mtl->texture(i);
     if (texture != nullptr) {
       glActiveTexture(texture->getTextureUnit());
       glBindTexture(GL_TEXTURE_2D, texture->getTextureId());

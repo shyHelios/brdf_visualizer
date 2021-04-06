@@ -17,9 +17,16 @@ set(IMGUI_SRC
     ${IMGUI_ROOT}/backends/imgui_impl_opengl3.h
     )
 
-add_library(libimgui)
-target_sources(libimgui PUBLIC ${IMGUI_SRC})
+#add_library(libimgui)
+#target_sources(libimgui PUBLIC ${IMGUI_SRC})
+#
+#target_include_directories(libimgui PUBLIC ${LIB_DIR}/imgui)
+#target_include_directories(libimgui PUBLIC ${LIB_DIR}/imgui/backends)
+#
+set(IMGUI_FD_ROOT ${LIB_DIR}/imguifiledialog)
 
-target_include_directories(libimgui PUBLIC ${LIB_DIR}/imgui)
-target_include_directories(libimgui PUBLIC ${LIB_DIR}/imgui/backends)
+set(IMGUI_FD_SRC
+    ${IMGUI_FD_ROOT}/ImGuiFileDialog.h
+    ${IMGUI_FD_ROOT}/ImGuiFileDialog.cpp)
+
 

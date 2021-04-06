@@ -25,6 +25,8 @@ include(${CMAKE_MODULE_PATH}/glad.cmake)
 include(${CMAKE_MODULE_PATH}/PVS-Studio.cmake)
 # Add imgui to project
 include(${CMAKE_MODULE_PATH}/imgui.cmake)
+# Add assimp to project
+include(${CMAKE_MODULE_PATH}/assimp.cmake)
 # Add spdlog to project
 include(${CMAKE_MODULE_PATH}/spdlog.cmake)
 # Add doxygen to project

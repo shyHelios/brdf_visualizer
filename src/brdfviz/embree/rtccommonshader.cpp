@@ -35,22 +35,19 @@ glm::vec4 RTCCommonShader::traceRay(const RTCRayHitIor &rayHit, int depth) {
     
     normal = mathScene_->getNormal(rayHit);
     material = mathScene_->getMaterial(rayHit);
-    
-    
     //return glm::vec4(normal, 1);
-  } else {
-    spdlog::error("[RTC COMMON SHADER] Invalid geometry hit");
-    return glm::vec4(0, 1, 1, 1);
-  }
-  /*else {
-    RTCGeometry geometry = rtcGetGeometry(*rtcScene_, rayHit.hit.geomID);
+  } else if (rayHit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
+    RTCGeometry geometry = rtcGetGeometry(rtcScene_, rayHit.hit.geomID);
     // get interpolated normal
     normal = glm::normalize(getNormal(geometry, rayHit));
     // and texture coordinates
     tex_coord = getTexCoords(geometry, rayHit);
     //Acquire material from hit object
-    material = static_cast<Material *>(rtcGetGeometryUserData(geometry));
-  }*/
+    material = *static_cast<std::shared_ptr<Material> *>(rtcGetGeometryUserData(geometry));
+  } else {
+    spdlog::error("[RTC COMMON SHADER] Invalid geometry hit");
+    return glm::vec4(0, 1, 1, 1);
+  }
   
   /*
    * Common for all shaders
@@ -446,38 +443,37 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
                                                                       const int depth) {
   const int currentRecursion = recursionDepth_ - depth;
   // Russian roulette
-  if (currentRecursion > 2) {
-    if (rng() >
-        (std::max<float>(material->diffuse_.data[0], std::max<float>(material->diffuse_.data[1], material->diffuse_.data[2]))) * 0.95f) {
-      return glm::vec4(0, 0, 0, 0);
-    }
+  float rho = (material == nullptr) ? 0.95 : (
+      (std::max<float>(material->diffuse_.data[0], std::max<float>(material->diffuse_.data[1], material->diffuse_.data[2]))) * 0.95f);
+  
+  
+  if (rho <= rng()) {
+    return glm::vec4(0, 0, 0, 0);
   }
+  
   if (brdfShader.lock()->currentBrdfIdx == BRDFShader::BRDF::Mirror) {
     return traceMaterial<RTCShadingType::Mirror>(rayHit, material, tex_coord, origin, direction, worldPos,
                                                  directionToCamera, lightPos, lightDir, shaderNormal,
                                                  dotNormalCamera, depth);
   }
-  glm::vec3 emmision = glm::vec3{material->emission_.data[0], material->emission_.data[1], material->emission_.data[2]};
+  
+  const glm::vec3 emmision =
+      (material == nullptr) ? glm::vec3(0, 0, 0) : glm::vec3{material->emission_.data[0], material->emission_.data[1], material->emission_.data[2]};
   
   float pdf = 1;
   const glm::vec3 reflectDir = glm::reflect(direction, shaderNormal);
   const glm::vec3 omegaI = pathTracerHelper->getTracesCount() == 0 ? reflectDir : sampler_->sample(shaderNormal, reflectDir, pdf);
   
+  if (pdf <= 0) {
+    return glm::vec4(0, 0, 0, 0);
+  }
+  
   const float brdf = getBRDF(omegaI, directionToCamera, shaderNormal);
   const RTCRayHitIor rayHitNew = generateRay(worldPos, omegaI);
   
-  
-  const glm::vec4 reflColor = traceRay(rayHitNew, depth - 1);
-  
-  const glm::vec3 diffuse = getDiffuseColor(material, tex_coord);
-  
-  glm::vec3 ei = reflColor * glm::dot(shaderNormal, omegaI) / pdf;
-  
-  glm::vec3 finalColor = ei * brdf;
-
-
-//  glm::vec3 finalColor(/*diffuse * */glm::vec3(reflColor.x, reflColor.y, reflColor.z) * brdf);
-  
+  const glm::vec4 li = traceRay(rayHitNew, depth - 1);
+//  const glm::vec3 diffuse = getDiffuseColor(material, tex_coord);
+  glm::vec3 finalColor = li * brdf * glm::dot(shaderNormal, omegaI) / (pdf * rho);
   return glm::vec4(finalColor.x, finalColor.y, finalColor.z, 1);
 }
 

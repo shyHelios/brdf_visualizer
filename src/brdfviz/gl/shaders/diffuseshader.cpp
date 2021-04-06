@@ -17,7 +17,8 @@ void DiffuseShader::use(const std::shared_ptr<Material> &mtl) {
   setData(diffuseUniformLocations_.ViewTransform, camInfo.viewMatrix);
   
   for (int i = 0; i < NO_TEXTURES; i++) {
-    auto *texture = mtl->texture(i);
+    const auto &texture = mtl->texture(i);
+    
     if (texture != nullptr) {
       glActiveTexture(texture->getTextureUnit());
       glBindTexture(GL_TEXTURE_2D, texture->getTextureId());

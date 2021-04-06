@@ -21,6 +21,8 @@ public:
   Sphere(const glm::vec3 &worldPos, float radius = 1, const std::shared_ptr<Material> &material = nullptr);
   
   bool intersect(RTCRayHitIor &ray);
+  
+  bool occlude(RTCRay &ray);
 
 //private:
   glm::vec3 worldPos_;

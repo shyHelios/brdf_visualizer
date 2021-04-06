@@ -111,6 +111,74 @@ bool Sphere::intersect(RTCRayHitIor &ray) {
   
 }
 
+
+bool Sphere::occlude(RTCRay &ray) {
+  double rayOriginX = ray.org_x;
+  double rayOriginY = ray.org_y;
+  double rayOriginZ = ray.org_z;
+  
+  double rayDirectionX = ray.dir_x;
+  double rayDirectionY = ray.dir_y;
+  double rayDIrectionZ = ray.dir_z;
+  
+  double spherePosX = worldPos_.x;
+  double spherePosY = worldPos_.y;
+  double spherePosZ = worldPos_.z;
+  
+  double a = sqr(ray.dir_x) + sqr(ray.dir_y) + sqr(ray.dir_z);
+  double b = 2. * rayDirectionX * (rayOriginX - spherePosX) + 2 * rayDirectionY * (rayOriginY - spherePosY) +
+             2 * rayDIrectionZ * (rayOriginZ - spherePosZ);
+  double c = sqr(rayOriginX - spherePosX) + sqr(rayOriginY - spherePosY) + sqr(rayOriginZ - spherePosZ) - sqr(radius_);
+  
+  double d = sqr(b) - 4. * a * c;
+  
+  float tfar = 0;
+  
+  if (d < 0) {
+    //no intersect point
+    return false;
+  } else if (d == 0.) {
+    //glm::vec3 intersectPoint(0, 0, 0);
+    
+    tfar = -b / 2. * a;
+    //one intersect point
+  } else {
+//    glm::vec3 intersectPoint1(0, 0, 0);
+//    glm::vec3 intersectPoint2(0, 0, 0);
+    
+    double sqrtd = sqrt(d);
+    
+    double t1 = (-b + sqrtd) / (2. * a);
+    double t2 = (-b - sqrtd) / (2. * a);
+    
+    
+    // if both negative, return
+    if (t1 <= RAY_OFFSET && t2 <= RAY_OFFSET) {
+      return false;
+    }
+      //if both positive choose closer
+    else if (t1 > RAY_OFFSET && t2 > RAY_OFFSET) {
+      if (t1 < t2) {
+        tfar = t1;
+      } else {
+        tfar = t2;
+      }
+      //if one positive and other negative, choose positive
+    } else {
+      if (t1 < RAY_OFFSET) {
+        tfar = t2;
+      } else if (t2 < RAY_OFFSET) {
+        tfar = t1;
+      }
+    }
+  }
+  if (ray.tfar < RAY_OFFSET) {
+    return false;
+  }
+  ray.tfar = tfar;
+  return true;
+}
+
 Sphere::Sphere(const glm::vec3 &worldPos, float radius, const std::shared_ptr<Material> &material) :
     worldPos_(worldPos),
     radius_(radius),
@@ -126,3 +194,4 @@ glm::vec3 Sphere::getNormal(const RTCRayHitIor &ray) const {
   
   return normal;
 }
+

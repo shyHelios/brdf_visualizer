@@ -19,8 +19,13 @@ Material::Material() {
   metallicness = 0.0f;
   
   ior = -1.0f;
+
+//  memset(textures_, 0, sizeof(*textures_) * NO_TEXTURES);
   
-  memset(textures_, 0, sizeof(*textures_) * NO_TEXTURES);
+  for (int i = 0; i < static_cast<int>(TextureSlot::numberOfSlots); i++) {
+    textures_.at(i) = nullptr;
+  }
+  hasTexture = false;
   
   name_ = "default";
   shader_ = ShaderEnum::PHONG;
@@ -28,7 +33,8 @@ Material::Material() {
 
 Material::Material(const std::string &name, const Color3f &ambient, const Color3f &diffuse,
                    const Color3f &specular, const Color3f &emission, const float reflectivity,
-                   const float shininess, const float ior, const ShaderEnum shader, Texture3f **textures,
+                   const float shininess, const float ior, const ShaderEnum shader,
+                   const std::array<std::shared_ptr<Texture3f>, static_cast<int>(TextureSlot::numberOfSlots)> &textures,
                    const int no_textures) {
   name_ = name;
   
@@ -45,20 +51,11 @@ Material::Material(const std::string &name, const Color3f &ambient, const Color3
   
   hasTexture = false;
   
-  if (textures) {
-    hasTexture = true;
-    memcpy(textures_, textures, sizeof(textures) * no_textures);
-  } else {
-    memset(textures_, 0, sizeof(*textures_) * NO_TEXTURES);
-  }
-}
-
-Material::~Material() {
-  for (int i = 0; i < NO_TEXTURES; ++i) {
-    if (textures_[i]) {
-      delete[] textures_[i];
-      textures_[i] = nullptr;
-    };
+  for (int i = 0; i < static_cast<int>(TextureSlot::numberOfSlots); i++) {
+    if (textures.at(i) != nullptr) {
+      hasTexture = true;
+    }
+    textures_.at(i) = textures.at(i);
   }
 }
 
@@ -70,16 +67,20 @@ std::string Material::name() const {
   return name_;
 }
 
-void Material::set_texture(Texture3f *texture) {
+void Material::set_texture(const std::shared_ptr<Texture3f> &texture) {
   textures_[texture->getTextureUnit()] = texture;
 }
 
-void Material::set_texture(const int slot, Texture3f *texture) {
+void Material::set_texture(const int slot, const std::shared_ptr<Texture3f> &texture) {
   textures_[slot] = texture;
   texture->setTextureUnit(slot);
 }
 
-Texture3f *Material::texture(const int slot) const {
+void Material::set_texture(const TextureSlot slot, const std::shared_ptr<Texture3f> &texture) {
+  set_texture(static_cast<int>(slot), texture);
+}
+
+std::shared_ptr<Texture3f> Material::texture(const int slot) const {
   return textures_[slot];
 }
 
@@ -97,7 +98,7 @@ Color3f Material::ambient(const glm::vec2 *tex_coord) const {
 
 Color3f Material::diffuse(const glm::vec2 *tex_coord) const {
   if (tex_coord) {
-    Texture3f *texture = textures_[static_cast<int>(TextureSlot::diffuseSlot)];
+    std::shared_ptr<Texture3f> texture = textures_[static_cast<int>(TextureSlot::diffuseSlot)];
     
     if (texture) {
       return texture->texel(tex_coord->x, tex_coord->y/*, true*/);
@@ -109,7 +110,7 @@ Color3f Material::diffuse(const glm::vec2 *tex_coord) const {
 
 Color3f Material::specular(const glm::vec2 *tex_coord) const {
   if (tex_coord) {
-    Texture3f *texture = textures_[static_cast<int>(TextureSlot::specularSlot)];
+    std::shared_ptr<Texture3f> texture = textures_[static_cast<int>(TextureSlot::specularSlot)];
     
     if (texture) {
       return texture->texel(tex_coord->x, tex_coord->y/*, true*/);
@@ -121,7 +122,7 @@ Color3f Material::specular(const glm::vec2 *tex_coord) const {
 
 Color3f Material::bump(const glm::vec2 *tex_coord) const {
   if (tex_coord) {
-    Texture3f *texture = textures_[static_cast<int>(TextureSlot::normalSlot)];
+    std::shared_ptr<Texture3f> texture = textures_[static_cast<int>(TextureSlot::normalSlot)];
     
     if (texture) {
       return texture->texel(tex_coord->x, tex_coord->y/*, false*/);
@@ -134,7 +135,7 @@ Color3f Material::bump(const glm::vec2 *tex_coord) const {
 float Material::roughness(const glm::vec2 *tex_coord) const {
   
   if (tex_coord) {
-    Texture3f *texture = textures_[static_cast<int>(TextureSlot::roughnessSlot)];
+    std::shared_ptr<Texture3f> texture = textures_[static_cast<int>(TextureSlot::roughnessSlot)];
     
     if (texture) {
       return texture->texel(tex_coord->x, tex_coord->y/*, false*/).data[0];
@@ -173,6 +174,7 @@ void Material::setName(const std::string &name) {
   name_ = name;
 }
 
-Texture3f *Material::texture(const TextureSlot slot) const {
+std::shared_ptr<Texture3f> Material::texture(const TextureSlot slot) const {
   return texture(static_cast<int>(slot));
 }
+

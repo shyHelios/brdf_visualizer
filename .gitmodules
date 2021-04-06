@@ -33,3 +33,8 @@
 	url = https://github.com/aiekick/ImGuiFileDialog.git
 	branch = master
 
+[submodule "assimp"]
+	path = lib/assimp
+	url = https://github.com/assimp/assimp.git
+	branch = master
+

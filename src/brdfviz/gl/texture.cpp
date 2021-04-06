@@ -523,7 +523,13 @@ Texture<T, F>::Texture(const std::string &file_name, int slot) {
 
 template<class T, FREE_IMAGE_TYPE F>
 T Texture<T, F>::pixel(const int x, const int y) const {
-  assert(x >= 0 && x < width_ && y >= 0 && y < height_);
+  #if NDEBUG
+  #else
+  if (x < 0 || y < 0 || x > width_ || y > height_) {
+    throw std::runtime_error("Invalid coordinates in texture");
+  }
+  #endif
+//  assert(x >= 0 && x < width_ && y >= 0 && y < height_);
   
   return data_[size_t(x) + size_t(y) * size_t(width_)];
 }
