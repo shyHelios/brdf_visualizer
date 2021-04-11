@@ -470,7 +470,7 @@ Texture<T, F>::Texture(const int width, const int height, int slot) {
   
   data_.resize(size_t(width) * size_t(height));
   createGLTexture(slot);
-  glBindTexture(GL_TEXTURE_2D, 0);
+  glCall(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
 template<class T, FREE_IMAGE_TYPE F>

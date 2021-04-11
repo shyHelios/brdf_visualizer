@@ -29,6 +29,8 @@ public:
   void invalidateRendering();
   
   std::unique_ptr<RTCCommonShader> &getCommonShader();
+  
+  std::shared_ptr<Material> &getDefaultMaterial();
 
 private:
   void initRTC(const char *config = "threads=0,verbose=4");

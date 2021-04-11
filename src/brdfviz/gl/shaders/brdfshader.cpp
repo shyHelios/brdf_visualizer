@@ -118,6 +118,10 @@ bool BRDFShader::imguiSelectionGetter(void *data, int idx, const char **out_str)
   return true;
 }
 
+BRDFShader::BRDFShader(int shaderProgramStub) : Shader(shaderProgramStub) {
+  spdlog::error("[SHADER] Creating null BRDF shader");
+}
+
 void BRDFShader::BRDFUniformLocations::init(int shaderProgram) {
   BasicUniformLocations::init(shaderProgram);
   MaterialUniformLocations::init(shaderProgram);

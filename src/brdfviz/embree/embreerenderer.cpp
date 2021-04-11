@@ -39,7 +39,7 @@ EmbreeRenderer::EmbreeRenderer(const int width, const int height, const float re
   commonShader_->camera_ = camera_;
   
   mathScene_ = std::make_shared<MathScene>();
-  mathScene_->initDefaultScene();
+  mathScene_->initDefaultScene(defaultMtl_);
   commonShader_->mathScene_ = mathScene_;
   
   rtcScene_ = nullptr;
@@ -104,7 +104,7 @@ void EmbreeRenderer::ui() {
   if (ImGui::Button("Reset scene")) {
     std::lock_guard<std::mutex> lockScene(sceneLock_);
     releaseRTC();
-    mathScene_->initDefaultScene();
+    mathScene_->initDefaultScene(defaultMtl_);
     invalidateRendering();
   }
   
@@ -398,8 +398,9 @@ void EmbreeRenderer::loadScene(const std::string filename) {
         RTC_FORMAT_FLOAT2,
         sizeof(glm::vec2),
         model.vertices.size());
-    
-    rtcSetGeometryUserData(mesh, (void *) (&model.material));
+
+//    rtcSetGeometryUserData(mesh, (void *) (&model.material));
+    rtcSetGeometryUserData(mesh, (void *) (&defaultMtl_));
     
     for (size_t i = 0; i < model.vertices.size(); i++) {
       const auto &vertex = model.vertices.at(i);
@@ -460,4 +461,8 @@ void EmbreeRenderer::rtcErrHandler(void *user_ptr, const RTCError code, const ch
       default: throw std::runtime_error("invalid error code" + descr);
     }
   }
+}
+
+std::shared_ptr<Material> &EmbreeRenderer::getDefaultMaterial() {
+  return defaultMtl_;
 }

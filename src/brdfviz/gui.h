@@ -6,6 +6,8 @@
 #define GUI_H
 
 
+#include <gl/material.h>
+
 typedef unsigned int GLuint;
 
 struct GLFWwindow;
@@ -80,6 +82,8 @@ private:
   void drawMainRender();
   
   void drawBRDFSettings();
+  
+  void drawMaterialSettings();
   
   const char *winName_;
   

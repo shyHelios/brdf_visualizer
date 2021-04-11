@@ -367,6 +367,11 @@ void Shader::setData(const int location, const Tdata &value, const int overrideT
   throw std::invalid_argument("Set data method not implemented for this data type.");
 }
 
+Shader::Shader(int shaderProgramStub) {
+  shaderProgram = shaderProgramStub;
+  spdlog::error("[SHADER] Creating null shader");
+}
+
 template<>
 void Shader::setData<bool>(const int location, const bool &value, const int overrideType) const {
   glCheckLocation(location >= 0);
@@ -480,10 +485,10 @@ void Shader::setData<glm::mat3x3>(const int location, const glm::mat3x3 &value, 
 }
 
 void Shader::BasicUniformLocations::init(int shaderProgram) {
-  ModelTransform = glGetUniformLocation(shaderProgram, "u_modelMat");
-  ViewTransform = glGetUniformLocation(shaderProgram, "u_viewMat");
-  ProjectionTransform = glGetUniformLocation(shaderProgram, "u_projMat");
-  CameraPosition = glGetUniformLocation(shaderProgram, "u_cameraPosition");
+  glCall(ModelTransform = glGetUniformLocation(shaderProgram, "u_modelMat"));
+  glCall(ViewTransform = glGetUniformLocation(shaderProgram, "u_viewMat"));
+  glCall(ProjectionTransform = glGetUniformLocation(shaderProgram, "u_projMat"));
+  glCall(CameraPosition = glGetUniformLocation(shaderProgram, "u_cameraPosition"));
   
   if (ModelTransform == -1) { spdlog::warn("[SHADER]  ModelTransform not found"); }
   if (ViewTransform == -1) { spdlog::warn("[SHADER]  ViewTransform not found"); }
@@ -492,22 +497,22 @@ void Shader::BasicUniformLocations::init(int shaderProgram) {
 }
 
 void Shader::MaterialUniformLocations::init(int shaderProgram) {
-  MaterialDiffuseColor = glGetUniformLocation(shaderProgram, "u_material.diffuseColor");
-  MaterialDiffuseTexture = glGetUniformLocation(shaderProgram, "u_material.diffuseTexture");
-  MaterialHasDiffuseTexture = glGetUniformLocation(shaderProgram, "u_material.hasDiffuseTexture");
-  MaterialSpecularColor = glGetUniformLocation(shaderProgram, "u_material.specularColor");
-  MaterialSpecularTexture = glGetUniformLocation(shaderProgram, "u_material.specularTexture");
-  MaterialHasSpecularTexture = glGetUniformLocation(shaderProgram, "u_material.hasSpecularTexture");
-  MaterialNormalTexture = glGetUniformLocation(shaderProgram, "u_material.normalTexture");
-  MaterialHasNormalTexture = glGetUniformLocation(shaderProgram, "u_material.hasNormalTexture");
-  MaterialRoughness = glGetUniformLocation(shaderProgram, "u_material.roughness");
-  MaterialRoughnessTexture = glGetUniformLocation(shaderProgram, "u_material.roughnessTexture");
-  MaterialHasRoughnessTexture = glGetUniformLocation(shaderProgram, "u_material.hasRoughnessTexture");
-  MaterialMetalness = glGetUniformLocation(shaderProgram, "u_material.metalness");
-  MaterialMetalnessTexture = glGetUniformLocation(shaderProgram, "u_material.metalnessTexture");
-  MaterialHasMetalnessTexture = glGetUniformLocation(shaderProgram, "u_material.hasMetalnessTexture");
-  MaterialShininess = glGetUniformLocation(shaderProgram, "u_material.shininess");
-  MaterialIor = glGetUniformLocation(shaderProgram, "u_material.ior");
+  glCall(MaterialDiffuseColor = glGetUniformLocation(shaderProgram, "u_material.diffuseColor"));
+  glCall(MaterialDiffuseTexture = glGetUniformLocation(shaderProgram, "u_material.diffuseTexture"));
+  glCall(MaterialHasDiffuseTexture = glGetUniformLocation(shaderProgram, "u_material.hasDiffuseTexture"));
+  glCall(MaterialSpecularColor = glGetUniformLocation(shaderProgram, "u_material.specularColor"));
+  glCall(MaterialSpecularTexture = glGetUniformLocation(shaderProgram, "u_material.specularTexture"));
+  glCall(MaterialHasSpecularTexture = glGetUniformLocation(shaderProgram, "u_material.hasSpecularTexture"));
+  glCall(MaterialNormalTexture = glGetUniformLocation(shaderProgram, "u_material.normalTexture"));
+  glCall(MaterialHasNormalTexture = glGetUniformLocation(shaderProgram, "u_material.hasNormalTexture"));
+  glCall(MaterialRoughness = glGetUniformLocation(shaderProgram, "u_material.roughness"));
+  glCall(MaterialRoughnessTexture = glGetUniformLocation(shaderProgram, "u_material.roughnessTexture"));
+  glCall(MaterialHasRoughnessTexture = glGetUniformLocation(shaderProgram, "u_material.hasRoughnessTexture"));
+  glCall(MaterialMetalness = glGetUniformLocation(shaderProgram, "u_material.metalness"));
+  glCall(MaterialMetalnessTexture = glGetUniformLocation(shaderProgram, "u_material.metalnessTexture"));
+  glCall(MaterialHasMetalnessTexture = glGetUniformLocation(shaderProgram, "u_material.hasMetalnessTexture"));
+  glCall(MaterialShininess = glGetUniformLocation(shaderProgram, "u_material.shininess"));
+  glCall(MaterialIor = glGetUniformLocation(shaderProgram, "u_material.ior"));
   
   if (MaterialDiffuseColor == -1) { spdlog::warn("[SHADER]  MaterialDiffuseColor not found"); }
   if (MaterialDiffuseTexture == -1) { spdlog::warn("[SHADER]  MaterialDiffuseTexture not found"); }
@@ -533,10 +538,10 @@ void Shader::MaterialUniformLocations::init(int shaderProgram) {
 }
 
 void Shader::EnvironmentUniformLocations::init(int shaderProgram) {
-  environmentMap = glGetUniformLocation(shaderProgram, "u_environment.environmentMap");
-  GGXIntegrMap = glGetUniformLocation(shaderProgram, "u_environment.GGXIntegrMap");
-  irradianceMap = glGetUniformLocation(shaderProgram, "u_environment.irradianceMap");
-  maxMip = glGetUniformLocation(shaderProgram, "u_environment.maxMip");
+  glCall(environmentMap = glGetUniformLocation(shaderProgram, "u_environment.environmentMap"));
+  glCall(GGXIntegrMap = glGetUniformLocation(shaderProgram, "u_environment.GGXIntegrMap"));
+  glCall(irradianceMap = glGetUniformLocation(shaderProgram, "u_environment.irradianceMap"));
+  glCall(maxMip = glGetUniformLocation(shaderProgram, "u_environment.maxMip"));
   
   if (environmentMap == -1) { spdlog::warn("[SHADER] environmentMap not found"); }
   if (GGXIntegrMap == -1) { spdlog::warn("[SHADER] GGXIntegrMap not found"); }
@@ -545,7 +550,7 @@ void Shader::EnvironmentUniformLocations::init(int shaderProgram) {
 }
 
 void Shader::LightUniformLocations::init(int shaderProgram) {
-  LightCount = glGetUniformLocation(shaderProgram, "u_lightCount");
+  glCall(LightCount = glGetUniformLocation(shaderProgram, "u_lightCount"));
   if (LightCount == -1) { spdlog::warn("[SHADER] LightCount not found"); }
 }
 
@@ -554,13 +559,13 @@ void Shader::LightUniformLocations::addLight(const std::shared_ptr<Light> &light
   std::string number = std::to_string(idx);
   
   ShaderLightInfo phongLightInfo;
-  phongLightInfo.position = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].position").c_str());
-  phongLightInfo.ambient = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].ambient").c_str());
-  phongLightInfo.diffuse = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].diffuse").c_str());
-  phongLightInfo.specular = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].specular").c_str());
-  phongLightInfo.constant = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].constant").c_str());
-  phongLightInfo.linear = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].linear").c_str());
-  phongLightInfo.quadratic = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].quadratic").c_str());
+  glCall(phongLightInfo.position = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].position").c_str()));
+  glCall(phongLightInfo.ambient = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].ambient").c_str()));
+  glCall(phongLightInfo.diffuse = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].diffuse").c_str()));
+  glCall(phongLightInfo.specular = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].specular").c_str()));
+  glCall(phongLightInfo.constant = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].constant").c_str()));
+  glCall(phongLightInfo.linear = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].linear").c_str()));
+  glCall(phongLightInfo.quadratic = glGetUniformLocation(shaderProgramId, ("u_light[" + number + "].quadratic").c_str()));
   
   if (phongLightInfo.position == -1) { spdlog::warn("[SHADER]  lightInfo.position at index {} not found", idx); }
   if (phongLightInfo.ambient == -1) { spdlog::warn("[SHADER]  lightInfo.ambient at index {} not found", idx); }

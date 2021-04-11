@@ -441,6 +441,8 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
                                                                       const glm::vec3 &shaderNormal,
                                                                       const float dotNormalCamera,
                                                                       const int depth) {
+//  return glm::vec4(material->diffuse_.data[0], material->diffuse_.data[1], material->diffuse_.data[2], 1);
+  
   const int currentRecursion = recursionDepth_ - depth;
   // Russian roulette
   float rho = (material == nullptr) ? 0.95 : (
@@ -472,8 +474,9 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
   const RTCRayHitIor rayHitNew = generateRay(worldPos, omegaI);
   
   const glm::vec4 li = traceRay(rayHitNew, depth - 1);
-//  const glm::vec3 diffuse = getDiffuseColor(material, tex_coord);
-  glm::vec3 finalColor = li * brdf * glm::dot(shaderNormal, omegaI) / (pdf * rho);
+  const glm::vec3 diffuse = getDiffuseColor(material, tex_coord);
+  const glm::vec4 diffuse4 = glm::vec4(diffuse.x, diffuse.y, diffuse.z, 1);
+  glm::vec3 finalColor = diffuse4 * li * brdf * glm::dot(shaderNormal, omegaI) / (pdf * rho);
   return glm::vec4(finalColor.x, finalColor.y, finalColor.z, 1);
 }
 

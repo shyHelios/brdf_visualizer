@@ -291,6 +291,8 @@ void Gui::ui() {
     
     drawBRDFSettings();
     
+    drawMaterialSettings();
+    
     #pragma region "Sampler"
     
     ImGui::Separator();
@@ -640,4 +642,12 @@ void Gui::drawBRDFSettings() {
   } else {
     spdlog::warn("[GUI] BRDFShader ptr expired");
   }
+}
+
+void Gui::drawMaterialSettings() {
+  auto &commonMaterial = embreeRenderer_->getDefaultMaterial();
+  
+  ImGui::Separator();
+  ImGui::Text("Material");
+  shallInvalidateRTC_ |= ImGui::ColorEdit3("Diffuse color", commonMaterial->diffuse_.data.data());
 }

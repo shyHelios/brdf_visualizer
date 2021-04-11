@@ -56,7 +56,7 @@ glm::vec3 MathScene::getNormal(const RTCRayHitIor &ray) const {
   return spheres.at(ray.mathObjIndex)->getNormal(ray);
 }
 
-std::shared_ptr<Material> MathScene::getMaterial(const RTCRayHitIor &ray) const {
+std::shared_ptr<Material> &MathScene::getMaterial(const RTCRayHitIor &ray) const {
   assert(ray.mathObjIndex >= 0 && ray.mathObjIndex < spheres.size());
   return spheres.at(ray.mathObjIndex)->material;
 }
@@ -65,12 +65,13 @@ void MathScene::clearScene() {
   spheres.clear();
 }
 
-void MathScene::initDefaultScene() {
+void MathScene::initDefaultScene(std::shared_ptr<Material> material) {
+  if (material == nullptr) {
+    material = std::make_shared<Material>();
+    material->diffuse_.data = {0.1, 0.5, 0.9};
+  }
   clearScene();
-  auto mtl = std::make_shared<Material>();
-  mtl->diffuse_.data = {0.1, 0.5, 0.9};
-  auto sphere = std::make_unique<Sphere>(glm::vec3(0, 0, 0), 1.0f, mtl);
-  
+  auto sphere = std::make_unique<Sphere>(glm::vec3(0, 0, 0), 1.0f, material);
   spheres.emplace_back(std::move(sphere));
 }
 

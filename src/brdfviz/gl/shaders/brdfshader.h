@@ -10,6 +10,8 @@
 
 class BRDFShader : public Shader {
 public:
+  BRDFShader(int shaderProgramStub);
+  
   BRDFShader(const char *vertex = "./Shaders/brdf/VertexShader.glsl", const char *fragment = "./Shaders/brdf/FragmentShader.glsl");
   
   virtual void use(const std::shared_ptr<Material> &mtl) override;

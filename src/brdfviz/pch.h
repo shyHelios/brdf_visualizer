@@ -66,7 +66,11 @@
 #include <spdlog/sinks/basic_file_sink.h>
 
 #if (NDEBUG)
-  #define glCall(x) x
+  #if (NGL)
+    #define glCall(x) (void)0
+  #else
+    #define glCall(x) x
+  #endif
 #else
 
 #if defined(_MSC_VER)
@@ -74,17 +78,20 @@
 #else
   #define DBG_BREAK __builtin_trap()
 #endif
-
-#define glCall(x) \
-  {               \
-    glGetError(); \
-    x;            \
-    GLenum error = glGetError(); \
-    if (error != GL_NO_ERROR){   \
-      spdlog::error("[GL] error {} file '{}' line {}", error, __FILE__, __LINE__); \
-      DBG_BREAK;\
-    }\
-  }
+  #if (NGL)
+    #define glCall(x) (void)0
+  #else
+    #define glCall(x) \
+    {               \
+      glGetError(); \
+      x;            \
+      GLenum error = glGetError(); \
+      if (error != GL_NO_ERROR){   \
+        spdlog::error("[GL] error {} file '{}' line {}", error, __FILE__, __LINE__); \
+        DBG_BREAK;\
+      }\
+    }
+  #endif
 #endif
 
 #define M_2PI (M_PI + M_PI)

@@ -22,6 +22,8 @@ class Light;
 
 class Shader : public ShaderLoader/*, std::enable_shared_from_this<Shader> */{
 public:
+  Shader(int shaderProgramStub);
+  
   Shader(const char *vertex, const char *fragment);
   
   virtual ~Shader();
