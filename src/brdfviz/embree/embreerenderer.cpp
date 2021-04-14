@@ -129,14 +129,18 @@ void EmbreeRenderer::ui() {
     // close
     ImGuiFileDialog::Instance()->Close();
   }
+
+//  if (ImGui::Button("Load test embree scene")) {
+//    std::lock_guard<std::mutex> lockScene(sceneLock_);
+//    mathScene_->clearScene();
+//    initRTC();
+//    loadTestScene();
+//    invalidateRendering();
+//  }
   
-  if (ImGui::Button("Load test embree scene")) {
-    std::lock_guard<std::mutex> lockScene(sceneLock_);
-    mathScene_->clearScene();
-    initRTC();
-    loadTestScene();
-    invalidateRendering();
-  }
+  
+  bool shallSave = ImGui::Button("Save screenshot");
+  
   
   ImGui::Text("Samples: %d", commonShader_->pathTracerHelper->getTracesCount());
   
@@ -163,6 +167,20 @@ void EmbreeRenderer::ui() {
     invalidateRendering();
   }
   
+  
+  if (shallSave) {
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+    
+    std::string filename = std::string("out/render");
+    filename.append(oss.str());
+    filename.append(".png");
+    
+    saveImage(filename);
+  }
 }
 
 glm::vec4 EmbreeRenderer::getPixel(int x, int y) {
@@ -465,4 +483,54 @@ void EmbreeRenderer::rtcErrHandler(void *user_ptr, const RTCError code, const ch
 
 std::shared_ptr<Material> &EmbreeRenderer::getDefaultMaterial() {
   return defaultMtl_;
+}
+
+void EmbreeRenderer::saveImage(const std::string &filename) {
+  const uint8_t channels = 3;
+  const size_t size = width_ * height_ * channels;
+  
+  uint8_t *pixels = new uint8_t[size]();
+//  std::vector<BYTE> pixels(size);
+  {
+    std::lock_guard<std::mutex> lock(texDataLock_);
+    
+    for (int y = 0; y < height_; ++y) {
+      for (int x = 0; x < width_; ++x) {
+        const size_t texDataIdx = (y * width_ + x);
+        const size_t pixelsOffset = texDataIdx * channels;
+
+//        assert(texData_[texDataIdx].x >= 0);
+//        assert(texData_[texDataIdx].y >= 0);
+//        assert(texData_[texDataIdx].z >= 0);
+//
+//        assert(texData_[texDataIdx].x <= 1);
+//        assert(texData_[texDataIdx].y <= 1);
+//        assert(texData_[texDataIdx].z <= 1);
+        
+        pixels[pixelsOffset + 2] = clamp(texData_[texDataIdx].x, 0, 1) * 255;
+        pixels[pixelsOffset + 1] = clamp(texData_[texDataIdx].y, 0, 1) * 255;
+        pixels[pixelsOffset + 0] = clamp(texData_[texDataIdx].z, 0, 1) * 255;
+//        writeArray[offset + 3] = 255;//tex_data_[offset + 3] * 255;
+      }
+    }
+    
+    FIBITMAP *image = FreeImage_ConvertFromRawBits(pixels,
+                                                   width_,
+                                                   height_,
+                                                   channels * width_,
+                                                   channels * 8,
+                                                   FI_RGBA_RED_MASK,
+                                                   FI_RGBA_GREEN_MASK,
+                                                   FI_RGBA_BLUE_MASK,
+                                                   TRUE);
+    
+    if (FreeImage_Save(FIF_PNG, image, filename.c_str(), 0))
+      printf("Successfully saved!\n");
+    else
+      printf("Failed saving!\n");
+    
+    FreeImage_Unload(image);
+    
+  } // lock release
+  delete[] pixels;
 }

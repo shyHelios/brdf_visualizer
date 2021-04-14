@@ -18,7 +18,7 @@ public:
   
   void ui();
   
-  //virtual void saveImage(const std::string &filename);
+  void saveImage(const std::string &filename);
   
   const std::atomic<bool> &getFinishRequest() const;
   
