@@ -619,7 +619,8 @@ void Gui::drawBRDFSettings() {
         break;
       }
       
-      case BRDFShader::BRDF::TorranceSparrow: {
+      case BRDFShader::BRDF::TorranceSparrow:
+      case BRDFShader::BRDF::CookTorrance: {
         shallInvalidateRTC_ |= ImGui::SliderFloat("Roughness", &brdfShader->getBrdfUniformLocations().TorranceSparrow::roughness.getData(), 0.001, 1.0);
         shallInvalidateRTC_ |= ImGui::SliderFloat("f0", &brdfShader->getBrdfUniformLocations().TorranceSparrow::f0.getData(), 0, 1);
         break;

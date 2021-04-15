@@ -13,7 +13,8 @@ layout(location = 3)in vec3 in_Tangent;
 #define BLINN_PHONG_BRDF (PHONG_BRDF + 1)
 #define PHONG_PHYS_CORRECT_BRDF (BLINN_PHONG_BRDF + 1)
 #define LAMBERT_BRDF (PHONG_PHYS_CORRECT_BRDF + 1)
-#define COOK_TORRANCE_BRDF (LAMBERT_BRDF + 1)
+#define TORRANCE_SPARROW_BRDF (LAMBERT_BRDF + 1)
+#define COOK_TORRANCE_BRDF (TORRANCE_SPARROW_BRDF + 1)
 #define OREN_NAYAR_BRDF (COOK_TORRANCE_BRDF + 1)
 #define MIRROR (OREN_NAYAR_BRDF + 1)
 
@@ -109,6 +110,24 @@ float cookTorranceBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, v
   return specVal;
 }
 
+float torranceSparrowBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
+  vec3 halfVector = normalize(toLight + toCamera);
+  
+  float normDotHalf = dot(normal, halfVector);
+  float toCamDotHalf = dot(toCamera, halfVector);
+  
+  float normDotToLight = dot(normal, toLight);
+  float normDotToCamera = dot(normal, toLight);
+  
+  float D = beckmannDistribution(u_roughness, normDotHalf);
+  float F = schlick(u_f0, toCamDotHalf);
+  float G = geometricAttenuation(toLight, toCamera, normal);
+  
+  float specVal = /*kd / M_PI*/ +(/*ks **/ D * F * G) / (4 * M_PI * normDotToLight);
+  
+  return specVal;
+}
+
 float orenNayarBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
   float toCamDotNormal = dot(toCamera, normal);
   float toLightDotNormal = dot(toLight, normal);
@@ -160,6 +179,11 @@ float BRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangen
     
     case LAMBERT_BRDF:{
       res = lambertBRDF(toLight, toCamera, normal, tangent, bitangent);
+      break;
+    }
+    
+    case TORRANCE_SPARROW_BRDF:{
+      res = torranceSparrowBRDF(toLight, toCamera, normal, tangent, bitangent);
       break;
     }
     

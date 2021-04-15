@@ -207,6 +207,29 @@ float RTCCommonShader::getTorranceSparrowBRDF(const glm::vec3 &toLight, const gl
 }
 
 
+float RTCCommonShader::getCookTorranceBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal,
+                                           const std::shared_ptr<BRDFShader> &brdfShaderPtr) {
+  using CookTorrance = BRDFShader::TorranceSparrowUniformLocationsPack; // Cook Torrance and Torrance Sparrow share parameters
+  glm::vec3 halfVector = normalize(toLight + toCamera);
+  
+  float normDotHalf = dot(normal, halfVector);
+  float toCamDotHalf = dot(toCamera, halfVector);
+  
+  float normDotToLight = dot(normal, toLight);
+  float normDotToCamera = dot(normal, toLight);
+  
+  float D = beckmannDistribution(brdfShaderPtr->getBrdfUniformLocations().CookTorrance::roughness.getData(), normDotHalf);
+  float F = schlick(brdfShaderPtr->getBrdfUniformLocations().CookTorrance::f0.getData(), toCamDotHalf);
+  float G = geometricAttenuation(toLight, toCamera, normal);
+
+//  float specVal = D * F * G;
+  
+  
+  float specVal = /*kd / M_PI*/ +(/*ks **/ D * F * G) / (4 * M_PI * normDotToLight);
+  return specVal;
+}
+
+
 float RTCCommonShader::getBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal) {
   if (auto brdfShaderPtr = brdfShader.lock()) {
     switch (brdfShaderPtr->currentBrdfIdx) {
@@ -215,6 +238,7 @@ float RTCCommonShader::getBRDF(const glm::vec3 &toLight, const glm::vec3 &toCame
       case BRDFShader::BRDF::PhongPhysCorrect:return getPhysicallyCorrectPhongBRDF(toLight, toCamera, normal, brdfShaderPtr);
       case BRDFShader::BRDF::Lambert:return getLambertBRDF(toLight, toCamera, normal, brdfShaderPtr);
       case BRDFShader::BRDF::TorranceSparrow:return getTorranceSparrowBRDF(toLight, toCamera, normal, brdfShaderPtr);
+      case BRDFShader::BRDF::CookTorrance:return getCookTorranceBRDF(toLight, toCamera, normal, brdfShaderPtr);
       case BRDFShader::BRDF::OrenNayar:return getOrenNayarBRDF(toLight, toCamera, normal, brdfShaderPtr);
       default: {
         spdlog::warn("[COMMON SHADER] invalid BRDF selected");

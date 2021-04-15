@@ -22,6 +22,7 @@ public:
     PhongPhysCorrect,
     Lambert,
     TorranceSparrow,
+    CookTorrance,
     OrenNayar,
     Mirror,
     CountBrdf

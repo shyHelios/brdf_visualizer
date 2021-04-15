@@ -10,6 +10,7 @@ const std::pair<const char *, BRDFShader::BRDF> BRDFShader::brdfArray[static_cas
     {"Physically correct Phong", BRDF::PhongPhysCorrect},
     {"Lambert",                  BRDF::Lambert},
     {"Torrance-Sparrow",         BRDF::TorranceSparrow},
+    {"Cook-Torrance",            BRDF::CookTorrance},
     {"Oren-Nayar",               BRDF::OrenNayar},
     {"Mirror",                   BRDF::Mirror},
 };
@@ -58,6 +59,7 @@ void BRDFShader::use(const std::shared_ptr<Material> &mtl) {
   setData(brdfUniformLocations_.ModelTransform, modelMatrix);
   setData(brdfUniformLocations_.ProjectionTransform, camInfo.projectionMatrix);
   setData(brdfUniformLocations_.ViewTransform, camInfo.viewMatrix);
+  
   for (int i = 0; i < NO_TEXTURES; i++) {
     const auto &texture = mtl->texture(i);
     if (texture != nullptr) {
