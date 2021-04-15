@@ -29,8 +29,8 @@ uniform int u_phongShininess = 16;
 uniform float u_phongDiffuse = 0.5;
 uniform float u_phongSpecular = 0.5;
 
-uniform float u_roughness = 0.1;
-uniform float u_f0 = 0.1;
+uniform float u_roughness = 0.7;
+uniform float u_f0 = 0.7;
 
 uniform float u_lambertReflectance = 0.5;
 
@@ -95,14 +95,17 @@ float cookTorranceBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, v
   float normDotHalf = dot(normal, halfVector);
   float toCamDotHalf = dot(toCamera, halfVector);
   
+  float normDotToLight = dot(normal, toLight);
+  float normDotToCamera = dot(normal, toLight);
+  
   float D = beckmannDistribution(u_roughness, normDotHalf);
   float F = schlick(u_f0, toCamDotHalf);
   float G = geometricAttenuation(toLight, toCamera, normal);
   
-  float specVal = D * F * G;
-  //  float specVal = D;
-  //  float specVal = F;
-  //  float specVal = G;
+  // float specVal = D * F * G;
+  
+  float specVal = (F/M_PI) * (D/normDotToLight) * (G / normDotToCamera);
+  
   return specVal;
 }
 

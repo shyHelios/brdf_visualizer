@@ -156,8 +156,8 @@ void BRDFShader::TorranceSparrowUniformLocationsPack::init(int shaderProgram) {
   roughness.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_roughness");
   f0.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_f0");
   
-  roughness.getData() = 0.1;
-  f0.getData() = 0.1;
+  roughness.getData() = 0.7;
+  f0.getData() = 0.7;
   
   if (roughness.getUniformLocation() == -1) { spdlog::warn("[SHADER]  roughness not found"); }
   if (f0.getUniformLocation() == -1) { spdlog::warn("[SHADER]  f0 not found"); }

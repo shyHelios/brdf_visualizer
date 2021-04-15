@@ -193,11 +193,16 @@ float RTCCommonShader::getTorranceSparrowBRDF(const glm::vec3 &toLight, const gl
   float normDotHalf = dot(normal, halfVector);
   float toCamDotHalf = dot(toCamera, halfVector);
   
+  float normDotToLight = dot(normal, toLight);
+  float normDotToCamera = dot(normal, toLight);
+  
   float D = beckmannDistribution(brdfShaderPtr->getBrdfUniformLocations().TorranceSparrow::roughness.getData(), normDotHalf);
   float F = schlick(brdfShaderPtr->getBrdfUniformLocations().TorranceSparrow::f0.getData(), toCamDotHalf);
   float G = geometricAttenuation(toLight, toCamera, normal);
+
+//  float specVal = D * F * G;
   
-  float specVal = D * F * G;
+  float specVal = (F / M_PI) * (D / normDotToLight) * (G / normDotToCamera);
   return specVal;
 }
 
@@ -445,13 +450,13 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
   
   const int currentRecursion = recursionDepth_ - depth;
   // Russian roulette
-  float rho = (material == nullptr) ? 0.95 : (
-      (std::max<float>(material->diffuse_.data[0], std::max<float>(material->diffuse_.data[1], material->diffuse_.data[2]))) * 0.95f);
-  
-  
-  if (rho <= rng()) {
-    return glm::vec4(0, 0, 0, 0);
-  }
+//  float rho = (material == nullptr) ? 0.95 : (
+//      (std::max<float>(material->diffuse_.data[0], std::max<float>(material->diffuse_.data[1], material->diffuse_.data[2]))) * 0.95f);
+//
+//
+//  if (rho <= rng()) {
+//    return glm::vec4(0, 0, 0, 0);
+//  }
   
   if (brdfShader.lock()->currentBrdfIdx == BRDFShader::BRDF::Mirror) {
     return traceMaterial<RTCShadingType::Mirror>(rayHit, material, tex_coord, origin, direction, worldPos,
@@ -474,9 +479,7 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
   const RTCRayHitIor rayHitNew = generateRay(worldPos, omegaI);
   
   const glm::vec4 li = traceRay(rayHitNew, depth - 1);
-  const glm::vec3 diffuse = getDiffuseColor(material, tex_coord);
-  const glm::vec4 diffuse4 = glm::vec4(diffuse.x, diffuse.y, diffuse.z, 1);
-  glm::vec3 finalColor = diffuse4 * li * brdf * glm::dot(shaderNormal, omegaI) / (pdf * rho);
+  glm::vec3 finalColor = li * brdf * glm::dot(shaderNormal, omegaI);
   return glm::vec4(finalColor.x, finalColor.y, finalColor.z, 1);
 }
 

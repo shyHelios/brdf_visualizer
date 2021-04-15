@@ -745,14 +745,38 @@ int Texture<T, F>::width() const {
 template<class T, FREE_IMAGE_TYPE F>
 T Texture<T, F>::texel(const float u, const float v) const {
   T value;
-  float clampedU = u - static_cast<int>(u);
-  float clampedV = v - static_cast<int>(v);
-#ifdef FAST_INTERP
+  const float clampedU = u - static_cast<int>(u);
+  const float clampedV = v - static_cast<int>(v);
+  
+  #ifdef FAST_INTERP
+  
   value = pixel(int(clampedU * width_), int(clampedV * height_)); // nearest neighbour
-#else
-  throw std::runtime_error("Bilinear interpolation not implemented yet");
-// TODO bilinear interpolation
-#endif
+  
+  #else
+  
+  const float row = clampedV * height_;
+  const float col = clampedU * width_;
+  
+  const int upperRow = static_cast<int>(std::ceil(clampedV * height_));
+  const int lowerRow = static_cast<int>(std::floor(clampedV * height_));
+  const int upperCol = static_cast<int>(std::ceil(clampedU * width_));
+  const int lowerCol = static_cast<int>(std::floor(clampedU * width_));
+  
+  const T pixUU = pixel(upperCol, upperRow);
+  const T pixUL = pixel(upperCol, lowerRow);
+  const T pixLU = pixel(lowerCol, upperRow);
+  const T pixLL = pixel(lowerCol, lowerRow);
+  
+  float x = row - lowerRow;
+  float y = col - lowerCol;
+  
+  value = (pixLL * (1. - x) * (1. - y)) +
+          (pixUL * x * (1. - y)) +
+          (pixLU * (1. - x) * y) +
+          (pixUU * x * y);
+
+//// TODO bilinear interpolation
+  #endif
   
   return value;
 }

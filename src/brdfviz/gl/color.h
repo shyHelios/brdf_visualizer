@@ -79,7 +79,11 @@ public:
   friend Color<N, T> operator+(Color<N, T> lhs, const Color<N, T> &rhs) {
     // passing lhs by value helps optimize chained a + b + c
     // otherwise, both parameters may be const references
-    lhs += rhs;
+//    lhs += rhs;
+    for (int i = 0; i < N; ++i) {
+      lhs.data[i] += rhs.data[i];
+    }
+    
     
     return lhs;
   }
