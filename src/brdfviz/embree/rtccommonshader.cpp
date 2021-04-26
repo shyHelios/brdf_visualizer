@@ -294,10 +294,23 @@ float RTCCommonShader::getOrenNayarBRDF(const glm::vec3 &toLight, const glm::vec
   return L1r + L2r;
 }
 
+
+float RTCCommonShader::getMirrorBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal,
+                                     const std::shared_ptr<BRDFShader> &brdfShaderPtr) {
+  glm::vec3 reflectVector = glm::reflect(-toCamera, normal);
+  
+  if (toLight == toCamera)
+    return std::numeric_limits<float>::infinity();
+  else
+    return 0;
+}
+
+
 float RTCCommonShader::getPhysicallyCorrectPhongBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal,
                                                      const std::shared_ptr<BRDFShader> &brdfShaderPtr) {
   using Phong = BRDFShader::PhongUniformLocationsPack;
   glm::vec3 reflectVector = glm::reflect(-toLight, normal);
+  
   float specVal = std::pow(std::max(glm::dot(toCamera, reflectVector), 0.0f), brdfShaderPtr->getBrdfUniformLocations().Phong::shininess.getData());
   //  return (u_phongDiffuse / M_PI) + (((u_phongSpecular * (u_phongShininess + 2)) / M_2PI) * pow(max(dot(toCamera, reflectVector), 0.0), u_phongShininess));
   return (brdfShaderPtr->getBrdfUniformLocations().Phong::diffuse.getData() / M_PI) +
@@ -499,11 +512,13 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
     return glm::vec4(0, 0, 0, 0);
   }
   
+  const glm::vec3 lightSample = sphericalMap_->sample(pdf);
   const float brdf = getBRDF(omegaI, directionToCamera, shaderNormal);
   const RTCRayHitIor rayHitNew = generateRay(worldPos, omegaI);
   
   const glm::vec4 li = traceRay(rayHitNew, depth - 1);
-  glm::vec3 finalColor = li * brdf * glm::dot(shaderNormal, omegaI);
+//  glm::vec3 finalColor = li * brdf * glm::dot(shaderNormal, omegaI);
+  glm::vec3 finalColor = lightSample * brdf /** glm::dot(shaderNormal, omegaI)*/;
   return glm::vec4(finalColor.x, finalColor.y, finalColor.z, 1);
 }
 

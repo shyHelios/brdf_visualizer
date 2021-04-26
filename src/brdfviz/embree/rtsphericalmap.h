@@ -12,11 +12,18 @@ public:
   glm::vec3 texel(const glm::vec3 &pos);
   
   glm::vec3 downsampledTexel(const glm::vec3 &pos);
+  
+  glm::vec3 sample(float &pdf);
 
 private:
   
+  void computeCdf();
+  
   std::unique_ptr<Texture3f> texture_;
   std::unique_ptr<Texture3f> downsampledTexture_;
+  std::vector<float> downsampledPdf_;
+  std::vector<float> downsampledCdf_;
+  std::vector<float> marginalCdf_;
 };
 
 

@@ -54,7 +54,8 @@ protected:
   bool showDemoWindow_ = false;
   ImVec2 mainRenderCanvasSize_;
   float yaw_ = M_PI / 4.0f;
-  float pitch_ = M_PI / 4.0f;
+//  float pitch_ = M_PI / 4.0f;
+  float pitch_ = 0.5f;
   float dist_ = 7.0f;
   float theta_ = M_PI / 4.0f; // <0, PI/2>
   float phi_ = M_PI - (M_PI / 4.0f); // <0, 2*PI>

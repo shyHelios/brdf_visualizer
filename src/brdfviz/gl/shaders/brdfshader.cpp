@@ -145,8 +145,8 @@ void BRDFShader::PhongUniformLocationsPack::init(int shaderProgram) {
   specular.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_phongSpecular");
   
   shininess.getData() = 32;
-  diffuse.getData() = 0.5;
-  specular.getData() = 0.5;
+  diffuse.getData() = 0.8;
+  specular.getData() = 0.1;
   
   
   if (shininess.getUniformLocation() == -1) { spdlog::warn("[SHADER]  u_phongShininess not found"); }
@@ -158,8 +158,8 @@ void BRDFShader::TorranceSparrowUniformLocationsPack::init(int shaderProgram) {
   roughness.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_roughness");
   f0.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_f0");
   
-  roughness.getData() = 0.7;
-  f0.getData() = 0.7;
+  roughness.getData() = 0.35;
+  f0.getData() = 1;
   
   if (roughness.getUniformLocation() == -1) { spdlog::warn("[SHADER]  roughness not found"); }
   if (f0.getUniformLocation() == -1) { spdlog::warn("[SHADER]  f0 not found"); }
@@ -167,7 +167,7 @@ void BRDFShader::TorranceSparrowUniformLocationsPack::init(int shaderProgram) {
 
 void BRDFShader::LambertUniformLocationsPack::init(int shaderProgram) {
   reflectance.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_lambertReflectance");
-  reflectance.getData() = 0.5;
+  reflectance.getData() = 0.8;
   
   if (reflectance.getUniformLocation() == -1) { spdlog::warn("[SHADER] u_lambertReflectance not found"); }
 }
@@ -176,8 +176,8 @@ void BRDFShader::OrenNayarUniformLocationsPack::init(int shaderProgram) {
   reflectance.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_orenNayarReflectance");
   roughness.getUniformLocation() = glGetUniformLocation(shaderProgram, "u_orenNayarRoughness");
   
-  reflectance.getData() = 0.5;
-  roughness.getData() = 0.1;
+  reflectance.getData() = 0.7;
+  roughness.getData() = 0.8;
   
   if (reflectance.getUniformLocation() == -1) { spdlog::warn("[SHADER] u_orenNayarReflectance not found"); }
   if (roughness.getUniformLocation() == -1) { spdlog::warn("[SHADER]  u_orenNayarRoughness not found"); }

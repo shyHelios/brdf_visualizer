@@ -5,8 +5,7 @@ set(FRONTEND_SRC
     gui.h
 
     embree/embreerenderer.cpp
-    embree/embreerenderer.h
-    )
+    embree/embreerenderer.h)
 
 set(SRC
     gl/vertexbufferobject.cpp
@@ -95,6 +94,9 @@ set(SRC
     common/utils/rgb.h
     common/utils/assimploading.cpp
     common/utils/assimploading.h
+    common/utils/texutils.cpp
+    common/utils/texutils.h
+
     common/sampler.h
     common/sampler.cpp
     )

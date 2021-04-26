@@ -236,6 +236,15 @@ public:
   std::array<T, N> data;
   static const int channels = N;
   //static const ColorSpaces colorSpace = ColorSpaces::kLinearRGB; // default color space
+  
+  T toGrayscale() {
+//    const float weights[3] = {0.2989f, 0.5870f, 0.1140f};
+    const float weights[3] = {0.2126f, 0.7152, 0.0722};
+    return data[0] * weights[0] + // R
+           data[1] * weights[1] + // G
+           data[2] * weights[2];  // B
+    
+  }
 };
 
 using Color3f = Color<3, float>;

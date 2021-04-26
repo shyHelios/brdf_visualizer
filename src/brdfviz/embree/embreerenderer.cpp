@@ -485,9 +485,13 @@ std::shared_ptr<Material> &EmbreeRenderer::getDefaultMaterial() {
   return defaultMtl_;
 }
 
-void EmbreeRenderer::saveImage(const std::string &filename) {
+void EmbreeRenderer::saveImage(const std::filesystem::path &path) {
   const uint8_t channels = 3;
   const size_t size = width_ * height_ * channels;
+  
+  if (!std::filesystem::exists(path.parent_path())) {
+    std::filesystem::create_directory(path.parent_path());
+  }
   
   uint8_t *pixels = new uint8_t[size]();
 //  std::vector<BYTE> pixels(size);
@@ -524,7 +528,7 @@ void EmbreeRenderer::saveImage(const std::string &filename) {
                                                    FI_RGBA_BLUE_MASK,
                                                    TRUE);
     
-    if (FreeImage_Save(FIF_PNG, image, filename.c_str(), 0))
+    if (FreeImage_Save(FIF_PNG, image, path.c_str(), 0))
       printf("Successfully saved!\n");
     else
       printf("Failed saving!\n");

@@ -235,7 +235,6 @@ void Gui::ui() {
     ImGui::Separator();
     ImGui::Text("Rendering");
     ImGui::Checkbox("Render edges", &geometry_);
-    shallSave_ = ImGui::Button("Save");
     
     ImGui::Separator();
     
@@ -315,6 +314,15 @@ void Gui::ui() {
     shallInvalidateRTC_ |= ImGui::Checkbox("Sample lights", &sampleLights);
     
     
+    #pragma endregion
+    
+    
+    #pragma region "Saving"
+    ImGui::Separator();
+    ImGui::Text("Saving");
+    shallSave_ = ImGui::Button("Save");
+//    static char str0[128] = "filename.png";
+//    ImGui::InputText("Filename", str0, IM_ARRAYSIZE(str0));
     #pragma endregion
     
     ImGui::End();
@@ -487,7 +495,8 @@ void Gui::renderLoop() {
     
     // If saving screen, resize fbo to real size, render again and resize it back.
     if (shallSave_) {
-      fbo_->resize(fbo_->getRealWidth(), fbo_->getRealHeight());
+//      fbo_->resize(fbo_->getRealWidth(), fbo_->getRealHeight());
+      fbo_->resize(800, 800);
       fbo_->bind();
       renderer_->render(geometry_);
       fbo_->unbind();

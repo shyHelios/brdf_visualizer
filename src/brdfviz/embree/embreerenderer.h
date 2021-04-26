@@ -18,7 +18,7 @@ public:
   
   void ui();
   
-  void saveImage(const std::string &filename);
+  void saveImage(const std::filesystem::path &path);
   
   const std::atomic<bool> &getFinishRequest() const;
   

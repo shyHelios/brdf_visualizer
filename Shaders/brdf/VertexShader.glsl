@@ -158,6 +158,13 @@ float orenNayarBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3
   return L1r + L2r;
 }
 
+float mirrorBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
+  vec3 reflectVector = reflect(-toLight, normal);
+  if (reflectVector == toCamera){
+    return 1;
+  }
+  return 0;
+}
 
 float BRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
   float res;
@@ -198,7 +205,7 @@ float BRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangen
     }
     
     case MIRROR:{
-      res = 0.;
+      res = mirrorBRDF(toLight, toCamera, normal, tangent, bitangent);
       break;
     }
   }

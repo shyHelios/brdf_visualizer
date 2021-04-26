@@ -3,6 +3,7 @@
 * PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 */
 #include <pch.h>
+#include <common/utils/texutils.h>
 #include "framebufferobject.h"
 
 FrameBufferObject::FrameBufferObject(uint16_t width, uint16_t height) : width_(width), height_(height) {
@@ -99,28 +100,7 @@ uint32_t FrameBufferObject::getFrameBufferDepthId() const {
 
 void FrameBufferObject::saveScreen() const {
   bind();
-  auto now = std::chrono::system_clock::now();
-  auto in_time_t = std::chrono::system_clock::to_time_t(now);
-  
-  std::stringstream ss;
-  ss << "out/";
-  ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %X");
-  ss << ".png";
-  
-  BYTE *pixels = (BYTE *) malloc(width_ * height_ * 3);
-  
-  glReadPixels(0, 0, width_, height_, GL_BGR, GL_UNSIGNED_BYTE, pixels);
-  
-  FIBITMAP *image = FreeImage_ConvertFromRawBits(pixels, width_, height_, 3 * width_, 24, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, TRUE);
-  
-  if (FreeImage_Save(FIF_PNG, image, ss.str().c_str(), 0))
-    printf("Successfully saved!\n");
-  else
-    printf("Failed saving!\n");
-  
-  FreeImage_Unload(image);
-  
-  free(pixels);
+  ::saveScreen(width_, height_);
   unbind();
 }
 
