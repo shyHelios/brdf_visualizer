@@ -745,8 +745,11 @@ int Texture<T, F>::width() const {
 template<class T, FREE_IMAGE_TYPE F>
 T Texture<T, F>::texel(const float u, const float v) const {
   T value;
-  const float clampedU = u - static_cast<int>(u);
-  const float clampedV = v - static_cast<int>(v);
+  float clampedU = u - static_cast<int>(u);
+  float clampedV = v - static_cast<int>(v);
+  
+  if (clampedU < 0) clampedU += 1.;
+  if (clampedV < 0) clampedV += 1.;
   
   #ifdef FAST_INTERP
   

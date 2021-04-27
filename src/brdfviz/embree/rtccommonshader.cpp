@@ -470,6 +470,41 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::Mirror>(const RTCRayHit
   return reflected;
 }
 
+glm::vec4 RTCCommonShader::sampleBRDF(const glm::vec3 &direction,
+                                      const glm::vec3 &shaderNormal,
+                                      const glm::vec3 &directionToCamera,
+                                      const glm::vec3 &worldPos,
+                                      const int depth,
+                                      float &pdf) {
+  const glm::vec3 reflectDir = glm::reflect(direction, shaderNormal);
+  const glm::vec3 omegaI = pathTracerHelper->getTracesCount() == 0 ? reflectDir : sampler_->sample(shaderNormal, reflectDir, pdf);
+  const float brdf = getBRDF(omegaI, directionToCamera, shaderNormal);
+  const RTCRayHitIor rayHitNew = generateRay(worldPos, omegaI);
+//
+  const glm::vec4 li = traceRay(rayHitNew, depth - 1);
+  glm::vec3 finalColor = li * brdf * glm::dot(shaderNormal, omegaI);
+  return glm::vec4(finalColor.x, finalColor.y, finalColor.z, 1);
+}
+
+glm::vec4 RTCCommonShader::sampleLight(const glm::vec3 &direction,
+                                       const glm::vec3 &shaderNormal,
+                                       const glm::vec3 &directionToCamera,
+                                       const glm::vec3 &worldPos,
+                                       const int depth,
+                                       float &pdf) {
+  const glm::vec3 reflectDir = glm::reflect(direction, shaderNormal);
+  glm::vec3 omegaI = reflectDir;
+  if (!pathTracerHelper->getTracesCount() == 0)
+    sphericalMap_->sample(pdf, omegaI);
+  
+  const float brdf = getBRDF(omegaI, directionToCamera, shaderNormal);
+  const RTCRayHitIor rayHitNew = generateRay(worldPos, omegaI);
+//
+  const glm::vec4 li = traceRay(rayHitNew, depth - 1);
+  glm::vec3 finalColor = li * brdf * glm::dot(shaderNormal, omegaI);
+  return glm::vec4(finalColor.x, finalColor.y, finalColor.z, 1);
+}
+
 template<>
 glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCRayHitIor &rayHit,
                                                                       const std::shared_ptr<Material> &material,
@@ -487,13 +522,13 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
   
   const int currentRecursion = recursionDepth_ - depth;
   // Russian roulette
-//  float rho = (material == nullptr) ? 0.95 : (
-//      (std::max<float>(material->diffuse_.data[0], std::max<float>(material->diffuse_.data[1], material->diffuse_.data[2]))) * 0.95f);
-//
-//
-//  if (rho <= rng()) {
-//    return glm::vec4(0, 0, 0, 0);
-//  }
+  float rho = /*(material == nullptr) ?*/ 0.95 /*: (
+      (std::max<float>(material->diffuse_.data[0], std::max<float>(material->diffuse_.data[1], material->diffuse_.data[2]))) * 0.95f)*/;
+  
+  
+  if (rho <= rng()) {
+    return glm::vec4(0, 0, 0, 0);
+  }
   
   if (brdfShader.lock()->currentBrdfIdx == BRDFShader::BRDF::Mirror) {
     return traceMaterial<RTCShadingType::Mirror>(rayHit, material, tex_coord, origin, direction, worldPos,
@@ -501,25 +536,44 @@ glm::vec4 RTCCommonShader::traceMaterial<RTCShadingType::PathTracing>(const RTCR
                                                  dotNormalCamera, depth);
   }
   
+  
   const glm::vec3 emmision =
       (material == nullptr) ? glm::vec3(0, 0, 0) : glm::vec3{material->emission_.data[0], material->emission_.data[1], material->emission_.data[2]};
   
+  
   float pdf = 1;
+  
+  
   const glm::vec3 reflectDir = glm::reflect(direction, shaderNormal);
-  const glm::vec3 omegaI = pathTracerHelper->getTracesCount() == 0 ? reflectDir : sampler_->sample(shaderNormal, reflectDir, pdf);
+  /*const*/ glm::vec3 omegaI = pathTracerHelper->getTracesCount() == 0 ? reflectDir : sampler_->sample(shaderNormal, reflectDir, pdf);
+
+//  if (pdf <= 0) {
+//    return glm::vec4(0, 0, 0, 0);
+//  }
   
-  if (pdf <= 0) {
-    return glm::vec4(0, 0, 0, 0);
+  switch (samplingType_) {
+    case Sampling::BRDF: {
+      const glm::vec4 brdfSample = sampleBRDF(direction, shaderNormal, directionToCamera, worldPos, depth, pdf);
+      return brdfSample;
+    }
+    case Sampling::Lights: {
+      const glm::vec4 lightSample = sampleLight(direction, shaderNormal, directionToCamera, worldPos, depth, pdf);
+      return lightSample;
+    }
+    case Sampling::MIS: {
+      const glm::vec4 brdfSample = sampleBRDF(direction, shaderNormal, directionToCamera, worldPos, depth, pdf);
+      const glm::vec4 lightSample = sampleLight(direction, shaderNormal, directionToCamera, worldPos, depth, pdf);
+      return brdfSample + lightSample;
+    }
   }
-  
-  const glm::vec3 lightSample = sphericalMap_->sample(pdf);
-  const float brdf = getBRDF(omegaI, directionToCamera, shaderNormal);
-  const RTCRayHitIor rayHitNew = generateRay(worldPos, omegaI);
-  
-  const glm::vec4 li = traceRay(rayHitNew, depth - 1);
+  throw std::runtime_error("Invalid sampling type");
+//  const glm::vec3 lightSample = sphericalMap_->sample(pdf, omegaI);
+//  const float brdf = getBRDF(omegaI, directionToCamera, shaderNormal);
+//  const RTCRayHitIor rayHitNew = generateRay(worldPos, omegaI);
+////
+//  const glm::vec4 li = traceRay(rayHitNew, depth - 1);
 //  glm::vec3 finalColor = li * brdf * glm::dot(shaderNormal, omegaI);
-  glm::vec3 finalColor = lightSample * brdf /** glm::dot(shaderNormal, omegaI)*/;
-  return glm::vec4(finalColor.x, finalColor.y, finalColor.z, 1);
+//  return glm::vec4(finalColor.x, finalColor.y, finalColor.z, 1);
 }
 
 template<>

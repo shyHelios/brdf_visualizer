@@ -5,6 +5,8 @@
 #ifndef COORDSYSTEM_H
 #define COORDSYSTEM_H
 
+#include <common/utils/math.h>
+
 inline glm::vec3 sphericalToCartesian(const float theta, const float phi) {
   return glm::vec3(sin(theta) * cos(phi),
                    sin(theta) * sin(phi),
@@ -17,8 +19,10 @@ inline glm::vec3 sphericalToCartesian(const glm::vec2 vec) {
 
 
 inline glm::vec2 cartesianToSpherical(const float x, const float y, const float z) {
-  float theta = atan((sqrt((x * x) + (y * y))) / z);
-  float phi = atan(y / x);
+  float theta = acosf(clamp(z, -1.f, 1.f));
+  float phi = atan2f(y, x) + static_cast<float>(M_PI);
+//  float theta = atan((sqrt((x * x) + (y * y))) / z);
+//  float phi = atan(y / x);
   if (std::isnan(theta)) {
     theta = 0;
   }

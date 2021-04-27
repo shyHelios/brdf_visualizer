@@ -24,6 +24,13 @@ enum class SuperSamplingType : int {
   SuperSamplingCount
 };
 
+enum class Sampling {
+  BRDF,
+  Lights,
+  MIS,
+  SamplingCount
+};
+
 
 class RTCShader {
 public:
@@ -57,14 +64,24 @@ public:
   
   glm::vec4 &getDefaultBgColorRef();
   
+  Sampling &getSamplingTypeRef();
+  
   const std::shared_ptr<Sampler> &getSampler() const;
   
   void setSampler(const std::shared_ptr<Sampler> &sampler);
+  
+  static const std::pair<const char *, Sampling> samplingArray[static_cast<int>(Sampling::SamplingCount)];
+  
+  static bool imguiSamplingSelectionGetter(void *data, int idx, const char **out_str) {
+    *out_str = reinterpret_cast<std::pair<const char *, Sampling> *>(data)[idx].first;
+    return true;
+  }
 
 protected:
   std::unique_ptr<RTLight> light_;
   std::unique_ptr<RTSphericalMap> sphericalMap_;
   glm::vec4 defaultBgColor_;
+  Sampling samplingType_;
   
   static glm::vec3 getNormal(const RTCGeometry geometry, const RTCRayHitIor &rayHit);
   

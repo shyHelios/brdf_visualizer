@@ -13,7 +13,7 @@ public:
   
   glm::vec3 downsampledTexel(const glm::vec3 &pos);
   
-  glm::vec3 sample(float &pdf);
+  glm::vec3 sample(float &pdf, glm::vec3 &omegaI);
 
 private:
   

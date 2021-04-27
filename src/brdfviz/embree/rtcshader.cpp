@@ -15,6 +15,12 @@
 #include "pathtracerhelper.h"
 #include "mathscene.h"
 
+const std::pair<const char *, Sampling> RTCShader::samplingArray[static_cast<int>(Sampling::SamplingCount)] = {
+    {"BRDF",   Sampling::BRDF},
+    {"Lights", Sampling::Lights},
+    {"MIS",    Sampling::MIS},
+};
+
 
 RTCShader::RTCShader() :
     pathTracerHelper(nullptr),
@@ -33,8 +39,8 @@ RTCShader::RTCShader() :
 //    sphericalMap_(std::make_unique<RTSphericalMap>("data/sphereMap.jpg")),
 //    sphericalMap_(std::make_unique<RTSphericalMap>("data/studio_small_03_4k.hdr")),
     sphericalMap_(std::make_unique<RTSphericalMap>("data/outdoor_umbrellas_4k.hdr")),
-    defaultBgColor_(glm::vec4(0.8, 0.8, 0.8, 1)) {
-  
+    defaultBgColor_(glm::vec4(0.8, 0.8, 0.8, 1)),
+    samplingType_(Sampling::MIS) {
 }
 
 RTCRayHitIor RTCShader::shootRay(const float x, const float y) {
@@ -235,5 +241,9 @@ const std::shared_ptr<Sampler> &RTCShader::getSampler() const {
 
 void RTCShader::setSampler(const std::shared_ptr<Sampler> &sampler) {
   sampler_ = sampler;
+}
+
+Sampling &RTCShader::getSamplingTypeRef() {
+  return samplingType_;
 }
 

@@ -34,6 +34,20 @@ public:
   
   float getMirrorBRDF(const glm::vec3 &toLight, const glm::vec3 &toCamera, const glm::vec3 &normal, const std::shared_ptr<BRDFShader> &brdfShaderPtr);
   
+  glm::vec4 sampleLight(const glm::vec3 &direction,
+                        const glm::vec3 &shaderNormal,
+                        const glm::vec3 &directionToCamera,
+                        const glm::vec3 &worldPos,
+                        const int depth,
+                        float &pdf);
+  
+  glm::vec4 sampleBRDF(const glm::vec3 &direction,
+                       const glm::vec3 &shaderNormal,
+                       const glm::vec3 &directionToCamera,
+                       const glm::vec3 &worldPos,
+                       const int depth,
+                       float &pdf);
+  
   std::weak_ptr<BRDFShader> brdfShader;
 protected:
   float beckmannDistribution(float roughness, float normDotHalf);

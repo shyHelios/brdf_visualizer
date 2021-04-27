@@ -113,6 +113,7 @@ void Gui::init() {
   renderer_ = std::make_unique<OpenGLRenderer>();
   embreeRenderer_ = std::make_unique<EmbreeRenderer>(200, 200, 2.0f);
 //  embreeRenderer_ = std::make_unique<EmbreeRenderer>(400, 400, 1.0f);
+//  embreeRenderer_ = std::make_unique<EmbreeRenderer>(800, 800, 0.5f);
   
   fbo_ = std::make_unique<FrameBufferObject>(800, 800);
   
@@ -221,9 +222,9 @@ void Gui::ui() {
   
   // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
   {
-    ImGui::Begin("Hello, world!");// Create a window called "Hello, world!" and append into it.
+    ImGui::Begin("Parameters");// Create a window called "Hello, world!" and append into it.
     
-    ImGui::Checkbox("Show Demo Window", &showDemoWindow_);      // Edit bools storing our window open/close state
+    // ImGui::Checkbox("Show Demo Window", &showDemoWindow_);      // Edit bools storing our window open/close state
     
     ImGui::ColorEdit3("clear color", (float *) &renderer_->clearColor); // Edit 3 floats representing a color
     
@@ -309,9 +310,12 @@ void Gui::ui() {
     shallInvalidateSampler_ |= samplerSelected;
     shallInvalidateRTC_ |= samplerSelected;
     
-    bool sampleLights = false;
-    
-    shallInvalidateRTC_ |= ImGui::Checkbox("Sample lights", &sampleLights);
+    selectedIdx = reinterpret_cast<int *>(&embreeRenderer_->getCommonShader()->getSamplingTypeRef());
+    shallInvalidateRTC_ |= ImGui::Combo("Sampling type",                                   // const char* label,
+                                        selectedIdx,                                             // int* current_item,
+                                        &RTCShader::imguiSamplingSelectionGetter,                // bool(*items_getter)(void* data, int idx, const char** out_text),
+                                        (void *) RTCShader::samplingArray,                       // void* data
+                                        IM_ARRAYSIZE(RTCShader::samplingArray));// int items_count
     
     
     #pragma endregion
@@ -542,7 +546,7 @@ void Gui::renderLoop() {
 
 void Gui::drawMainRender() {
   ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollWithMouse;
-  ImGui::Begin("Test drawing into window", nullptr, window_flags);
+  ImGui::Begin("BRDF visualization", nullptr, window_flags);
   ImGuiIO &io = ImGui::GetIO();
   
   glm::vec2 fboUv = fbo_->getUV();

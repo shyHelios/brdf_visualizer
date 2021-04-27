@@ -6,6 +6,7 @@
 #include <common/utils/math.h>
 #include <gl/texture.h>
 #include <common/utils/rng.h>
+#include <common/utils/coordsystem.h>
 #include "rtsphericalmap.h"
 
 RTSphericalMap::RTSphericalMap(const std::string &filename) {
@@ -34,21 +35,35 @@ RTSphericalMap::RTSphericalMap(const std::string &filename) {
 }
 
 glm::vec3 RTSphericalMap::texel(const glm::vec3 &pos) {
-  float theta = acosf(clamp(pos.z, -1.f, 1.f));
-  float phi = atan2f(pos.y, pos.x) + static_cast<float>(M_PI);
-  
-  float u = 1.0f - phi * 0.5f * static_cast<float>(M_1_PI);
+  glm::vec2 spherical = cartesianToSpherical(pos);
+  float theta = spherical.x;
+  float phi = spherical.y;
+  float u = 1.0f - (phi * 0.5f * static_cast<float>(M_1_PI));
+//  float u = 1.0f - (phi / (2. * M_PI));
   float v = theta * static_cast<float>(M_1_PI);
 
-//  return colorToGlm(downsampledTexture_->texel(u, v));
+//  theta = v * M_PI;
+//  phi = (1. - u) * (2 * M_PI);
+//
+//  glm::vec3 cartesian = sphericalToCartesian(theta, phi);
+//  cartesian.x *= -1.;
+//  cartesian.y *= -1.;
+//
+//  float dist = glm::distance(pos, cartesian);
+//
+//  if (dist > 0.001f) {
+//    spdlog::warn("dist: {} [{},{},{}],  [{},{},{}]", dist, cartesian.x, cartesian.y, cartesian.z, pos.x, pos.y, pos.z);
+//  }
+//
   return colorToGlm(texture_->texel(u, v));
 }
 
 glm::vec3 RTSphericalMap::downsampledTexel(const glm::vec3 &pos) {
-  float theta = acosf(clamp(pos.z, -1.f, 1.f));
-  float phi = atan2f(pos.y, pos.x) + static_cast<float>(M_PI);
-  
-  float u = 1.0f - phi * 0.5f * static_cast<float>(M_1_PI);
+  glm::vec2 spherical = cartesianToSpherical(pos);
+  float theta = spherical.x;
+  float phi = spherical.y;
+  float u = 1.0f - (phi * 0.5f * static_cast<float>(M_1_PI));
+//  float u = 1.0f - (phi / (2. * M_PI));
   float v = theta * static_cast<float>(M_1_PI);
   
   return colorToGlm(downsampledTexture_->texel(u, v));
@@ -96,9 +111,9 @@ void RTSphericalMap::computeCdf() {
 //  spdlog::info("[SPHERE MAP] pdf sum: {}", sum);
 }
 
-glm::vec3 RTSphericalMap::sample(float &pdf) {
-  const float u = rng();
-  const float v = rng();
+glm::vec3 RTSphericalMap::sample(float &pdf, glm::vec3 &omegaI) {
+  const float randU = rng();
+  const float randV = rng();
   const size_t height = downsampledTexture_->height();
   const size_t width = downsampledTexture_->width();
   
@@ -107,7 +122,7 @@ glm::vec3 RTSphericalMap::sample(float &pdf) {
     marginalSum += marginal;
   }
   size_t colIdx;
-  const float sampleU = u * marginalSum;
+  const float sampleU = randU * marginalSum;
   float currentSum = 0;
   for (colIdx = 0; colIdx < marginalCdf_.size(); colIdx++) {
     currentSum += marginalCdf_.at(colIdx);
@@ -120,7 +135,7 @@ glm::vec3 RTSphericalMap::sample(float &pdf) {
   for (size_t y = 0; y < height; y++) {
     cdfSum += downsampledCdf_[y * width + colIdx];
   }
-  const float sampleV = v * cdfSum;
+  const float sampleV = randV * cdfSum;
   
   size_t rowIdx;
   currentSum = 0;
@@ -130,6 +145,19 @@ glm::vec3 RTSphericalMap::sample(float &pdf) {
       break;
     }
   }
+  
+  float texU = static_cast<float>(colIdx) / static_cast<float>(width);
+  float texV = static_cast<float>(rowIdx) / static_cast<float>(height);
+  
+  float theta = texV * M_PI;
+  float phi = (1. - texU) * (2 * M_PI);
+  
+  glm::vec3 cartesian = sphericalToCartesian(theta, phi);
+  cartesian.x *= -1.;
+  cartesian.y *= -1.;
+  
+  omegaI = sphericalToCartesian(theta, phi);
+  
   
   const glm::vec3 sampledColor = colorToGlm(downsampledTexture_->pixel(colIdx, rowIdx));
   pdf = downsampledPdf_[rowIdx * width + colIdx];
