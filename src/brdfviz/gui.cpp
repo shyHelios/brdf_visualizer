@@ -37,9 +37,9 @@ void Gui::init() {
   if (!glfwInit())
     throw "Unable to init GLFW";
   
-  glsl_version = "#version 400";
+  glsl_version = "#version 450";
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
   
   // Create window with graphics context
   window = glfwCreateWindow(1280, 720, winName_, NULL, NULL);
@@ -111,7 +111,7 @@ void Gui::init() {
 
 //  LineVertexBufferObject::setupStaticObjects();
   renderer_ = std::make_unique<OpenGLRenderer>();
-  embreeRenderer_ = std::make_unique<EmbreeRenderer>(200, 200, 2.0f);
+   embreeRenderer_ = std::make_unique<EmbreeRenderer>(200, 200, 2.0f);
 //  embreeRenderer_ = std::make_unique<EmbreeRenderer>(400, 400, 1.0f);
 //  embreeRenderer_ = std::make_unique<EmbreeRenderer>(800, 800, 0.5f);
   
@@ -176,7 +176,7 @@ void Gui::init() {
   
   
   sampler_ = std::make_shared<Sampler>(brdfShader);
-  embreeRenderer_->getCommonShader()->setSampler(sampler_);
+   embreeRenderer_->getCommonShader()->setSampler(sampler_);
   
   auto samplerVisualizerObject = std::make_shared<SamplerVisualizerObject>(normalVector,
                                                                            incidentVector,

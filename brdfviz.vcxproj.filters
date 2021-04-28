@@ -677,5 +677,6 @@
     </CopyFileToFolders>
     <CopyFileToFolders Include="Shaders\Normal\FragmentShader.glsl" />
     <CopyFileToFolders Include="Shaders\Normal\VertexShader.glsl" />
+    <CopyFileToFolders Include="imgui.ini" />
   </ItemGroup>
 </Project>
