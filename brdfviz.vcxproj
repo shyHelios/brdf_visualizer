@@ -1,0 +1,700 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{0fa3f0a7-ae3b-4174-9a47-4a7d0bcf62f6}</ProjectGuid>
+    <RootNamespace>brdfviz</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\msvc\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\msvc\objects\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\msvc\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\msvc\objects\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\msvc\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\msvc\objects\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\msvc\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\msvc\objects\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES;SPDLOG_COMPILED_LIB</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\brdfviz;$(SolutionDir)lib\imguifiledialog;$(SolutionDir)lib\imgui\backends;$(SolutionDir)lib\imgui;$(SolutionDir)lib\glm;$(SolutionDir)lib\spdlog\include;$(SolutionDir)lib\msvc\FreeImage\$(Platform);$(SolutionDir)lib\msvc\assimp\$(Platform)\include;$(SolutionDir)lib\msvc\embree\$(Platform)\include;$(SolutionDir)lib\msvc\glad\include;$(SolutionDir)lib\msvc\glfw\$(Platform)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)lib\msvc\FreeImage\$(Platform)\FreeImage.lib;$(SolutionDir)lib\msvc\assimp\$(Platform)\lib\assimp-vc142-mt.lib;$(SolutionDir)lib\msvc\embree\$(Platform)\lib\embree3.lib;$(SolutionDir)lib\msvc\glfw\$(Platform)\lib\glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES;SPDLOG_COMPILED_LIB</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\brdfviz;$(SolutionDir)lib\imguifiledialog;$(SolutionDir)lib\imgui\backends;$(SolutionDir)lib\imgui;$(SolutionDir)lib\glm;$(SolutionDir)lib\spdlog\include;$(SolutionDir)lib\msvc\FreeImage\$(Platform);$(SolutionDir)lib\msvc\assimp\$(Platform)\include;$(SolutionDir)lib\msvc\embree\$(Platform)\include;$(SolutionDir)lib\msvc\glad\include;$(SolutionDir)lib\msvc\glfw\$(Platform)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)lib\msvc\FreeImage\$(Platform)\FreeImage.lib;$(SolutionDir)lib\msvc\assimp\$(Platform)\lib\assimp-vc142-mt.lib;$(SolutionDir)lib\msvc\embree\$(Platform)\lib\embree3.lib;$(SolutionDir)lib\msvc\glfw\$(Platform)\lib\glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES;SPDLOG_COMPILED_LIB</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\brdfviz;$(SolutionDir)lib\imguifiledialog;$(SolutionDir)lib\imgui\backends;$(SolutionDir)lib\imgui;$(SolutionDir)lib\glm;$(SolutionDir)lib\spdlog\include;$(SolutionDir)lib\msvc\FreeImage\$(Platform);$(SolutionDir)lib\msvc\assimp\$(Platform)\include;$(SolutionDir)lib\msvc\embree\$(Platform)\include;$(SolutionDir)lib\msvc\glad\include;$(SolutionDir)lib\msvc\glfw\$(Platform)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)lib\msvc\FreeImage\$(Platform)\FreeImage.lib;$(SolutionDir)lib\msvc\assimp\$(Platform)\lib\assimp-vc142-mt.lib;$(SolutionDir)lib\msvc\embree\$(Platform)\lib\embree3.lib;$(SolutionDir)lib\msvc\glfw\$(Platform)\lib\glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES;SPDLOG_COMPILED_LIB</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\brdfviz;$(SolutionDir)lib\imguifiledialog;$(SolutionDir)lib\imgui\backends;$(SolutionDir)lib\imgui;$(SolutionDir)lib\glm;$(SolutionDir)lib\spdlog\include;$(SolutionDir)lib\msvc\FreeImage\$(Platform);$(SolutionDir)lib\msvc\assimp\$(Platform)\include;$(SolutionDir)lib\msvc\embree\$(Platform)\include;$(SolutionDir)lib\msvc\glad\include;$(SolutionDir)lib\msvc\glfw\$(Platform)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)lib\msvc\FreeImage\$(Platform)\FreeImage.lib;$(SolutionDir)lib\msvc\assimp\$(Platform)\lib\assimp-vc142-mt.lib;$(SolutionDir)lib\msvc\embree\$(Platform)\lib\embree3.lib;$(SolutionDir)lib\msvc\glfw\$(Platform)\lib\glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="lib\imguifiledialog\ImGuiFileDialog.cpp" />
+    <ClCompile Include="lib\imgui\backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="lib\imgui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="lib\imgui\imgui.cpp" />
+    <ClCompile Include="lib\imgui\imgui_demo.cpp" />
+    <ClCompile Include="lib\imgui\imgui_draw.cpp" />
+    <ClCompile Include="lib\imgui\imgui_tables.cpp" />
+    <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="lib\msvc\glad\src\glad.c" />
+    <ClCompile Include="lib\spdlog\src\async.cpp" />
+    <ClCompile Include="lib\spdlog\src\cfg.cpp" />
+    <ClCompile Include="lib\spdlog\src\color_sinks.cpp" />
+    <ClCompile Include="lib\spdlog\src\file_sinks.cpp" />
+    <ClCompile Include="lib\spdlog\src\fmt.cpp" />
+    <ClCompile Include="lib\spdlog\src\spdlog.cpp" />
+    <ClCompile Include="lib\spdlog\src\stdout_sinks.cpp" />
+    <ClCompile Include="src\brdfviz\common\sampler.cpp" />
+    <ClCompile Include="src\brdfviz\common\utils\assimploading.cpp" />
+    <ClCompile Include="src\brdfviz\common\utils\coordsystem.cpp" />
+    <ClCompile Include="src\brdfviz\common\utils\rgb.cpp" />
+    <ClCompile Include="src\brdfviz\common\utils\rng.cpp" />
+    <ClCompile Include="src\brdfviz\common\utils\texutils.cpp" />
+    <ClCompile Include="src\brdfviz\common\utils\timer.cpp" />
+    <ClCompile Include="src\brdfviz\embree\embreerenderer.cpp" />
+    <ClCompile Include="src\brdfviz\embree\mathscene.cpp" />
+    <ClCompile Include="src\brdfviz\embree\pathtracerhelper.cpp" />
+    <ClCompile Include="src\brdfviz\embree\rtcamera.cpp" />
+    <ClCompile Include="src\brdfviz\embree\rtccommonshader.cpp" />
+    <ClCompile Include="src\brdfviz\embree\rtcshader.cpp" />
+    <ClCompile Include="src\brdfviz\embree\rtlight.cpp" />
+    <ClCompile Include="src\brdfviz\embree\rtsphericalmap.cpp" />
+    <ClCompile Include="src\brdfviz\embree\sphere.cpp" />
+    <ClCompile Include="src\brdfviz\gl\camera.cpp" />
+    <ClCompile Include="src\brdfviz\gl\cameratransformation.cpp" />
+    <ClCompile Include="src\brdfviz\gl\framebufferobject.cpp" />
+    <ClCompile Include="src\brdfviz\gl\icospherevertexbufferobject.cpp" />
+    <ClCompile Include="src\brdfviz\gl\light.cpp" />
+    <ClCompile Include="src\brdfviz\gl\linevertexbufferobject.cpp" />
+    <ClCompile Include="src\brdfviz\gl\material.cpp" />
+    <ClCompile Include="src\brdfviz\gl\object.cpp" />
+    <ClCompile Include="src\brdfviz\gl\objecttransformation.cpp" />
+    <ClCompile Include="src\brdfviz\gl\openglrenderer.cpp" />
+    <ClCompile Include="src\brdfviz\gl\openglscene.cpp" />
+    <ClCompile Include="src\brdfviz\gl\renderer.cpp" />
+    <ClCompile Include="src\brdfviz\gl\samplervisualizerobject.cpp" />
+    <ClCompile Include="src\brdfviz\gl\shader.cpp" />
+    <ClCompile Include="src\brdfviz\gl\shaderloader.cpp" />
+    <ClCompile Include="src\brdfviz\gl\shaders\brdfshader.cpp" />
+    <ClCompile Include="src\brdfviz\gl\shaders\diffuseshader.cpp" />
+    <ClCompile Include="src\brdfviz\gl\shaders\normalshader.cpp" />
+    <ClCompile Include="src\brdfviz\gl\texture.cpp" />
+    <ClCompile Include="src\brdfviz\gl\transformation.cpp" />
+    <ClCompile Include="src\brdfviz\gl\vertexbufferobject.cpp" />
+    <ClCompile Include="src\brdfviz\gui.cpp" />
+    <ClCompile Include="src\brdfviz\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\imguifiledialog\dirent\dirent.h" />
+    <ClInclude Include="lib\imguifiledialog\ImGuiFileDialog.h" />
+    <ClInclude Include="lib\imguifiledialog\ImGuiFileDialogConfig.h" />
+    <ClInclude Include="lib\imgui\backends\imgui_impl_glfw.h" />
+    <ClInclude Include="lib\imgui\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="lib\imgui\imgui.h" />
+    <ClInclude Include="lib\imgui\imgui_internal.h" />
+    <ClInclude Include="lib\imgui\imstb_rectpack.h" />
+    <ClInclude Include="lib\imgui\imstb_textedit.h" />
+    <ClInclude Include="lib\imgui\imstb_truetype.h" />
+    <ClInclude Include="lib\msvc\glad\include\glad\glad.h" />
+    <ClInclude Include="lib\msvc\glad\include\KHR\khrplatform.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\async.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\async_logger-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\async_logger.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\cfg\argv.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\cfg\env.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\cfg\helpers-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\cfg\helpers.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\common-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\common.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\backtracer-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\backtracer.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\circular_q.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\console_globals.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\file_helper-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\file_helper.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\fmt_helper.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\log_msg-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\log_msg.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\log_msg_buffer-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\log_msg_buffer.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\mpmc_blocking_q.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\null_mutex.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\os-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\os.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\periodic_worker-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\periodic_worker.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\registry-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\registry.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\synchronous_factory.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\tcp_client-windows.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\tcp_client.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\thread_pool-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\thread_pool.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\details\windows_include.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\bin_to_hex.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\bundled\chrono.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\bundled\color.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\bundled\compile.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\bundled\core.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\bundled\format-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\bundled\format.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\bundled\locale.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\bundled\os.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\bundled\ostream.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\bundled\posix.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\bundled\printf.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\bundled\ranges.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\chrono.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\fmt.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fmt\ostr.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\formatter.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\fwd.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\logger-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\logger.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\pattern_formatter-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\pattern_formatter.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\android_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\ansicolor_sink-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\ansicolor_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\base_sink-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\base_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\basic_file_sink-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\basic_file_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\daily_file_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\dist_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\dup_filter_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\msvc_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\null_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\ostream_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\ringbuffer_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\rotating_file_sink-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\rotating_file_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\sink-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\stdout_color_sinks-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\stdout_color_sinks.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\stdout_sinks-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\stdout_sinks.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\syslog_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\systemd_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\tcp_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\wincolor_sink-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\wincolor_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\sinks\win_eventlog_sink.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\spdlog-inl.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\spdlog.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\stopwatch.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\tweakme.h" />
+    <ClInclude Include="lib\spdlog\include\spdlog\version.h" />
+    <ClInclude Include="src\brdfviz\common\sampler.h" />
+    <ClInclude Include="src\brdfviz\common\utils\assimploading.h" />
+    <ClInclude Include="src\brdfviz\common\utils\coordsystem.h" />
+    <ClInclude Include="src\brdfviz\common\utils\math.h" />
+    <ClInclude Include="src\brdfviz\common\utils\rgb.h" />
+    <ClInclude Include="src\brdfviz\common\utils\rng.h" />
+    <ClInclude Include="src\brdfviz\common\utils\texutils.h" />
+    <ClInclude Include="src\brdfviz\common\utils\timer.h" />
+    <ClInclude Include="src\brdfviz\common\utils\utils.h" />
+    <ClInclude Include="src\brdfviz\embree\embreerenderer.h" />
+    <ClInclude Include="src\brdfviz\embree\mathscene.h" />
+    <ClInclude Include="src\brdfviz\embree\pathtracerhelper.h" />
+    <ClInclude Include="src\brdfviz\embree\rtcamera.h" />
+    <ClInclude Include="src\brdfviz\embree\rtccommonshader.h" />
+    <ClInclude Include="src\brdfviz\embree\rtcrayhitior.h" />
+    <ClInclude Include="src\brdfviz\embree\rtcshader.h" />
+    <ClInclude Include="src\brdfviz\embree\rtcshadingtype.h" />
+    <ClInclude Include="src\brdfviz\embree\rtlight.h" />
+    <ClInclude Include="src\brdfviz\embree\rtsphericalmap.h" />
+    <ClInclude Include="src\brdfviz\embree\sphere.h" />
+    <ClInclude Include="src\brdfviz\gl\camera.h" />
+    <ClInclude Include="src\brdfviz\gl\camerainfo.h" />
+    <ClInclude Include="src\brdfviz\gl\cameratransformation.h" />
+    <ClInclude Include="src\brdfviz\gl\color.h" />
+    <ClInclude Include="src\brdfviz\gl\framebufferobject.h" />
+    <ClInclude Include="src\brdfviz\gl\icospherevertexbufferobject.h" />
+    <ClInclude Include="src\brdfviz\gl\light.h" />
+    <ClInclude Include="src\brdfviz\gl\lightinfo.h" />
+    <ClInclude Include="src\brdfviz\gl\linevertexbufferobject.h" />
+    <ClInclude Include="src\brdfviz\gl\material.h" />
+    <ClInclude Include="src\brdfviz\gl\object.h" />
+    <ClInclude Include="src\brdfviz\gl\objecttransformation.h" />
+    <ClInclude Include="src\brdfviz\gl\openglrenderer.h" />
+    <ClInclude Include="src\brdfviz\gl\openglscene.h" />
+    <ClInclude Include="src\brdfviz\gl\renderer.h" />
+    <ClInclude Include="src\brdfviz\gl\samplervisualizerobject.h" />
+    <ClInclude Include="src\brdfviz\gl\shader.h" />
+    <ClInclude Include="src\brdfviz\gl\shaderloader.h" />
+    <ClInclude Include="src\brdfviz\gl\shaders\brdfshader.h" />
+    <ClInclude Include="src\brdfviz\gl\shaders\diffuseshader.h" />
+    <ClInclude Include="src\brdfviz\gl\shaders\normalshader.h" />
+    <ClInclude Include="src\brdfviz\gl\texture.h" />
+    <ClInclude Include="src\brdfviz\gl\texturetype.h" />
+    <ClInclude Include="src\brdfviz\gl\transformation.h" />
+    <ClInclude Include="src\brdfviz\gl\uniformlocationpair.h" />
+    <ClInclude Include="src\brdfviz\gl\uniformlocations.h" />
+    <ClInclude Include="src\brdfviz\gl\vbos\cube.h" />
+    <ClInclude Include="src\brdfviz\gl\vbos\gizmo.h" />
+    <ClInclude Include="src\brdfviz\gl\vbos\halficosahedron.h" />
+    <ClInclude Include="src\brdfviz\gl\vbos\icosahedron.h" />
+    <ClInclude Include="src\brdfviz\gl\vbos\plane.h" />
+    <ClInclude Include="src\brdfviz\gl\vertex.h" />
+    <ClInclude Include="src\brdfviz\gl\vertexbufferobject.h" />
+    <ClInclude Include="src\brdfviz\gui.h" />
+    <ClInclude Include="src\brdfviz\pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="Shaders\brdf\FragmentShader.glsl">
+      <DeploymentContent>true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="lib\msvc\assimp\x64\bin\assimp-vc142-mt.dll">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="lib\msvc\embree\x64\bin\embree3.dll">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="lib\msvc\FreeImage\x64\FreeImage.dll">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="lib\msvc\embree\x64\bin\tbb12.dll">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="Shaders\brdf\VertexShader.glsl">
+      <FileType>Document</FileType>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Shaders\Default\FragmentShader.glsl">
+      <FileType>Document</FileType>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Shaders\Default\VertexShader.glsl">
+      <FileType>Document</FileType>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="data\cube.mtl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="data\outdoor_umbrellas_4k.hdr">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="data\sphere.mtl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="data\studio_small_03_4k.hdr">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="data\suzie.mtl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="data\teapot2.mtl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="data\field.jpg">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="data\sphereMap.jpg">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="data\venice_sunset.jpg">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="Shaders\Normal\FragmentShader.glsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Shaders\Normal\VertexShader.glsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
+      <DestinationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RelativeDir)%(Filename)%(Extension)</DestinationFileName>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
