@@ -14,7 +14,7 @@
 
 
 EmbreeRenderer::EmbreeRenderer(const int width, const int height, const float renderScale) : width_(width), height_(height), renderScale_(renderScale) {
-  texData_.reserve(width_ * height_);
+  texData_.resize(width_ * height_);
   
   for (int y = 0; y < height_; ++y) {
     for (int x = 0; x < width_; ++x) {
@@ -528,7 +528,7 @@ void EmbreeRenderer::saveImage(const std::filesystem::path &path) {
                                                    FI_RGBA_BLUE_MASK,
                                                    TRUE);
     
-    if (FreeImage_Save(FIF_PNG, image, path.c_str(), 0))
+    if (FreeImage_Save(FIF_PNG, image, (char*)path.c_str(), 0))
       printf("Successfully saved!\n");
     else
       printf("Failed saving!\n");

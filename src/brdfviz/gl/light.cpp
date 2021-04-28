@@ -2,8 +2,8 @@
 * This is a personal academic project. Dear PVS-Studio, please check it.
 * PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 */
-#include "light.h"
 #include <pch.h>
+#include "light.h"
 #include "shader.h"
 
 Light::Light(const std::shared_ptr<Transformation> &transformation, glm::vec4 diffuse, glm::vec4 ambient, glm::vec4 specular, float constant,

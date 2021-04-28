@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <FreeImage.h>
+#include <string>
 #include "color.h"
 
 FIBITMAP *BitmapFromFile(const char *file_name, int &width, int &height);

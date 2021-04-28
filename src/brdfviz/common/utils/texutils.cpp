@@ -29,7 +29,7 @@ void saveScreen(const size_t width, const size_t height, const std::filesystem::
   
   FIBITMAP *image = FreeImage_ConvertFromRawBits(pixels, width, height, 3 * width, 24, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, TRUE);
   
-  if (FreeImage_Save(FIF_PNG, image, path.c_str(), 0))
+  if (FreeImage_Save(FIF_PNG, image, (char*)path.c_str(), 0))
     spdlog::info("[TEXUTILS] Successfully saved!");
   else
     spdlog::error("[TEXUTILS] Failed saving!");

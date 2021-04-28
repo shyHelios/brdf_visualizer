@@ -5,6 +5,7 @@
 #ifndef RTLIGHT_H
 #define RTLIGHT_H
 
+// #include <glm/vec3.hpp>
 
 class RTLight {
 public:

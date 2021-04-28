@@ -6,10 +6,21 @@
 #ifndef PCH_H
 #define PCH_H
 
+#ifndef NOMINMAX
+  #define NOMINMAX
+#endif
 
-#define NOMINMAX
-#define _CRT_SECURE_NO_WARNINGS
-#define _USE_MATH_DEFINES
+#ifndef _CRT_SECURE_NO_WARNINGS
+  #define _CRT_SECURE_NO_WARNINGS
+#endif
+
+#ifndef _USE_MATH_DEFINES
+  #define _USE_MATH_DEFINES
+#endif
+
+#ifdef _MSC_VER 
+  #define __PRETTY_FUNCTION__ __FUNCSIG__ 
+#endif
 
 #include <cassert>
 #include <cmath>
@@ -61,7 +72,9 @@
 // GLFW - simple API for creating windows, receiving input and events
 #include <GLFW/glfw3.h>
 
-#define FMT_HEADER_ONLY
+#ifndef _MSC_VER 
+  #define FMT_HEADER_ONLY
+#endif
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>

@@ -2,6 +2,7 @@
 * This is a personal academic project. Dear PVS-Studio, please check it.
 * PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 */
+#include <pch.h>
 #include "brdfshader.h"
 
 const std::pair<const char *, BRDFShader::BRDF> BRDFShader::brdfArray[static_cast<int>(BRDF::CountBrdf)] = {
