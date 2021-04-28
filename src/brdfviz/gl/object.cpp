@@ -10,7 +10,7 @@
 
 
 int Object::IDcounter = 0;
-std::map<int, Object *> Object::objects = std::map<int, Object *>();
+//std::map<int, Object *> Object::objects = std::map<int, Object *>();
 
 Object::Object(const std::shared_ptr<VertexBufferObject> &innerObject,
                const std::shared_ptr<Shader> &shader,
@@ -25,7 +25,7 @@ Object::Object(const std::shared_ptr<VertexBufferObject> &innerObject,
     transformation(transformation == nullptr ?
                    std::make_shared<ObjectTransformation>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.f), glm::vec3(0.0f)) :
                    transformation) {
-  objects.insert_or_assign(ID, this);
+//  objects.insert_or_assign(ID, this);
 }
 
 void Object::draw(const bool geometry) {
@@ -76,6 +76,6 @@ void Object::addName(const std::string &name) {
   this->objectName = name;
 }
 
-Object *Object::getObjectByID(int ID) {
-  return objects.at(ID);
-}
+//Object *Object::getObjectByID(int ID) {
+//  return objects.at(ID);
+//}

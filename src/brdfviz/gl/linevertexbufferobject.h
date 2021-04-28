@@ -9,11 +9,6 @@
 
 class LineVertexBufferObject : public VertexBufferObject {
 public:
-//  static std::shared_ptr<LineVertexBufferObject> gizmo;
-//
-//  static void setupStaticObjects();
-//
-//  static void deleteStaticObjects();
   
   LineVertexBufferObject(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, int lineWidth = 1);
   

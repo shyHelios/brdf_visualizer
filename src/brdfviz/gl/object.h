@@ -44,13 +44,13 @@ public:
   int getID();
   
   void addName(const std::string &);
-  
-  static Object *getObjectByID(int ID);
+
+//  static Object *getObjectByID(int ID);
 
 //private:
   bool visible;
   std::string objectName;
-  static std::map<int, Object *> objects;
+//  static std::map<int, Object *> objects;
   
   std::shared_ptr<Material> material;
   bool hasMtl;

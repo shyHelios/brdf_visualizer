@@ -10,18 +10,6 @@
 
 class VertexBufferObject {
 public:
-//  static std::shared_ptr<VertexBufferObject> cube;
-//  static std::shared_ptr<VertexBufferObject> plane;
-//  static std::shared_ptr<VertexBufferObject> disk;
-//  static std::shared_ptr<VertexBufferObject> icosahedron;
-//  static std::shared_ptr<VertexBufferObject> halficosahedron;
-
-//  static void setupStaticObjects();
-
-//  static void deleteStaticObjects();
-
-//  VertexBufferObject(const std::vector<float> &points);
-  
   VertexBufferObject(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices);
   
   virtual ~VertexBufferObject();
