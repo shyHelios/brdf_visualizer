@@ -22,3 +22,7 @@ cp data bin/reldbginfo -r
 cp Shaders bin/debug -r
 cp Shaders bin/release -r
 cp Shaders bin/reldbginfo -r
+
+cp imgui.ini bin/debug
+cp imgui.ini bin/release
+cp imgui.ini bin/reldbginfo
