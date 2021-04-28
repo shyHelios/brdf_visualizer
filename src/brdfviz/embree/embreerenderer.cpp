@@ -195,7 +195,7 @@ glm::vec4 EmbreeRenderer::getPixel(int x, int y) {
 
 void EmbreeRenderer::producer() {
   std::vector<glm::vec4> localData;
-  localData.reserve(width_ * height_);
+  localData.resize(width_ * height_);
   
   float t = 0.0f; // time
   auto t0 = std::chrono::high_resolution_clock::now();
@@ -528,7 +528,7 @@ void EmbreeRenderer::saveImage(const std::filesystem::path &path) {
                                                    FI_RGBA_BLUE_MASK,
                                                    TRUE);
     
-    if (FreeImage_Save(FIF_PNG, image, (char*)path.c_str(), 0))
+    if (FreeImage_Save(FIF_PNG, image, (char *) path.c_str(), 0))
       printf("Successfully saved!\n");
     else
       printf("Failed saving!\n");

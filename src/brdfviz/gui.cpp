@@ -111,7 +111,7 @@ void Gui::init() {
 
 //  LineVertexBufferObject::setupStaticObjects();
   renderer_ = std::make_unique<OpenGLRenderer>();
-   embreeRenderer_ = std::make_unique<EmbreeRenderer>(200, 200, 2.0f);
+  embreeRenderer_ = std::make_unique<EmbreeRenderer>(200, 200, 2.0f);
 //  embreeRenderer_ = std::make_unique<EmbreeRenderer>(400, 400, 1.0f);
 //  embreeRenderer_ = std::make_unique<EmbreeRenderer>(800, 800, 0.5f);
   
@@ -176,7 +176,7 @@ void Gui::init() {
   
   
   sampler_ = std::make_shared<Sampler>(brdfShader);
-   embreeRenderer_->getCommonShader()->setSampler(sampler_);
+  embreeRenderer_->getCommonShader()->setSampler(sampler_);
   
   auto samplerVisualizerObject = std::make_shared<SamplerVisualizerObject>(normalVector,
                                                                            incidentVector,
