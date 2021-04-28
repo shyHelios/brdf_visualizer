@@ -1,8 +1,10 @@
-#version 460
+#version 400
 out vec4 fragColor;
 
 in vec3 o_objectColor;
 in vec2 o_texCoord;
+in vec3 o_normal;
+
 
 
 struct Environment{
@@ -110,5 +112,6 @@ float getMetalness(){
 void main () {
   //  fragColor = getAlbedo();
   //  fragColor = vec4(o_objectColor, 1);
-  fragColor = colormap(min(o_objectColor.x, 1));
+  // fragColor = vec4(((o_normal + 1.)/2.) * o_objectColor, 1.0);
+  fragColor = colormap(1.-min(o_objectColor.x, 1));
 }

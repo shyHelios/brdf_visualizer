@@ -1,4 +1,4 @@
-#version 460
+#version 400
 
 layout(location = 0)in vec3 in_Position;
 layout(location = 1)in vec3 in_Normal;
@@ -23,6 +23,7 @@ uniform mat4 u_viewMat;
 uniform mat4 u_projMat;
 out vec2 o_texCoord;
 out vec3 o_objectColor;
+out vec3 o_normal;
 
 uniform vec3 u_incidentVector;
 
@@ -161,9 +162,9 @@ float orenNayarBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3
 float mirrorBRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
   vec3 reflectVector = reflect(-toLight, normal);
   if (reflectVector == toCamera){
-    return 1;
+    return 1.f;
   }
-  return 0;
+  return 0.f;
 }
 
 float BRDF(vec3 toLight, vec3 toCamera, vec3 normal, vec3 tangent, vec3 bitangent){
@@ -228,4 +229,5 @@ void main(void){
   gl_Position = u_projMat * u_viewMat * u_modelMat * vec4(newPos, 1.0);
   o_texCoord = in_TexCoords;
   o_objectColor = vec3(brdf);
+  o_normal = in_Normal;
 }

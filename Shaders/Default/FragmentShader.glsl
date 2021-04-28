@@ -1,4 +1,4 @@
-#version 460
+#version 400
 out vec4 fragColor;
 
 in vec3 o_objectColor;

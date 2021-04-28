@@ -37,9 +37,9 @@ void Gui::init() {
   if (!glfwInit())
     throw "Unable to init GLFW";
   
-  glsl_version = "#version 460";
+  glsl_version = "#version 400";
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
   
   // Create window with graphics context
   window = glfwCreateWindow(1280, 720, winName_, NULL, NULL);
