@@ -34,6 +34,8 @@ enum class Sampling {
 
 class RTCShader {
 public:
+  friend class EmbreeRenderer;
+  
   RTCShader();
   
   std::unique_ptr<PathTracerHelper> pathTracerHelper;

@@ -129,6 +129,23 @@ void EmbreeRenderer::ui() {
     // close
     ImGuiFileDialog::Instance()->Close();
   }
+  
+  if (ImGui::Button("Load environment map")) {
+    ImGuiFileDialog::Instance()->OpenDialog("ChooseEnvMapDlgKey", "Choose Environment map", ".hdr,.png,.jpg", "./");
+  }
+  
+  if (ImGuiFileDialog::Instance()->Display("ChooseEnvMapDlgKey")) {
+    // action if OK
+    if (ImGuiFileDialog::Instance()->IsOk()) {
+      std::lock_guard<std::mutex> lockScene(sceneLock_);
+      std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+      commonShader_->sphericalMap_ = std::make_unique<RTSphericalMap>(filePathName);
+      invalidateRendering();
+    }
+    
+    // close
+    ImGuiFileDialog::Instance()->Close();
+  }
 
 //  if (ImGui::Button("Load test embree scene")) {
 //    std::lock_guard<std::mutex> lockScene(sceneLock_);
