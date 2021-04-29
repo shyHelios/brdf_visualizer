@@ -13,6 +13,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Setup path to libs
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
+option(USE_ANALYSER OFF)
+
 # Add embree to project
 include(${CMAKE_MODULE_PATH}/embree.cmake)
 # Add glm to project
@@ -21,8 +23,10 @@ include(${CMAKE_MODULE_PATH}/glm.cmake)
 include(${CMAKE_MODULE_PATH}/glfw3.cmake)
 # Add glad to project
 include(${CMAKE_MODULE_PATH}/glad.cmake)
-# Add PVS studio to project
-include(${CMAKE_MODULE_PATH}/PVS-Studio.cmake)
+if (USE_ANALYSER)
+  # Add PVS studio to project
+  include(${CMAKE_MODULE_PATH}/PVS-Studio.cmake)
+endif ()
 # Add imgui to project
 include(${CMAKE_MODULE_PATH}/imgui.cmake)
 # Add assimp to project

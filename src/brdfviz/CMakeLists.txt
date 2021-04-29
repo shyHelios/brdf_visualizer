@@ -137,26 +137,27 @@ target_compile_definitions(${PROJECT_NAME}_benchmark PRIVATE NGL=1)
 target_precompile_headers(${PROJECT_NAME} PUBLIC pch.h)
 target_precompile_headers(${PROJECT_NAME}_benchmark PUBLIC pch.h)
 
-target_compile_options(${PROJECT_NAME}
-                       PUBLIC
-                       -Wall
-                       -Wextra
-                       #                       -pedantic
-                       #                       -Werror
-                       -Wno-unknown-pragmas
-                       )
-
-target_compile_options(${PROJECT_NAME}_benchmark
-                       PUBLIC
-                       -Wall
-                       -Wextra
-                       #                       -pedantic
-                       #                       -Werror
-                       -Wno-unknown-pragmas
-                       )
-
-pvs_studio_add_target(TARGET ${PROJECT_NAME}.analyze ALL
-                      OUTPUT FORMAT errorfile
-                      ANALYZE ${PROJECT_NAME}
-                      MODE GA:1,2 OP
-                      LOG ${PROJECT_NAME}.err)
+#target_compile_options(${PROJECT_NAME}
+#                       PUBLIC
+#                       -Wall
+#                       -Wextra
+#                       #                       -pedantic
+#                       #                       -Werror
+#                       -Wno-unknown-pragmas
+#                       )
+#
+#target_compile_options(${PROJECT_NAME}_benchmark
+#                       PUBLIC
+#                       -Wall
+#                       -Wextra
+#                       #                       -pedantic
+#                       #                       -Werror
+#                       -Wno-unknown-pragmas
+#                       )
+if (USE_ANALYSER)
+  pvs_studio_add_target(TARGET ${PROJECT_NAME}.analyze ALL
+                        OUTPUT FORMAT errorfile
+                        ANALYZE ${PROJECT_NAME}
+                        MODE GA:1,2 OP
+                        LOG ${PROJECT_NAME}.err)
+endif ()
