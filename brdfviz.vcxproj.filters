@@ -661,22 +661,16 @@
     <CopyFileToFolders Include="Shaders\Default\FragmentShader.glsl" />
     <CopyFileToFolders Include="Shaders\Default\VertexShader.glsl" />
     <CopyFileToFolders Include="data\cube.mtl" />
-    <CopyFileToFolders Include="data\field.jpg">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
     <CopyFileToFolders Include="data\outdoor_umbrellas_4k.hdr" />
     <CopyFileToFolders Include="data\sphere.mtl" />
-    <CopyFileToFolders Include="data\sphereMap.jpg">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="data\studio_small_03_4k.hdr" />
     <CopyFileToFolders Include="data\suzie.mtl" />
     <CopyFileToFolders Include="data\teapot2.mtl" />
-    <CopyFileToFolders Include="data\venice_sunset.jpg">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
     <CopyFileToFolders Include="Shaders\Normal\FragmentShader.glsl" />
     <CopyFileToFolders Include="Shaders\Normal\VertexShader.glsl" />
     <CopyFileToFolders Include="imgui.ini" />
+    <CopyFileToFolders Include="data\suzie.obj" />
+    <CopyFileToFolders Include="data\sphere.obj" />
+    <CopyFileToFolders Include="data\cube.obj" />
+    <CopyFileToFolders Include="data\teapot2.obj" />
   </ItemGroup>
 </Project>
